@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pulpo Box Fitness | Premium CrossFit &amp; Training</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#001a42",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-surface": "#191c1e",
+                        "surface-glass": "rgba(255, 255, 255, 0.7)",
+                        "inverse-primary": "#bec6e0",
+                        "on-secondary-container": "#fefcff",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#004395",
+                        "tertiary-container": "#002113",
+                        "primary": "#000000",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "tertiary-fixed-dim": "#00E6E6",
+                        "outline-variant": "#c6c6cd",
+                        "blue-600": "#2563EB",
+                        "surface-container-high": "#e6e8ea",
+                        "slate-900": "#0F172A",
+                        "tertiary-fixed": "#58FFFF",
+                        "tertiary": "#000000",
+                        "surface-tint": "#565e74",
+                        "on-secondary": "#ffffff",
+                        "background": "#f7f9fb",
+                        "surface-container": "#eceef0",
+                        "surface-bright": "#f7f9fb",
+                        "inverse-surface": "#2d3133",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#131b2e",
+                        "on-tertiary-container": "#00BFC9",
+                        "surface-variant": "#e0e3e5",
+                        "border-subtle": "rgba(15, 23, 42, 0.08)",
+                        "on-primary-container": "#7c839b",
+                        "surface-container-highest": "#e0e3e5",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#007B83",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary-container": "#2170e4",
+                        "on-tertiary-fixed": "#001F22",
+                        "inverse-on-surface": "#eff1f3",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-primary-fixed": "#131b2e",
+                        "secondary-fixed": "#d8e2ff",
+                        "secondary": "#0058be",
+                        "emerald-500": "#00E6E6",
+                        "surface": "#f7f9fb",
+                        "primary-fixed": "#dae2fd",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#d8dadc",
+                        "outline": "#76777d",
+                        "on-background": "#191c1e",
+                        "on-surface-variant": "#45464d",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "container-max": "1280px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Hanken Grotesk"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-surface-glass {
+            backdrop-filter: blur(12px);
+        }
+        .gradient-overlay {
+            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.85) 100%);
+        }
+        .teal-glow {
+            box-shadow: 0 0 20px rgba(78, 222, 163, 0.15);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #00E6E6;
+            border-radius: 10px;
+        }
+        .schedule-table-shell {
+            transition: opacity 180ms ease, transform 180ms ease;
+        }
+        .schedule-table-shell.is-switching {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        .pricing-grid {
+            transition: opacity 180ms ease, transform 180ms ease;
+        }
+        .pricing-grid.is-switching {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        .pricing-segmented {
+            width: min(100%, 30rem);
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0.25rem;
+            border-radius: 9999px;
+            background: #2d3548;
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .pricing-segmented-indicator {
+            position: absolute;
+            inset: 0.25rem auto 0.25rem 0.25rem;
+            width: calc(50% - 0.25rem);
+            border-radius: 9999px;
+            background: #00E6E6;
+            transition: transform 220ms ease;
+        }
+        .pricing-segmented.is-personalizado .pricing-segmented-indicator {
+            transform: translateX(100%);
+        }
+        .pricing-segmented-option {
+            position: relative;
+            z-index: 1;
+            min-height: 3.75rem;
+            border-radius: 9999px;
+            color: white;
+            font-weight: 700;
+            transition: color 180ms ease;
+        }
+        button.pricing-segmented-option:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        button.pricing-segmented-option:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .pricing-segmented-option.is-active {
+            color: #000000;
+        }
+        @media (max-width: 767px) {
+            nav > div {
+                height: 4.25rem !important;
+                gap: 0.75rem;
+            }
+            nav .font-display-lg {
+                font-size: 1.05rem !important;
+                line-height: 1.2 !important;
+                max-width: 11rem;
+            }
+            nav button {
+                padding: 0.65rem 1rem !important;
+                font-size: 0.9rem;
+                white-space: nowrap;
+            }
+            section {
+                scroll-margin-top: 4.25rem;
+            }
+            .fit-section {
+                padding-top: 3.5rem !important;
+                padding-bottom: 3.5rem !important;
+            }
+            .fit-section-heading,
+            .fit-section-heading-sm {
+                font-size: clamp(1.85rem, 9vw, 2.35rem) !important;
+                line-height: 1.12 !important;
+                letter-spacing: 0 !important;
+            }
+            .service-card {
+                height: 22rem !important;
+                min-height: 22rem;
+            }
+            .service-card-content {
+                padding: 1.25rem !important;
+            }
+            .price-card {
+                padding: 1.5rem !important;
+                transform: none !important;
+            }
+            .pricing-segmented {
+                width: min(100%, 22rem);
+            }
+            .pricing-segmented-option {
+                min-height: 3.25rem;
+                font-size: 0.92rem;
+            }
+            .price-value {
+                font-size: 2rem !important;
+                line-height: 1.1 !important;
+                margin-bottom: 1.25rem !important;
+            }
+            .fit-tight-list {
+                margin-bottom: 1.5rem !important;
+            }
+            .location-map {
+                height: 14rem !important;
+                aspect-ratio: auto !important;
+            }
+            .coach-avatar {
+                width: 7rem !important;
+                height: 7rem !important;
+            }
+            footer {
+                padding-top: 4rem !important;
+            }
+        }
+        @media (min-width: 768px) {
+            .fit-section {
+                padding-top: 3.25rem !important;
+                padding-bottom: 3.25rem !important;
+                scroll-margin-top: 80px;
+                min-height: calc(100vh - 80px);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            .fit-section > .max-w-container-max {
+                width: 100%;
+            }
+            .fit-section-heading {
+                font-size: clamp(2.15rem, 3.2vw, 3.05rem) !important;
+                line-height: 1.08 !important;
+                letter-spacing: 0 !important;
+            }
+            .fit-section-heading-sm {
+                font-size: clamp(2rem, 2.6vw, 2.6rem) !important;
+                line-height: 1.08 !important;
+                letter-spacing: 0 !important;
+            }
+            .service-card {
+                height: min(46vh, 380px) !important;
+                min-height: 330px;
+            }
+            .service-card-content {
+                padding: 1.5rem !important;
+            }
+            .price-card {
+                padding: 1.75rem !important;
+            }
+            .price-value {
+                font-size: 2.15rem !important;
+                line-height: 1.1 !important;
+                margin-bottom: 1.25rem !important;
+            }
+            .fit-tight-list {
+                margin-bottom: 1.5rem !important;
+            }
+            .fit-tight-list > li {
+                font-size: 0.92rem;
+            }
+            .location-map {
+                width: 11rem !important;
+                height: 11rem !important;
+                aspect-ratio: auto !important;
+            }
+            .location-section {
+                min-height: calc(100vh - 80px);
+                display: flex;
+                align-items: center;
+            }
+            .coach-avatar {
+                width: 7.5rem !important;
+                height: 7.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-primary-container text-on-surface font-body-md overflow-x-hidden">
+<!-- Top Navigation -->
+<nav class="fixed top-0 w-full z-50 bg-surface-glass backdrop-blur-xl border-b border-border-subtle shadow-sm transition-all duration-300 ease-in-out">
+<div class="flex justify-between items-center max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop h-20">
+<div class="font-display-lg text-headline-md font-bold text-on-surface">
+                PULPO BOX FITNESS
+            </div>
+<div class="hidden md:flex items-center gap-5 lg:gap-gutter">
+<a class="text-tertiary-fixed-dim font-bold border-b-2 border-tertiary-fixed-dim pb-1 font-body-md" href="#inicio">Home</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#servicios">Services</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#horarios">Schedule</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#planes">Pricing</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#sedes">Locations</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#coaches">Coaches</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#contacto-footer">Contacto</a>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-full font-bold hover:bg-tertiary-fixed-dim transition-all duration-300" data-scroll-target="#contacto">
+                Join Now
+            </button>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="relative min-h-screen flex flex-col justify-center pt-20 overflow-hidden" id="inicio">
+<div class="absolute inset-0 z-0">
+<img alt="Athlete Training" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHOb9zCy0vQP1RSvq_Yw3m67aNk1KnTnGWKXibIdOdmQVDOAJ1BTqYyf1XlSpDlPylbsZ34BGJanOMMzUs3ORbLeMD-cHQS3zvL10dGeELcTM2ZzTVmSCw7UyNKJp0cWtF38HIzCYt7Mc7VdJRL4td3EVnCPAyG6cD4-1tYbHqNDCPp7Pf4Jfru1sAssk68DUn_exJ5gmcfBM8DFks2j0HXgoIYfZZrA8K_22Gckv4eUAY8YCe7hzCVLUGbhqxdkoKGhE9Zq0_FJc"/>
+<div class="absolute inset-0 gradient-overlay"></div>
+</div>
+<div class="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop w-full py-24">
+<div class="max-w-3xl">
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white mb-6 uppercase tracking-tight">
+                    PULPO BOX<br/><span class="text-tertiary-fixed-dim">FITNESS.</span>
+</h1>
+<p class="font-body-md text-on-primary-container text-lg md:text-xl max-w-xl mb-10 opacity-90 leading-relaxed">
+                    TU ESPACIO PARA SUPERAR LÍMITES. MÁS QUE UN GIMNASIO, UNA COMUNIDAD.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 mb-20">
+<button class="bg-tertiary-fixed-dim text-primary py-4 px-10 rounded-full font-bold text-lg hover:scale-105 transition-transform" data-scroll-target="#planes">VER PLANES</button>
+<button class="border-2 border-white text-white py-4 px-10 rounded-full font-bold text-lg hover:bg-white hover:text-primary transition-all" data-scroll-target="#contacto">CLASE DE PRUEBA</button>
+</div>
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl">
+<div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/10 text-center">
+<div class="text-display-lg-mobile text-tertiary-fixed-dim font-bold">2</div>
+<div class="text-label-caps text-white uppercase tracking-widest opacity-70">SEDES</div>
+</div>
+<div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/10 text-center">
+<div class="text-display-lg-mobile text-tertiary-fixed-dim font-bold">1h</div>
+<div class="text-label-caps text-white uppercase tracking-widest opacity-70">POR CLASE</div>
+</div>
+<div class="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/10 text-center">
+<div class="text-display-lg-mobile text-tertiary-fixed-dim font-bold">2016</div>
+<div class="text-label-caps text-white uppercase tracking-widest opacity-70">COMUNIDAD ACTIVA</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Value Props Section -->
+<section class="py-24 bg-background">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center mb-16">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary mb-4 leading-tight uppercase">
+                UNA LANDING MÁS CLARA, <br/>MÁS PREMIUM Y MÁS ORIENTADA A CONVERTIR
+            </h2>
+</div>
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div class="p-8 bg-white border border-border-subtle rounded-xl hover:shadow-lg transition-shadow">
+<span class="text-tertiary-fixed-dim font-display-lg text-headline-md block mb-4">01</span>
+<h3 class="font-headline-md text-primary mb-3">Experiencia Personalizada</h3>
+<p class="font-body-sm text-on-surface-variant">Adaptamos cada entrenamiento a tu nivel y objetivos específicos para resultados reales.</p>
+</div>
+<div class="p-8 bg-white border border-border-subtle rounded-xl hover:shadow-lg transition-shadow">
+<span class="text-tertiary-fixed-dim font-display-lg text-headline-md block mb-4">02</span>
+<h3 class="font-headline-md text-primary mb-3">Horarios Flexibles</h3>
+<p class="font-body-sm text-on-surface-variant">Amplia disponibilidad horaria para que el entrenamiento se ajuste a tu vida, no al revés.</p>
+</div>
+<div class="p-8 bg-white border border-border-subtle rounded-xl hover:shadow-lg transition-shadow">
+<span class="text-tertiary-fixed-dim font-display-lg text-headline-md block mb-4">03</span>
+<h3 class="font-headline-md text-primary mb-3">Entrenadores Expertos</h3>
+<p class="font-body-sm text-on-surface-variant">Contamos con un equipo altamente calificado para guiarte en cada repetición.</p>
+</div>
+<div class="p-8 bg-white border border-border-subtle rounded-xl hover:shadow-lg transition-shadow">
+<span class="text-tertiary-fixed-dim font-display-lg text-headline-md block mb-4">04</span>
+<h3 class="font-headline-md text-primary mb-3">Comunidad de Motivación</h3>
+<p class="font-body-sm text-on-surface-variant">Entrenar en equipo te empuja a dar lo mejor de ti en un ambiente inigualable.</p>
+</div>
+</div>
+</section>
+<!-- Lead Capture Section -->
+<section class="py-24 bg-primary-container relative overflow-hidden" id="contacto">
+<div class="absolute right-0 top-0 w-1/2 h-full bg-tertiary-fixed-dim opacity-5 blur-[120px] rounded-full"></div>
+<div class="max-w-3xl mx-auto px-margin-mobile relative z-10">
+<div class="text-center mb-12">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white mb-4 uppercase">HABLA CON LA SEDE QUE TE ACOMODA</h2>
+</div>
+<form class="space-y-6" id="lead-form">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-body-sm font-bold text-white mb-2 uppercase tracking-wide">Nombre Completo</label>
+<input class="w-full bg-white/5 border border-white/20 text-white rounded-lg py-4 px-4 focus:border-tertiary-fixed-dim focus:ring-0 transition-all outline-none" name="full_name" placeholder="Ej: Juan Pérez" required type="text"/>
+</div>
+<div>
+<label class="block text-body-sm font-bold text-white mb-2 uppercase tracking-wide">Teléfono</label>
+<input class="w-full bg-white/5 border border-white/20 text-white rounded-lg py-4 px-4 focus:border-tertiary-fixed-dim focus:ring-0 transition-all outline-none" name="phone" placeholder="+569 1234 5678" required type="tel"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-body-sm font-bold text-white mb-2 uppercase tracking-wide">Email</label>
+<input class="w-full bg-white/5 border border-white/20 text-white rounded-lg py-4 px-4 focus:border-tertiary-fixed-dim focus:ring-0 transition-all outline-none" name="email" placeholder="juan@ejemplo.cl" type="email"/>
+</div>
+<div>
+<label class="block text-body-sm font-bold text-white mb-2 uppercase tracking-wide">Sede Preferida</label>
+<select class="w-full bg-white/5 border border-white/20 text-white rounded-lg py-4 px-4 focus:border-tertiary-fixed-dim focus:ring-0 transition-all outline-none appearance-none" name="preferred_location">
+<option class="bg-primary-container" value="manuel_plaza">Manuel Plaza</option>
+<option class="bg-primary-container" value="bilbao">Bilbao</option>
+</select>
+</div>
+</div>
+<button class="w-full bg-tertiary-fixed-dim text-primary font-bold py-5 rounded-lg text-lg flex items-center justify-center gap-3 hover:scale-[1.01] transition-transform" id="lead-submit" type="submit">
+                    CONTINUAR POR WHATSAPP
+                    <span class="material-symbols-outlined">send</span>
+</button>
+<p class="hidden text-center text-body-sm font-bold" id="lead-status"></p>
+</form>
+</div>
+</section>
+<!-- Services Section -->
+<section class="py-24 bg-white fit-section" id="servicios">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center mb-10">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary uppercase fit-section-heading">ENTRENA CON ESTRUCTURA, ENERGÍA Y ACOMPAÑAMIENTO</h2>
+</div>
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="group relative rounded-2xl overflow-hidden h-[500px] service-card">
+<div class="absolute inset-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A professional athlete performing CrossFit movements in a gritty industrial gym setting. High-contrast lighting with cool teal shadows and warm highlights creates a sense of intensity and focus. The background shows workout equipment and heavy tires, emphasizing a professional, high-performance fitness environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQItEMFLaLcloP8NlB4lbIzF-hcvH4sXU5nt8vSDet5vaSaMr6VVnxNqluiNOC13jBS4Rz_IPbj1C8lCpzbeG6GP1f8WrPr7uOIW5ZRPX0DFWsAcsMGadLtjyXDQ796Z_-CexfRTo0B8AL_hySrrvScLqE9BgumZeV--_Iffjc3UhzU-TARhebJY_qX20iHujzRpFoJlstLh3FkeXvejKMM5pgCTEbbnA7exTZVKIpgnmjWQJ9WQ1fXYQfm6r9zD1RbrZn6zYE3IA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+</div>
+<div class="absolute bottom-0 left-0 p-8 service-card-content">
+<h3 class="font-display-lg text-headline-md text-white mb-2">CrossFit</h3>
+<p class="text-on-primary-container opacity-80 mb-4">WODs dinámicos para fuerza y agilidad.</p>
+<button class="bg-tertiary-fixed-dim text-primary px-6 py-2 rounded-full text-sm font-bold">VER MÁS</button>
+</div>
+</div>
+<div class="group relative rounded-2xl overflow-hidden h-[500px] service-card">
+<div class="absolute inset-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A personal trainer guiding a client through a weighted exercise in a minimalist, high-end private gym studio. The lighting is soft and architectural, using cool tones to create a premium, focused atmosphere. Deep blacks and clean lines define the space, with a subtle glow around the athlete to highlight the precision of their movement." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiwzmw-bH2S8SecePxsBGIHT3-My9z9ZpwnZsL0lrVMUNVsBrLDJgFDfYpPfgx0jZbr98BXROLrraz5J8Efiv7r7jSYfirTuo24Xm3s1vTisD_DeH9aATEwrP6eCFBg5Azjw8RwORzIRY7RceCOZOYCt86lkJLhWKPnLxLl6_OqlfQx4j9t6GxVFdm-s5Obi-3sGp-Q-lGShS2EOObedzLRClFRPzG5qQXvk529c9HnbMHjVbaWzcT7PqrQ-pdBkjqxSsMofP-O5s"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+</div>
+<div class="absolute bottom-0 left-0 p-8 service-card-content">
+<h3 class="font-display-lg text-headline-md text-white mb-2">Personalizados</h3>
+<p class="text-on-primary-container opacity-80 mb-4">Enfoque 100% en tus metas individuales.</p>
+<button class="bg-tertiary-fixed-dim text-primary px-6 py-2 rounded-full text-sm font-bold">VER MÁS</button>
+</div>
+</div>
+<div class="group relative rounded-2xl overflow-hidden h-[500px] service-card">
+<div class="absolute inset-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A group training session in a spacious, modern gym featuring bright, energizing lighting with teal accents. Multiple athletes are seen in a synchronized movement, conveying a sense of community and collective effort. The aesthetic is clean and high-tech, with premium fitness equipment and a vibrant atmosphere of mutual motivation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQTHergTyUZ1dt4emWcH8O8LyA2OJEtFc8WKa1_0h5KuCk76B-DCFid_ggW3fJM1ttwJmYgUEpvcZH9386ypDKW9JrImWqpj9DfhoowzK0YLfbE9E3vj6r6GdB0zdigN2HlWYgDeeDEFOSZTtvUUig0HxuYq5w8YVG0HYjGkJyKin6ebJ3THEff5yioXa5pdCdtDPlWEo0Z-lyhA4_lLRiC4-V5QP3gt1CFWoweqY1v1jVxadefWW64erdroOeXnkAo10czQgns-s"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+</div>
+<div class="absolute bottom-0 left-0 p-8 service-card-content">
+<h3 class="font-display-lg text-headline-md text-white mb-2">Grupales &amp; Open Box</h3>
+<p class="text-on-primary-container opacity-80 mb-4">Energía compartida o entrena a tu ritmo.</p>
+<button class="bg-tertiary-fixed-dim text-primary px-6 py-2 rounded-full text-sm font-bold">VER MÁS</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Schedule Section -->
+<section class="py-24 bg-primary-container fit-section" id="horarios">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="text-center mb-8">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white uppercase mb-5 fit-section-heading-sm">HORARIOS ORDENADOS...</h2>
+<div class="inline-flex bg-white/10 p-1 rounded-full mb-6">
+<button class="px-8 py-3 rounded-full bg-tertiary-fixed-dim text-primary font-bold transition-all" data-schedule-tab="grupales" type="button">Clases Grupales</button>
+<button class="px-8 py-3 rounded-full text-white font-medium hover:text-tertiary-fixed-dim transition-all" data-schedule-tab="personalizados" type="button">Personalizados</button>
+</div>
+</div>
+<div class="overflow-x-auto custom-scrollbar schedule-table-shell" id="schedule-table-wrapper">
+<table class="w-full border-collapse">
+<thead>
+<tr class="bg-white/5">
+<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">HORARIO</th>
+<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">LUNES</th>
+<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">MARTES</th>
+<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">MIÉRCOLES</th>
+<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">JUEVES</th>
+<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">VIERNES</th>
+</tr>
+</thead>
+<tbody class="text-white/80" id="schedule-body">
+<tr class="border-b border-white/5">
+<td class="p-3 font-label-caps border border-white/10">07:00 AM</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
+<td class="p-3 border border-white/10">--</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
+<td class="p-3 border border-white/10">--</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
+</tr>
+<tr class="border-b border-white/5">
+<td class="p-3 font-label-caps border border-white/10">09:00 AM</td>
+<td class="p-3 border border-white/10">--</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">HIIT</td>
+<td class="p-3 border border-white/10">--</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">HIIT</td>
+<td class="p-3 border border-white/10">--</td>
+</tr>
+<tr class="border-b border-white/5">
+<td class="p-3 font-label-caps border border-white/10">06:00 PM</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">Open Box</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">Open Box</td>
+<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- Pricing Section -->
+<section class="py-24 bg-white fit-section" id="planes">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary uppercase mb-4 fit-section-heading-sm">VALORES VISIBLES...</h2>
+<div class="pricing-segmented mb-8" id="pricing-toggle" role="tablist" tabindex="0" aria-label="Cambiar tipo de plan">
+<div class="pricing-segmented-indicator" id="pricing-toggle-knob"></div>
+<button aria-selected="true" class="pricing-segmented-option is-active" data-pricing-tab="grupal" role="tab" type="button">GRUPAL</button>
+<button aria-selected="false" class="pricing-segmented-option" data-pricing-tab="personalizado" role="tab" type="button">PERSONALIZADO</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter pricing-grid" id="pricing-grid">
+<!-- Plan 1 -->
+<div class="border border-border-subtle p-10 rounded-2xl flex flex-col items-center hover:border-tertiary-fixed-dim transition-all price-card" data-plan-card="0">
+<span class="text-label-caps text-on-surface-variant tracking-widest mb-3" data-plan-period>MENSUAL</span>
+<h3 class="font-display-lg text-headline-md mb-4" data-plan-name>PLAN STARTER</h3>
+<div class="text-display-lg mb-8 price-value" data-plan-price>$55.000 <span class="text-headline-md text-on-surface-variant font-normal">/clp</span></div>
+<ul class="text-on-surface-variant space-y-3 mb-10 w-full fit-tight-list" data-plan-features>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> 3 Clases por semana</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Acceso a Sede Manuel Plaza</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> App de Seguimiento</li>
+</ul>
+<button class="w-full py-4 border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all" data-scroll-target="#contacto">ELEGIR PLAN</button>
+</div>
+<!-- Plan 2 -->
+<div class="bg-primary text-white p-10 rounded-2xl flex flex-col items-center scale-105 shadow-2xl relative price-card" data-plan-card="1">
+<div class="absolute -top-4 bg-tertiary-fixed-dim text-primary text-label-caps py-1 px-4 rounded-full font-bold">MÁS POPULAR</div>
+<span class="text-label-caps text-white/60 tracking-widest mb-3" data-plan-period>MENSUAL</span>
+<h3 class="font-display-lg text-headline-md text-white mb-4" data-plan-name>PLAN FULL</h3>
+<div class="text-display-lg mb-8 text-tertiary-fixed-dim price-value" data-plan-price>$75.000 <span class="text-headline-md text-white/60 font-normal">/clp</span></div>
+<ul class="text-white/80 space-y-3 mb-10 w-full fit-tight-list" data-plan-features>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Clases Ilimitadas</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Acceso a ambas sedes</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Open Box incluido</li>
+</ul>
+<button class="w-full py-4 bg-tertiary-fixed-dim text-primary rounded-xl font-bold hover:scale-105 transition-transform" data-scroll-target="#contacto">ELEGIR PLAN</button>
+</div>
+<!-- Plan 3 -->
+<div class="border border-border-subtle p-10 rounded-2xl flex flex-col items-center hover:border-tertiary-fixed-dim transition-all price-card" data-plan-card="2">
+<span class="text-label-caps text-on-surface-variant tracking-widest mb-3" data-plan-period>TRIMESTRAL</span>
+<h3 class="font-display-lg text-headline-md mb-4" data-plan-name>PLAN PRO</h3>
+<div class="text-display-lg mb-8 price-value" data-plan-price>$190.000 <span class="text-headline-md text-on-surface-variant font-normal">/clp</span></div>
+<ul class="text-on-surface-variant space-y-3 mb-10 w-full fit-tight-list" data-plan-features>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Beneficios del Plan Full</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Descuento por pago adelantado</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Polera oficial de regalo</li>
+</ul>
+<button class="w-full py-4 border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all" data-scroll-target="#contacto">ELEGIR PLAN</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Benefits Section -->
+<section class="py-24 bg-background fit-section">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center mb-8">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary uppercase fit-section-heading-sm">BENEFICIOS QUE FORTALECEN...</h2>
+</div>
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="flex flex-col items-center text-center p-6">
+<img alt="Physical Benefits" class="w-20 h-20 mb-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr_syUylEWt8FmLn-brv76L3P7E1xE7pAf6X1aHGIu34ckOIcZ2yNkgSssy0_CcC6iUq4hirdWeP7iFBt2oA3hjUnbb8HLsI3UUs4sYPwZpRExJ4S9ePhQXVJc7OkyVsa1kd-IGWKo1iy6rwsDK7p_gmiiwwtl2ToCuxcqQzqzQsSW3-QU9_gplEy6CpJi-db0Uuf-tSHtAIbgxeU69mdDhMtOCQYai8TLT3vlIJXIDpPoCaPnwXQVIhHL1ZvgK9TjjEhxKNdrsFI"/>
+<h3 class="font-headline-md text-primary mb-4">Salud Física</h3>
+<p class="font-body-sm text-on-surface-variant">Mejora tu resistencia cardiovascular, fuerza muscular y flexibilidad en cada sesión.</p>
+</div>
+<div class="flex flex-col items-center text-center p-6">
+<img alt="Mental Benefits" class="w-20 h-20 mb-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAl0016_THQvGPl6UjplGgyJole8_rkuyv0JoU9AhxD9-ZS3bzCXEPi4kHexTWxFHWNNJ7xFQYATTK6wQgRkwkSIvNDJ5Mwfjuu8_G7aNet2WI3I4nd5D475pu6f1-02v-hGrpqkTgsa5e4yfnYeLDihsl33Fo20WpcCTK04xaZklqbCW-wBA7R_918ARZRpO1xTjIGVSinuzdaivZXvGbQJmggYnL4rYo1kSWEH0FdCbyfZbwL4kegF66qcsEHP9NV8WBEo45RFdk"/>
+<h3 class="font-headline-md text-primary mb-4">Bienestar Mental</h3>
+<p class="font-body-sm text-on-surface-variant">Libera estrés y mejora tu foco cognitivo a través del ejercicio de alta intensidad.</p>
+</div>
+<div class="flex flex-col items-center text-center p-6">
+<img alt="Community Benefits" class="w-20 h-20 mb-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFdh2NyG2BBct6h6sgbuZDwB7MxMf75uzX8_Q6FdZyjh8o3adUucqlpKCQ2wtS7w3Mm9OE5MoVZIVJ79T7jYSHVHHLTHe1mhpr4t0KDibZQhV3T5Z7qeicYZRgNBylsWZlw092CQMS6yf1S11kNydMAOPz_d7VcpXjCObXIOGstxM9iG5K_FN5y5bjIUhqB7M0JMIj_cLNkPKpKiLVXga1Ciqmbxb0fcPp0BTfEOYh0EiAAm1CKXB6XkA6OhSse9itzltZq4pu70U"/>
+<h3 class="font-headline-md text-primary mb-4">Comunidad</h3>
+<p class="font-body-sm text-on-surface-variant">Forma parte de un grupo que te apoya y te impulsa a superar tus límites cada día.</p>
+</div>
+</div>
+</section>
+<!-- Locations Section -->
+<section class="py-24 bg-white fit-section location-section" id="sedes">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary text-center uppercase mb-10 fit-section-heading-sm">DOS PUNTOS DE CONTACTO PARA EMPEZAR A ENTRENAR</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="bg-surface-container-low rounded-2xl p-6 flex flex-col md:flex-row gap-6">
+<div class="w-full md:w-1/2 aspect-square bg-white rounded-xl overflow-hidden location-map">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist map illustration showing the urban location of Manuel Plaza in Santiago, Chile. The map uses a sophisticated dark and teal color palette consistent with the fitness brand's identity, featuring a prominent pinpoint marker for the gym location." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-uic6JyIV7hm6Cm_O8SUAjCca5UgiecFvMsjhnKvevAlbkC8DSlt08oylqQjJ6aF41YQXBm8sBFoALNnY-9Z2yOFEtouN07Re5AuiIwaMd59QGioaddJ_I0kIvwijODjrOhs27oQy3rDY1EBks5wVAoa-29h0ivIN2riAVWISXEEkm5_-TQI__a7U1-MNVtva9tUK85o7dhQBcP7d5C4MU-be7zMtKLK_zez-76A2npwRsjljnJzRu4ZbO2pmqWyqS-qs4Hjllnk"/>
+</div>
+<div class="flex flex-col justify-center">
+<h3 class="font-display-lg text-headline-md text-primary mb-2">Manuel Plaza</h3>
+<p class="text-on-surface-variant mb-4">Calle Manuel Plaza 1234, Ñuñoa. Santiago.</p>
+<button class="bg-primary text-white py-3 px-6 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-tertiary-fixed-dim hover:text-primary transition-all">
+                            VER EN MAPS <span class="material-symbols-outlined">map</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-2xl p-6 flex flex-col md:flex-row gap-6">
+<div class="w-full md:w-1/2 aspect-square bg-white rounded-xl overflow-hidden location-map">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist map illustration showing the urban location of Avenida Bilbao in Providencia, Santiago, Chile. The map is styled with a sleek dark mode appearance and vibrant teal highlights, clearly marking the gym's second location for easy navigation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBSnHm-_tKHzIpa7TmL9mXzH6ZCVqasmQnyQXm2Ac_rmK37l-Z2oHsP9n0lKiEyN89r_wvHjF3TGGjauNFDtyayuqWCipgAZR99Eabn10Fn3FPmfyciT825WKB1st25pUh4bR1j2xK5EMZkv9wzU4IQuu6KaCsMibTueTn4t0DA7QZ0g54LJUGjZLWHUx3_nOYmbGEokCRIxfIEsNjCfDTkOpF90yIZjmTXPJbk4QDTDZb_PR6WE8f8XQqg8nOhAJixq8I7l9BVIw"/>
+</div>
+<div class="flex flex-col justify-center">
+<h3 class="font-display-lg text-headline-md text-primary mb-2">Bilbao</h3>
+<p class="text-on-surface-variant mb-4">Av. Francisco Bilbao 5678, Providencia. Santiago.</p>
+<button class="bg-primary text-white py-3 px-6 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-tertiary-fixed-dim hover:text-primary transition-all">
+                            VER EN MAPS <span class="material-symbols-outlined">map</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Coaches Section -->
+<section class="py-24 bg-primary-container fit-section" id="coaches">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white text-center uppercase mb-10 fit-section-heading-sm">PERSONAS REALES GUIANDO TU PROGRESO</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col md:flex-row items-center gap-6 bg-white/5 p-6 rounded-2xl border border-white/10">
+<div class="w-40 h-40 rounded-full overflow-hidden border-4 border-tertiary-fixed-dim flex-shrink-0 coach-avatar">
+<img class="w-full h-full object-cover" data-alt="Close-up professional portrait of Cristian Saez Muñoz, a senior CrossFit coach with an athletic build and a confident, friendly expression. The background is a softly blurred modern gym with cool teal studio lighting, conveying a professional yet approachable persona." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1dgcAg3X3Y6vZAb0xoz60Iy9kSfFUReC3JJQc5NSzw7xgoqu41Q1AiJTFTRXw8audUmLGu3xK1623qcnEu1qBKrQo1jiOssJiCSz2k8e2fCfECjcQePXT5J8fYT-0hrNLdPxjXnBBX46ToB75KYAjH3nhvaBGXUTQB_1KrM-fYOrB1MicWyBlfoJAEWJdKRjclPJQ7UyAnIeAaW5kLey9MB6j8nRkMx6eVyDcrpofewgVtPTWuxqr3d_1wW4acU81XLaz5Fhwya4"/>
+</div>
+<div>
+<h3 class="font-display-lg text-headline-md text-white mb-1">Cristian Saez Muñoz</h3>
+<span class="text-tertiary-fixed-dim font-label-caps tracking-widest mb-3 block">HEAD COACH</span>
+<p class="text-on-primary-container text-sm leading-relaxed">Especialista en levantamiento olímpico y programación deportiva de alto rendimiento. 10 años de experiencia.</p>
+</div>
+</div>
+<div class="flex flex-col md:flex-row items-center gap-6 bg-white/5 p-6 rounded-2xl border border-white/10">
+<div class="w-40 h-40 rounded-full overflow-hidden border-4 border-tertiary-fixed-dim flex-shrink-0 coach-avatar">
+<img class="w-full h-full object-cover" data-alt="Close-up professional portrait of Javier Andres Pavelec Fuentes, a dynamic fitness trainer. He has an engaging smile and looks directly at the camera, projecting motivation and expertise. Set against a moody gym background with sophisticated teal and dark gray lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAbmxKk4o_aRLJGetUMXZdnp37rAEzSwNKDfq2oP3BhJC0Cj3DTvm3QWR7NLQmLfzkLiEnxYADCSTN1w-96RDPokIrEyMD8KL2NUui5ZS5uQ4zxvKEB8CcR5bJw17uYd0js80t4MEfJxSTddfWAQFq9c-b8B3gTJPaONXhiJAKBywB9blM7B2CC8O3rfr0tdUR4UGRyG89lUJaDEtICM6Gphg-kE41G2Qxgc9WCV-cyPsXmLaZBymSzHEOD9tJhSNfxqhn-jaIlYo"/>
+</div>
+<div>
+<h3 class="font-display-lg text-headline-md text-white mb-1">Javier Andres Pavelec</h3>
+<span class="text-tertiary-fixed-dim font-label-caps tracking-widest mb-3 block">COACH CROSSFIT L1</span>
+<p class="text-on-primary-container text-sm leading-relaxed">Experto en gimnasia deportiva y movilidad. Apasionado por la técnica perfecta y la seguridad de los atletas.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-primary-container text-on-primary-container border-t border-border-subtle pt-24 pb-12" id="contacto-footer">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-4 gap-gutter mb-20">
+<!-- Brand Column -->
+<div class="lg:col-span-1">
+<div class="font-display-lg text-headline-md font-bold text-tertiary-fixed-dim mb-6">
+                    PULPO BOX FITNESS
+                </div>
+<p class="font-body-sm opacity-80 mb-8 max-w-xs">
+                    Impulsando el fitness de alto rendimiento en Santiago desde 2016. Únete a la comunidad más fuerte.
+                </p>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-tertiary-fixed-dim hover:text-primary transition-all" href="#"><span class="material-symbols-outlined">Notebook</span></a>
+<a class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-tertiary-fixed-dim hover:text-primary transition-all" href="#"><span class="material-symbols-outlined">camera</span></a>
+<a class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-tertiary-fixed-dim hover:text-primary transition-all" href="#"><span class="material-symbols-outlined">play_circle</span></a>
+</div>
+</div>
+<!-- Links Column -->
+<div class="lg:col-span-1">
+<h4 class="text-white font-bold mb-6 uppercase tracking-widest text-sm">Explora</h4>
+<ul class="space-y-4">
+<li><a class="hover:text-tertiary-fixed-dim transition-colors" href="#servicios">Programas</a></li>
+<li><a class="hover:text-tertiary-fixed-dim transition-colors" href="#horarios">Horarios</a></li>
+<li><a class="hover:text-tertiary-fixed-dim transition-colors" href="#coaches">Nuestros Coaches</a></li>
+<li><a class="hover:text-tertiary-fixed-dim transition-colors" href="#sedes">Sedes</a></li>
+</ul>
+</div>
+<!-- Instagram Wall -->
+<div class="lg:col-span-2">
+<h4 class="text-white font-bold mb-6 uppercase tracking-widest text-sm">Instagram @pulpobox</h4>
+<div class="grid grid-cols-3 gap-2">
+<div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram social media post showing a heavy kettlebell swing in a dark, moody gym environment. Teal accents and cinematic lighting highlight the intensity of the workout." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABnJQCPLO3tcmpDwvHjeL2ZzuOm6xzHRu9fx8H3HZ2T8Q4wpPleAKP5gIeB-K5QqeOUL2k0Av3iUtfheS41YvQXkpJ8Mh3xFWPKYSvutYujEtXsXdzp-wSIO4xIeD-EFCSPce4ud1ER8WZEYG558FbHRUe52eIk_obE0-FmwxvGzODF-u3sUWA9vFGNso2m0LJxlXeQJr5QioeVxVslr5nQvB6x-sgmGophKXsVFjWbbfkVAu8WYml1oSm20wqRPpa-TKo6DzsMHM"/>
+</div>
+<div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram post featuring a group of smiling athletes after a tough WOD. The atmosphere is warm and celebratory, set against a dark industrial gym backdrop with professional lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAytyQHCQRJ1oK6R1LjCre6_NNK0XXqQdTTqu-9S0SGgw9JqB4ARxU0Xh0SqLm5K_rHmujt_9qGa_RYsFZQzsOM_-vWi8b7v3vC99Pxvr9CFJh9ujByGXpD3olQDFTivYpg9gWVBcqUgt9xfGbiajvl3T1phefTSI7f9rDwlbaehtnOdva_7gMwcSeXifDsH3dk5Z4_Wm5RDf_eiXUp33SetMraqZjuzveo321ONyNWmNYI3BlKHkqP37S4HaACLKotkyosheZVW_4"/>
+</div>
+<div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram highlight showing a detailed shot of barbell weights on a rack. Sophisticated lighting highlights the texture of the equipment, in line with the premium gym's aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3juucQ4l9l_8r7xyeU-HU1zECSmRUTGTSYjp5C6BnZlWvZ9xHFg_J6HBM3BycvSY7knaq4szK72l2-6fbcexPjU-tLCv4BCm2CMR6WAeQpVgGNHI0qY5gSvBZO6ybzsdUg8WDEbBzk5RKq8p3Oj8mnOFIPUN5p5jLbKI92NEbtecri_FIfqu1p5S4cGMktziBUkQR6VAfG3EXKRd1UNBh-qNGdPBetWVVGpk5BzSIFZnfuIwU1io_uUmlWQiXEiuXJ4GjOrxBqMA"/>
+</div>
+<div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram post of a coach demonstrating proper pull-up form. The high-contrast, moody lighting creates a professional, instructive feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuaMR2XQLEOmM-TUaVTlAdysKbbAHGsy5WlJiAKR35Cu6R-FZ9rrW33V-oujednlBOxYFh2NPVNt9XAwVPYAgphz_evKMJ7kYNpx0Zkr9eEXS_s9EDK59K03IvoWxz5ZN_7Cs3TKUF8Fr5Ozf1-RLLf-ovdxoeC9Prl5oNvLCEQJWe8DXy3fKZIkY5HeMA1cx4mP03mQgg1dJQuc2yIGwypiml--JSfzx84rlgJRorMqOSBrdMOGAkQH2JOR3xXaAoeY9_ApvjhRU"/>
+</div>
+<div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram lifestyle shot of a gym member preparing their gear. Focus on the details and textures in a premium, dark-themed fitness setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtue1qUPijcDE7VZqPgP5mtTn8Xs4wnX1WbC7dZZ5y6yrgsJ97T4IIPYiiN4DWz8CtdjN0QfTQqnkgKp6MdgffnHATQpE5SHcorfFMQ8QwpFPEEI6XAdknWh3qUaDp5dz2yZKc9p41M4bBsyCuygHDtckJJ0ExRA3673z_jfITglCi69WjGElIwsIw1-AL7Rtsszq6SQTxPybTjOmdM6i60rl-3T2M-wyycvEhv2v1zVHMyX0eRgJy6QIdosdWsXGCKvhuSDE92Y8"/>
+</div>
+<div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Action-packed Instagram post showing a rope climb exercise. Dramatic low-angle shot with teal lighting highlights the height and effort." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAP2majrSaaZzVF11i0qrMVQdrvTFaKQTqZbqzZCQIMUpQxizmnT5RjnT9KPnNA98cJnO6dg-o_qTK9rz2GfkhQMumyPMbpsq1Jk0454oL54d8oZCWiJExBiPIVPC6OoFq0igPcXNWP8TVUiHUAnuD9yLT4Lx-TLtGW4uFBD0lsfXFhkg3EMrn5PDFQla43oTIgHVFiSwPM6_9Fvke46WC7sGLIZoc06XlO7TmyOiSkezCvFHu1FOFuNP0yQsh_qBlqrxLl6h4-ME0"/>
+</div>
+</div>
+</div>
+</div>
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop border-t border-white/5 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="font-body-sm text-sm opacity-60">
+                © 2024 Pulpo Box Fitness. All rights reserved.
+            </div>
+<div class="flex gap-8 font-body-sm text-sm opacity-60">
+<a class="hover:text-white transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-white transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-white transition-colors" href="#">FAQ</a>
+<a class="hover:text-white transition-colors" href="#">Careers</a>
+</div>
+</div>
+</footer>
+<script>
+  const leadForm = document.querySelector("#lead-form");
+  const leadSubmit = document.querySelector("#lead-submit");
+  const leadStatus = document.querySelector("#lead-status");
+  const scheduleButtons = document.querySelectorAll("[data-schedule-tab]");
+  const scheduleBody = document.querySelector("#schedule-body");
+  const scheduleTableWrapper = document.querySelector("#schedule-table-wrapper");
+  const pricingButtons = document.querySelectorAll("[data-pricing-tab]");
+  const pricingToggle = document.querySelector("#pricing-toggle");
+  const pricingGrid = document.querySelector("#pricing-grid");
+  const planCards = document.querySelectorAll("[data-plan-card]");
+
+  const scheduleRows = {
+    grupales: [
+      ["07:00 AM", "CrossFit", "--", "CrossFit", "--", "CrossFit"],
+      ["09:00 AM", "--", "HIIT", "--", "HIIT", "--"],
+      ["06:00 PM", "CrossFit", "Open Box", "CrossFit", "Open Box", "CrossFit"],
+    ],
+    personalizados: [
+      ["08:00 AM", "Coach Cristian", "Coach Javier", "Coach Cristian", "Coach Javier", "Coach Cristian"],
+      ["01:00 PM", "Evaluacion", "--", "Tecnica", "--", "Evaluacion"],
+      ["07:30 PM", "Fuerza", "Movilidad", "Fuerza", "Movilidad", "Planificacion"],
+    ],
+  };
+
+  const pricingPlans = {
+    grupal: [
+      {
+        period: "MENSUAL",
+        name: "PLAN STARTER",
+        price: "$55.000",
+        features: ["3 Clases por semana", "Acceso a Sede Manuel Plaza", "App de Seguimiento"],
+      },
+      {
+        period: "MENSUAL",
+        name: "PLAN FULL",
+        price: "$75.000",
+        features: ["Clases Ilimitadas", "Acceso a ambas sedes", "Open Box incluido"],
+      },
+      {
+        period: "TRIMESTRAL",
+        name: "PLAN PRO",
+        price: "$190.000",
+        features: ["Beneficios del Plan Full", "Descuento por pago adelantado", "Polera oficial de regalo"],
+      },
+    ],
+    personalizado: [
+      {
+        period: "MENSUAL",
+        name: "PLAN BASE",
+        price: "$120.000",
+        features: ["4 sesiones personalizadas", "Evaluacion inicial", "Plan de progreso"],
+      },
+      {
+        period: "MENSUAL",
+        name: "PLAN PRO",
+        price: "$180.000",
+        features: ["8 sesiones personalizadas", "Seguimiento semanal", "Acceso Open Box"],
+      },
+      {
+        period: "TRIMESTRAL",
+        name: "PLAN ELITE",
+        price: "$490.000",
+        features: ["24 sesiones personalizadas", "Plan nutricional base", "Prioridad de agenda"],
+      },
+    ],
+  };
+
+  function scheduleCellClass(value) {
+    return value === "--"
+      ? "p-3 border border-white/10"
+      : "p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white";
+  }
+
+  function renderSchedule(type) {
+    if (!scheduleBody) return;
+
+    scheduleTableWrapper?.classList.add("is-switching");
+
+    window.setTimeout(() => {
+      scheduleBody.innerHTML = scheduleRows[type].map((row) => `
+        <tr class="border-b border-white/5">
+          <td class="p-3 font-label-caps border border-white/10">${row[0]}</td>
+          ${row.slice(1).map((value) => `<td class="${scheduleCellClass(value)}">${value}</td>`).join("")}
+        </tr>
+      `).join("");
+
+      scheduleButtons.forEach((button) => {
+        const isActive = button.dataset.scheduleTab === type;
+        button.className = isActive
+          ? "px-8 py-3 rounded-full bg-tertiary-fixed-dim text-primary font-bold transition-all"
+          : "px-8 py-3 rounded-full text-white font-medium hover:text-tertiary-fixed-dim transition-all";
+      });
+
+      scheduleTableWrapper?.classList.remove("is-switching");
+    }, 160);
+  }
+
+  function renderPricing(type) {
+    if (!planCards.length) return;
+
+    pricingGrid?.classList.add("is-switching");
+
+    window.setTimeout(() => {
+      planCards.forEach((card, index) => {
+        const plan = pricingPlans[type][index];
+        const isFeatured = index === 1;
+        const priceTone = isFeatured ? "text-headline-md text-white/60 font-normal" : "text-headline-md text-on-surface-variant font-normal";
+
+        card.querySelector("[data-plan-period]").textContent = plan.period;
+        card.querySelector("[data-plan-name]").textContent = plan.name;
+        card.querySelector("[data-plan-price]").innerHTML = `${plan.price} <span class="${priceTone}">/clp</span>`;
+        card.querySelector("[data-plan-features]").innerHTML = plan.features.map((feature) => `
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> ${feature}</li>
+        `).join("");
+      });
+
+      pricingButtons.forEach((button) => {
+        const isActive = button.dataset.pricingTab === type;
+        button.className = isActive
+          ? "pricing-segmented-option is-active"
+          : "pricing-segmented-option";
+        button.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      pricingToggle?.classList.toggle("is-personalizado", type === "personalizado");
+      pricingGrid?.classList.remove("is-switching");
+    }, 160);
+  }
+
+  document.querySelectorAll("[data-scroll-target]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelector(button.dataset.scrollTarget)?.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+
+  scheduleButtons.forEach((button) => {
+    button.addEventListener("click", () => renderSchedule(button.dataset.scheduleTab));
+  });
+
+  pricingButtons.forEach((button) => {
+    button.addEventListener("click", () => renderPricing(button.dataset.pricingTab));
+  });
+
+  pricingToggle?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-pricing-tab]")) return;
+    const nextType = pricingToggle?.classList.contains("is-personalizado") ? "grupal" : "personalizado";
+    renderPricing(nextType);
+  });
+
+  pricingToggle?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      pricingToggle.click();
+    }
+  });
+
+  function setStatus(message, type = "info") {
+    leadStatus.textContent = message;
+    leadStatus.className = `text-center text-body-sm font-bold ${type === "error" ? "text-error-container" : "text-tertiary-fixed-dim"}`;
+  }
+
+  function buildWhatsappUrl(data) {
+    const locationLabel = data.preferred_location === "bilbao" ? "Bilbao" : "Manuel Plaza";
+    const message = [
+      "Hola Pulpo Box Fitness, quiero agendar una clase de prueba.",
+      `Nombre: ${data.full_name}`,
+      `Telefono: ${data.phone}`,
+      data.email ? `Email: ${data.email}` : "",
+      `Sede: ${locationLabel}`,
+    ].filter(Boolean).join("\n");
+
+    return `https://wa.me/?text=${encodeURIComponent(message)}`;
+  }
+
+  leadForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(leadForm).entries());
+    leadSubmit.disabled = true;
+    leadSubmit.classList.add("opacity-70", "cursor-wait");
+    setStatus("Guardando tus datos...");
+
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Lead save failed");
+      }
+
+      setStatus("Listo. Te llevamos a WhatsApp.");
+      window.location.href = buildWhatsappUrl(data);
+    } catch (error) {
+      setStatus("No pudimos guardar en la base, pero puedes continuar por WhatsApp.", "error");
+      window.location.href = buildWhatsappUrl(data);
+    } finally {
+      leadSubmit.disabled = false;
+      leadSubmit.classList.remove("opacity-70", "cursor-wait");
+    }
+  });
+</script>
+</body></html>
