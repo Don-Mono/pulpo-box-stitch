@@ -4,8 +4,7 @@
   "private": true,
   "description": "Pulpo Box Fitness landing page with Vercel serverless lead capture and Supabase storage.",
   "scripts": {
-    "dev": "npx vercel dev",
-    "start": "npx vercel dev"
+    "preview": "npx --yes vercel@latest dev"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4"

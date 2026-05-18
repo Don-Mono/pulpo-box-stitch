@@ -19,5 +19,5 @@ Run `supabase_leads.sql` in the Supabase project to create the `public.leads` ta
 
 ```bash
 npm install
-npm run dev
+npm run preview
 ```
