@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Pulpo Box</title>
+    <link rel="stylesheet" href="/admin.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <section class="login-card" id="loginView">
+        <h1>Admin Pulpo Box</h1>
+        <p>Ingresa para actualizar textos, titulos e imagenes de la landing.</p>
+        <form id="loginForm">
+          <div class="field">
+            <label for="email">Correo</label>
+            <input id="email" name="email" autocomplete="email" type="email" required />
+          </div>
+          <div class="field">
+            <label for="password">Clave</label>
+            <input id="password" name="password" autocomplete="current-password" type="password" required />
+          </div>
+          <div class="actions">
+            <span class="status" id="loginStatus"></span>
+            <button class="button accent" type="submit">Entrar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="hidden" id="editorView">
+        <header class="admin-header">
+          <div>
+            <h1>Panel Pulpo Box</h1>
+            <p>Edita contenido y usa las fotos de marca ya cargadas en el proyecto.</p>
+          </div>
+          <div class="actions">
+            <a class="button ghost" href="/" target="_blank" rel="noopener noreferrer">Ver pagina</a>
+            <button class="button ghost" id="logoutButton" type="button">Salir</button>
+          </div>
+        </header>
+
+        <div class="admin-layout">
+          <aside class="panel sidebar" id="sectionNav"></aside>
+          <section class="panel editor">
+            <div class="section-title">
+              <div>
+                <h2 id="sectionTitle"></h2>
+                <small id="sectionHint"></small>
+              </div>
+            </div>
+            <form id="editorForm"></form>
+            <div class="actions">
+              <span class="status" id="editorStatus"></span>
+              <button class="button ghost" id="resetButton" type="button">Restaurar seccion</button>
+              <button class="button primary" id="saveButton" type="button">Guardar cambios</button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="/site-content.js"></script>
+    <script src="/admin.js"></script>
+  </body>
+</html>

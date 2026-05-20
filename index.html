@@ -5,7 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Pulpo Box Fitness | Premium CrossFit &amp; Training</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Teko:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -81,20 +81,20 @@
                         "margin-mobile": "16px"
                     },
                     "fontFamily": {
-                        "display-lg-mobile": ["Hanken Grotesk"],
+                        "display-lg-mobile": ["Teko"],
                         "label-caps": ["JetBrains Mono"],
                         "body-sm": ["Inter"],
-                        "display-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Teko"],
                         "body-md": ["Inter"],
-                        "headline-md": ["Hanken Grotesk"]
+                        "headline-md": ["Teko"]
                     },
                     "fontSize": {
-                        "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "display-lg-mobile": ["36px", {"lineHeight": "0.95", "letterSpacing": "0.04em", "fontWeight": "700"}],
                         "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
                         "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "0.95", "letterSpacing": "0.04em", "fontWeight": "700"}],
                         "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+                        "headline-md": ["24px", {"lineHeight": "1", "letterSpacing": "0.03em", "fontWeight": "600"}]
                     }
                 }
             }
@@ -113,6 +113,39 @@
         .teal-glow {
             box-shadow: 0 0 20px rgba(78, 222, 163, 0.15);
         }
+        .brand-wordmark,
+        h1.font-display-lg,
+        h2.font-display-lg,
+        h3.font-display-lg,
+        .font-headline-md {
+            font-family: "Teko", sans-serif !important;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .brand-wordmark {
+            line-height: 0.9;
+            letter-spacing: 0.05em;
+            text-wrap: balance;
+        }
+        h1.font-display-lg,
+        h2.font-display-lg {
+            line-height: 0.95 !important;
+            text-wrap: balance;
+        }
+        h3.font-display-lg,
+        .font-headline-md {
+            line-height: 0.98 !important;
+        }
+        .title-brand-accent {
+            color: #00E6E6;
+            text-shadow: 0 0 18px rgba(0, 230, 230, 0.18);
+        }
+        .title-on-dark {
+            text-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+        }
+        .title-on-light {
+            color: #111827;
+        }
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
             height: 4px;
@@ -128,42 +161,516 @@
             opacity: 0;
             transform: translateY(8px);
         }
+        #horarios {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            background: #0b1220;
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+        #horarios::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: var(--schedule-section-image, url("/assets/brand/gym-class.jpg"));
+            background-size: cover;
+            background-position: center;
+            opacity: 0.22;
+            transform: scale(1.04);
+            filter: saturate(0.95);
+            z-index: -2;
+        }
+        #horarios::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(11, 18, 32, 0.92) 0%, rgba(7, 11, 20, 0.76) 26%, rgba(5, 8, 15, 0.88) 100%),
+                radial-gradient(circle at top right, rgba(0, 230, 230, 0.10), transparent 30%);
+            z-index: -1;
+        }
+        #horarios > .max-w-container-max {
+            position: relative;
+            z-index: 1;
+        }
+        #convenios.fit-section {
+            justify-content: flex-start;
+            padding-top: 2.5rem !important;
+            padding-bottom: 2.75rem !important;
+        }
+        .schedule-panel {
+            position: relative;
+            overflow: hidden;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(5, 7, 13, 0.46);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+            backdrop-filter: blur(10px);
+        }
+        .schedule-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(5, 8, 15, 0.30) 0%, rgba(5, 8, 15, 0.54) 30%, rgba(5, 8, 15, 0.70) 100%),
+                radial-gradient(circle at top right, rgba(0, 230, 230, 0.12), transparent 32%);
+            z-index: 1;
+        }
+        .schedule-background {
+            display: none;
+        }
+        .schedule-content {
+            position: relative;
+            z-index: 2;
+            padding: 1.5rem;
+        }
+        .schedule-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.6rem;
+            max-width: 48rem;
+            margin: 0 auto 1.25rem;
+        }
+        .schedule-tab {
+            min-height: 3rem;
+            padding: 0.65rem 0.9rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.88);
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease;
+        }
+        .schedule-tab.is-active {
+            background: #d7ff25;
+            border-color: #d7ff25;
+            color: #05070d;
+            transform: translateY(-1px);
+        }
+        .schedule-subheading {
+            font-family: "JetBrains Mono", monospace;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.74);
+            margin-bottom: 0.8rem;
+            font-size: 0.92rem;
+        }
+        .schedule-days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+            gap: 0.75rem;
+        }
+        .schedule-day-card {
+            border-radius: 1.25rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.7rem;
+            backdrop-filter: blur(6px);
+        }
+        .schedule-day-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 2.25rem;
+            margin-bottom: 0.65rem;
+            border-radius: 0.9rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: #05070d;
+            background: #00E6E6;
+        }
+        .schedule-slots {
+            display: grid;
+            gap: 0.4rem;
+        }
+        .schedule-slot {
+            min-height: 2.2rem;
+            border-radius: 0.8rem;
+            background: rgba(255, 255, 255, 0.96);
+            color: #05070d;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.05;
+            padding: 0.28rem 0.35rem;
+            font-size: 0.76rem;
+        }
+        .schedule-slot small {
+            display: block;
+            font-size: 0.56rem;
+            letter-spacing: 0.06em;
+            margin-top: 0.1rem;
+        }
+        .schedule-slot.is-muted {
+            background: rgba(190, 190, 190, 0.72);
+            color: rgba(255, 255, 255, 0.94);
+        }
+        .schedule-slot.is-break {
+            background: #d7ff25;
+            color: #05070d;
+        }
+        .benefit-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+            transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+        }
+        .benefit-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 48px rgba(15, 23, 42, 0.12);
+            border-color: rgba(0, 230, 230, 0.24);
+        }
+        .benefit-card-media {
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            background: #0f172a;
+        }
+        .benefit-card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 220ms ease;
+        }
+        .benefit-card:hover .benefit-card-media img {
+            transform: scale(1.04);
+        }
+        .benefit-card-body {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1.4rem;
+            text-align: left;
+        }
+        .benefit-card-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 1.8rem;
+            padding: 0.15rem 0.7rem;
+            margin-bottom: 0.85rem;
+            border-radius: 9999px;
+            background: rgba(0, 230, 230, 0.12);
+            color: #007b83;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .benefit-card p {
+            margin-top: auto;
+        }
+        .discount-section-kicker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 2rem;
+            padding: 0.2rem 0.85rem;
+            margin-bottom: 1rem;
+            border-radius: 9999px;
+            background: rgba(0, 230, 230, 0.12);
+            color: #58ffff;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.74rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .discounts-intro {
+            max-width: 46rem;
+            margin: 1rem auto 0;
+            color: rgba(239, 241, 243, 0.76);
+        }
+        .discounts-carousel-shell {
+            position: relative;
+        }
+        .discounts-carousel-head {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+        .discounts-controls {
+            display: inline-flex;
+            gap: 0.65rem;
+        }
+        .discount-control {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+        }
+        .discount-control:hover {
+            transform: translateY(-1px);
+            background: #00E6E6;
+            border-color: #00E6E6;
+            color: #05070d;
+        }
+        .discounts-viewport {
+            overflow: hidden;
+            cursor: grab;
+            user-select: none;
+        }
+        .discounts-viewport.is-dragging {
+            cursor: grabbing;
+        }
+        .discounts-track {
+            display: flex;
+            gap: 1rem;
+            will-change: transform;
+            transition: transform 320ms ease;
+        }
+        .discount-slide {
+            flex: 0 0 clamp(16.5rem, 24vw, 18.5rem);
+        }
+        .discount-card {
+            position: relative;
+            display: flex;
+            height: 29.5rem;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #05070d;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+            isolation: isolate;
+        }
+        .discount-card-media,
+        .discount-card-overlay,
+        .discount-card-body {
+            position: absolute;
+            inset: 0;
+        }
+        .discount-card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.02);
+        }
+        .discount-card-overlay {
+            background:
+                linear-gradient(180deg, rgba(2, 4, 8, 0.08) 0%, rgba(2, 4, 8, 0.22) 40%, rgba(2, 4, 8, 0.82) 74%, rgba(2, 4, 8, 0.96) 100%),
+                radial-gradient(circle at top center, rgba(0, 230, 230, 0.16), transparent 28%);
+            z-index: 1;
+        }
+        .discount-card-body {
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 13.5rem 1.15rem 1.35rem;
+        }
+        .discount-card-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-start;
+            min-height: 1.9rem;
+            padding: 0.2rem 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 9999px;
+            background: rgba(0, 230, 230, 0.14);
+            color: #58ffff;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .discount-card-tag,
+        .discount-card-subtitle {
+            display: none;
+        }
+        .discount-card-highlight {
+            display: none;
+        }
+        .discount-card-copy {
+            display: none;
+        }
+        .discount-card h3 {
+            font-size: clamp(2rem, 3vw, 2.6rem) !important;
+            line-height: 0.95 !important;
+            max-width: 12rem;
+            text-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
+        }
         .pricing-grid {
             transition: opacity 180ms ease, transform 180ms ease;
+            align-items: stretch;
         }
         .pricing-grid.is-switching {
             opacity: 0;
             transform: translateY(8px);
         }
+        .price-card {
+            height: 100%;
+            min-height: 30rem;
+            align-items: stretch !important;
+            justify-content: flex-start;
+            text-align: left;
+        }
+        .price-card > a {
+            margin-top: auto;
+        }
+        .pricing-section {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #131b2e 0%, #0b1220 100%);
+        }
+        .pricing-section::before {
+            content: "";
+            position: absolute;
+            inset: -22% -14%;
+            background:
+                radial-gradient(circle at 18% 30%, rgba(0, 230, 230, 0.12), transparent 24rem),
+                radial-gradient(circle at 82% 18%, rgba(0, 191, 201, 0.16), transparent 22rem),
+                radial-gradient(circle at 50% 88%, rgba(255, 255, 255, 0.05), transparent 26rem);
+            background-size: 140% 140%;
+            animation: pricingFlow 16s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .pricing-section::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.10) 16%, rgba(255, 255, 255, 0.10) 84%, transparent 100%) bottom / 100% 1px no-repeat,
+                linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0%, transparent 36%, rgba(0, 230, 230, 0.035) 100%);
+            animation: pricingDepth 12s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes pricingFlow {
+            0% {
+                transform: translate3d(-2%, -1%, 0) scale(1);
+                filter: saturate(0.95);
+            }
+            100% {
+                transform: translate3d(2%, 1.5%, 0) scale(1.05);
+                filter: saturate(1.12);
+            }
+        }
+        @keyframes pricingDepth {
+            0% {
+                opacity: 0.55;
+            }
+            100% {
+                opacity: 0.88;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .pricing-section::before,
+            .pricing-section::after {
+                animation: none;
+            }
+        }
+        .pricing-section-content {
+            position: relative;
+            z-index: 1;
+        }
+        .pricing-section-logo {
+            width: clamp(5rem, 8vw, 6.75rem);
+            height: clamp(5rem, 8vw, 6.75rem);
+            margin: 0 auto 1rem;
+            border-radius: 9999px;
+            border: 2px solid rgba(0, 230, 230, 0.38);
+            box-shadow: 0 16px 34px rgba(0, 230, 230, 0.10);
+            object-fit: cover;
+            display: block;
+        }
+        .section-logo {
+            width: clamp(6.25rem, 10vw, 8.75rem);
+            height: clamp(6.25rem, 10vw, 8.75rem);
+            margin: 0 auto 1.15rem;
+            border-radius: 9999px;
+            border: 2px solid rgba(0, 230, 230, 0.42);
+            box-shadow: 0 18px 42px rgba(0, 230, 230, 0.14);
+            object-fit: cover;
+            display: block;
+        }
+        .hero-logo {
+            width: clamp(7rem, 11vw, 9.5rem);
+            height: clamp(7rem, 11vw, 9.5rem);
+            margin: 0 0 1.35rem;
+            border-radius: 9999px;
+            border: 2px solid rgba(0, 230, 230, 0.48);
+            box-shadow: 0 18px 42px rgba(0, 230, 230, 0.16);
+            object-fit: cover;
+            display: block;
+        }
+        .pricing-section-ornament {
+            display: none;
+        }
+        .pricing-section-glow {
+            display: none;
+        }
+        .pricing-panel-shell {
+            position: relative;
+            margin-top: 1.75rem;
+            padding: 0;
+            border-radius: 0;
+            border: 0;
+            background: transparent;
+            box-shadow: none;
+            overflow: visible;
+        }
+        .pricing-panel-shell::before {
+            content: none;
+        }
+        .pricing-panel-shell::after {
+            content: none;
+        }
+        .pricing-panel-inner {
+            position: relative;
+            z-index: 1;
+        }
         .pricing-segmented {
-            width: min(100%, 30rem);
+            width: min(100%, 46rem);
             margin-left: auto;
             margin-right: auto;
             padding: 0.25rem;
             border-radius: 9999px;
-            background: #2d3548;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.10);
             position: relative;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
         }
         .pricing-segmented-indicator {
             position: absolute;
             inset: 0.25rem auto 0.25rem 0.25rem;
-            width: calc(50% - 0.25rem);
+            width: calc(33.333% - 0.17rem);
             border-radius: 9999px;
             background: #00E6E6;
             transition: transform 220ms ease;
         }
-        .pricing-segmented.is-personalizado .pricing-segmented-indicator {
+        .pricing-segmented.is-pases .pricing-segmented-indicator {
             transform: translateX(100%);
+        }
+        .pricing-segmented.is-personalizados .pricing-segmented-indicator {
+            transform: translateX(200%);
         }
         .pricing-segmented-option {
             position: relative;
             z-index: 1;
             min-height: 3.75rem;
             border-radius: 9999px;
-            color: white;
+            color: rgba(255, 255, 255, 0.94);
             font-weight: 700;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
             transition: color 180ms ease;
         }
         button.pricing-segmented-option:focus {
@@ -176,6 +683,169 @@
         }
         .pricing-segmented-option.is-active {
             color: #000000;
+        }
+        .price-card {
+            background: #ffffff;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 20px 34px rgba(8, 12, 22, 0.16);
+        }
+        .price-card.is-featured {
+            border: 2px solid rgba(0, 230, 230, 0.75) !important;
+            box-shadow: 0 24px 40px rgba(0, 230, 230, 0.12);
+        }
+        .price-card-badge {
+            position: static;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 1.9rem;
+            padding: 0.2rem 0.9rem;
+            align-self: flex-start;
+            margin-bottom: 1rem;
+            border-radius: 9999px;
+            background: #00E6E6;
+            color: #131b2e;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .price-card-badge-spacer {
+            display: block;
+            min-height: 2.9rem;
+        }
+        .pricing-section .price-card > a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+        }
+        #coaches {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            background: linear-gradient(100deg, #0b1220 0%, #131b2e 34%, #06343c 62%, #0b1220 100%);
+            background-size: 260% 100%;
+            animation: coachesGradientFlow 18s ease-in-out infinite alternate;
+        }
+        #coaches::before {
+            content: "";
+            position: absolute;
+            inset: -18% -12%;
+            background:
+                radial-gradient(circle at 15% 40%, rgba(0, 230, 230, 0.13), transparent 24rem),
+                radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.07), transparent 20rem);
+            animation: coachesGlowTravel 16s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: -1;
+        }
+        #coaches > .max-w-container-max {
+            position: relative;
+            z-index: 1;
+        }
+        .coaches-carousel {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            cursor: grab;
+            scroll-behavior: auto;
+            scrollbar-width: none;
+            touch-action: pan-x;
+            mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+        }
+        .coaches-carousel::-webkit-scrollbar {
+            display: none;
+        }
+        .coaches-carousel.is-dragging {
+            cursor: grabbing;
+            scroll-behavior: auto;
+        }
+        .coaches-track {
+            display: flex;
+            gap: 1.5rem;
+            width: max-content;
+        }
+        .coach-card {
+            position: relative;
+            flex: 0 0 calc((min(100vw - 80px, 1280px) - 72px) / 4);
+            width: calc((min(100vw - 80px, 1280px) - 72px) / 4);
+            height: 24rem;
+            overflow: hidden;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(7, 11, 20, 0.84);
+            box-shadow: 0 22px 44px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+        }
+        .coach-card img {
+            width: 100%;
+            height: 58%;
+            object-fit: cover;
+            flex: 0 0 58%;
+            border-bottom: 1px solid rgba(0, 230, 230, 0.20);
+        }
+        .coach-card::after {
+            content: none;
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(7, 11, 20, 0.02) 0%, rgba(7, 11, 20, 0.40) 42%, rgba(7, 11, 20, 0.88) 100%);
+        }
+        .coach-card-body {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            padding: 1.15rem 1.2rem 1.25rem;
+            color: #ffffff;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .coach-card h3 {
+            font-size: 1.6rem !important;
+            margin-bottom: 0.15rem;
+        }
+        .coach-card-role {
+            color: #00E6E6;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin: 0.2rem 0 0.65rem;
+        }
+        .coach-card p {
+            color: rgba(239, 241, 243, 0.78);
+            font-size: 0.82rem;
+            line-height: 1.32;
+            margin-top: auto;
+        }
+        @keyframes coachesGradientFlow {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+        @keyframes coachesGlowTravel {
+            0% {
+                transform: translate3d(-2%, 0, 0) scale(1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translate3d(2%, 1%, 0) scale(1.04);
+                opacity: 1;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #coaches,
+            #coaches::before {
+                animation: none;
+            }
         }
         @media (max-width: 767px) {
             nav > div {
@@ -209,19 +879,88 @@
                 height: 22rem !important;
                 min-height: 22rem;
             }
+            .schedule-content {
+                padding: 1.25rem;
+            }
+            .schedule-tabs {
+                grid-template-columns: 1fr;
+            }
+            .schedule-tab {
+                min-height: 3.15rem;
+                font-size: 0.9rem;
+            }
+            .schedule-days-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.75rem;
+            }
+            .schedule-day-card {
+                padding: 0.65rem;
+            }
+            .schedule-day-label {
+                min-height: 2.4rem;
+                font-size: 0.72rem;
+            }
+            .schedule-slot {
+                min-height: 2.7rem;
+                font-size: 0.82rem;
+            }
+            .benefit-card-body {
+                padding: 1rem;
+            }
+            .discount-card {
+                height: 26.5rem;
+            }
+            .discount-card-body {
+                padding: 12rem 1rem 1.05rem;
+            }
+            .discount-card h3 {
+                font-size: clamp(1.85rem, 9vw, 2.35rem) !important;
+                max-width: 10.5rem;
+            }
+            .discounts-carousel-head {
+                justify-content: center;
+            }
+            .discount-slide {
+                flex-basis: min(76vw, 17.75rem);
+            }
+            .coaches-carousel {
+                mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+            }
+            .coaches-track {
+                gap: 1rem;
+                animation-duration: 26s;
+            }
+            .coach-card {
+                flex-basis: min(76vw, 19rem);
+                width: min(76vw, 19rem);
+                height: 23rem;
+            }
+            .coach-card-body {
+                padding: 1rem;
+            }
+            .coach-card h3 {
+                font-size: 1.35rem !important;
+            }
+            .coach-card p {
+                font-size: 0.78rem;
+            }
             .service-card-content {
                 padding: 1.25rem !important;
             }
             .price-card {
                 padding: 1.5rem !important;
                 transform: none !important;
+                min-height: 27rem;
             }
             .pricing-segmented {
-                width: min(100%, 22rem);
+                width: 100%;
             }
             .pricing-segmented-option {
                 min-height: 3.25rem;
-                font-size: 0.92rem;
+                font-size: 0.82rem;
+            }
+            .pricing-panel-shell {
+                margin-top: 1.25rem;
             }
             .price-value {
                 font-size: 2rem !important;
@@ -271,11 +1010,19 @@
                 height: min(46vh, 380px) !important;
                 min-height: 330px;
             }
+            .schedule-days-grid {
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+            }
+            #horarios.fit-section {
+                padding-top: 1.5rem !important;
+                padding-bottom: 1.5rem !important;
+            }
             .service-card-content {
                 padding: 1.5rem !important;
             }
             .price-card {
                 padding: 1.75rem !important;
+                min-height: 29rem;
             }
             .price-value {
                 font-size: 2.15rem !important;
@@ -303,39 +1050,52 @@
                 height: 7.5rem !important;
             }
         }
+        @media (min-width: 1024px) {
+            .pricing-grid.is-three-up {
+                display: flex !important;
+                justify-content: center;
+                gap: 24px;
+            }
+            .pricing-grid.is-three-up > .price-card {
+                flex: 0 0 calc((100% - 72px) / 4);
+                max-width: calc((100% - 72px) / 4);
+            }
+        }
     </style>
 </head>
 <body class="bg-primary-container text-on-surface font-body-md overflow-x-hidden">
 <!-- Top Navigation -->
 <nav class="fixed top-0 w-full z-50 bg-surface-glass backdrop-blur-xl border-b border-border-subtle shadow-sm transition-all duration-300 ease-in-out">
 <div class="flex justify-between items-center max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop h-20">
-<div class="font-display-lg text-headline-md font-bold text-on-surface">
-                PULPO BOX FITNESS
+<div class="brand-wordmark text-[1.45rem] md:text-[1.6rem] font-bold text-on-surface title-on-light">
+                PULPO BOX
             </div>
 <div class="hidden md:flex items-center gap-5 lg:gap-gutter">
-<a class="text-tertiary-fixed-dim font-bold border-b-2 border-tertiary-fixed-dim pb-1 font-body-md" href="#inicio">Home</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#servicios">Services</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#horarios">Schedule</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#planes">Pricing</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#sedes">Locations</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#coaches">Coaches</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 font-body-md" href="#contacto-footer">Contacto</a>
+<a class="text-tertiary-fixed-dim font-semibold border-b-2 border-tertiary-fixed-dim pb-1 text-[0.9rem] lg:text-[0.94rem]" href="#inicio">Inicio</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#servicios">Programas</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#horarios">Horarios</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#planes">Planes</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#convenios">Convenios</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#sedes">Sedes</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#coaches">Entrenadores</a>
+<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#contacto-footer">Contacto</a>
 </div>
-<button class="bg-primary text-on-primary px-6 py-2.5 rounded-full font-bold hover:bg-tertiary-fixed-dim transition-all duration-300" data-scroll-target="#contacto">
-                Join Now
+<button class="bg-primary text-on-primary px-5 py-2.5 rounded-full font-bold text-[0.92rem] hover:bg-tertiary-fixed-dim transition-all duration-300" data-scroll-target="#contacto">
+                Prueba Gratis
             </button>
 </div>
 </nav>
 <!-- Hero Section -->
 <section class="relative min-h-screen flex flex-col justify-center pt-20 overflow-hidden" id="inicio">
 <div class="absolute inset-0 z-0">
-<img alt="Athlete Training" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHOb9zCy0vQP1RSvq_Yw3m67aNk1KnTnGWKXibIdOdmQVDOAJ1BTqYyf1XlSpDlPylbsZ34BGJanOMMzUs3ORbLeMD-cHQS3zvL10dGeELcTM2ZzTVmSCw7UyNKJp0cWtF38HIzCYt7Mc7VdJRL4td3EVnCPAyG6cD4-1tYbHqNDCPp7Pf4Jfru1sAssk68DUn_exJ5gmcfBM8DFks2j0HXgoIYfZZrA8K_22Gckv4eUAY8YCe7hzCVLUGbhqxdkoKGhE9Zq0_FJc"/>
+<img alt="Equipo de Pulpo Box en el box principal." class="w-full h-full object-cover" src="/assets/brand/hero-team.jpg"/>
 <div class="absolute inset-0 gradient-overlay"></div>
 </div>
 <div class="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop w-full py-24">
 <div class="max-w-3xl">
-<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white mb-6 uppercase tracking-tight">
-                    PULPO BOX<br/><span class="text-tertiary-fixed-dim">FITNESS.</span>
+<img alt="Logo Pulpo Box" class="hero-logo" src="/assets/brand/pulpo-box-logo.png"/>
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white mb-6 uppercase tracking-tight title-on-dark">
+                    PULPO BOX
 </h1>
 <p class="font-body-md text-on-primary-container text-lg md:text-xl max-w-xl mb-10 opacity-90 leading-relaxed">
                     TU ESPACIO PARA SUPERAR LÍMITES. MÁS QUE UN GIMNASIO, UNA COMUNIDAD.
@@ -393,7 +1153,7 @@
 </div>
 </section>
 <!-- Lead Capture Section -->
-<section class="py-24 bg-primary-container relative overflow-hidden" id="contacto">
+<section class="py-24 bg-primary-container relative overflow-hidden fit-section" id="contacto">
 <div class="absolute right-0 top-0 w-1/2 h-full bg-tertiary-fixed-dim opacity-5 blur-[120px] rounded-full"></div>
 <div class="max-w-3xl mx-auto px-margin-mobile relative z-10">
 <div class="text-center mb-12">
@@ -439,7 +1199,7 @@
 <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-gutter">
 <div class="group relative rounded-2xl overflow-hidden h-[500px] service-card">
 <div class="absolute inset-0">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A professional athlete performing CrossFit movements in a gritty industrial gym setting. High-contrast lighting with cool teal shadows and warm highlights creates a sense of intensity and focus. The background shows workout equipment and heavy tires, emphasizing a professional, high-performance fitness environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQItEMFLaLcloP8NlB4lbIzF-hcvH4sXU5nt8vSDet5vaSaMr6VVnxNqluiNOC13jBS4Rz_IPbj1C8lCpzbeG6GP1f8WrPr7uOIW5ZRPX0DFWsAcsMGadLtjyXDQ796Z_-CexfRTo0B8AL_hySrrvScLqE9BgumZeV--_Iffjc3UhzU-TARhebJY_qX20iHujzRpFoJlstLh3FkeXvejKMM5pgCTEbbnA7exTZVKIpgnmjWQJ9WQ1fXYQfm6r9zD1RbrZn6zYE3IA"/>
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Clase grupal de CrossFit dentro de Pulpo Box." src="/assets/brand/gym-class.jpg"/>
 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
 </div>
 <div class="absolute bottom-0 left-0 p-8 service-card-content">
@@ -450,7 +1210,7 @@
 </div>
 <div class="group relative rounded-2xl overflow-hidden h-[500px] service-card">
 <div class="absolute inset-0">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A personal trainer guiding a client through a weighted exercise in a minimalist, high-end private gym studio. The lighting is soft and architectural, using cool tones to create a premium, focused atmosphere. Deep blacks and clean lines define the space, with a subtle glow around the athlete to highlight the precision of their movement." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiwzmw-bH2S8SecePxsBGIHT3-My9z9ZpwnZsL0lrVMUNVsBrLDJgFDfYpPfgx0jZbr98BXROLrraz5J8Efiv7r7jSYfirTuo24Xm3s1vTisD_DeH9aATEwrP6eCFBg5Azjw8RwORzIRY7RceCOZOYCt86lkJLhWKPnLxLl6_OqlfQx4j9t6GxVFdm-s5Obi-3sGp-Q-lGShS2EOObedzLRClFRPzG5qQXvk529c9HnbMHjVbaWzcT7PqrQ-pdBkjqxSsMofP-O5s"/>
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Coach guiando un entrenamiento personalizado en Pulpo Box." src="/assets/brand/coach-guidance.jpg"/>
 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
 </div>
 <div class="absolute bottom-0 left-0 p-8 service-card-content">
@@ -461,7 +1221,7 @@
 </div>
 <div class="group relative rounded-2xl overflow-hidden h-[500px] service-card">
 <div class="absolute inset-0">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A group training session in a spacious, modern gym featuring bright, energizing lighting with teal accents. Multiple athletes are seen in a synchronized movement, conveying a sense of community and collective effort. The aesthetic is clean and high-tech, with premium fitness equipment and a vibrant atmosphere of mutual motivation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQTHergTyUZ1dt4emWcH8O8LyA2OJEtFc8WKa1_0h5KuCk76B-DCFid_ggW3fJM1ttwJmYgUEpvcZH9386ypDKW9JrImWqpj9DfhoowzK0YLfbE9E3vj6r6GdB0zdigN2HlWYgDeeDEFOSZTtvUUig0HxuYq5w8YVG0HYjGkJyKin6ebJ3THEff5yioXa5pdCdtDPlWEo0Z-lyhA4_lLRiC4-V5QP3gt1CFWoweqY1v1jVxadefWW64erdroOeXnkAo10czQgns-s"/>
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Equipo celebrando y entrenando en comunidad en Pulpo Box." src="/assets/brand/team-energy.jpg"/>
 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
 </div>
 <div class="absolute bottom-0 left-0 p-8 service-card-content">
@@ -473,69 +1233,46 @@
 </div>
 </section>
 <!-- Schedule Section -->
-<section class="py-24 bg-primary-container fit-section" id="horarios">
+<section class="py-24 fit-section" id="horarios" style="--schedule-section-image: url('/assets/brand/gym-class.jpg');">
 <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
 <div class="text-center mb-8">
-<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white uppercase mb-5 fit-section-heading-sm">HORARIOS ORDENADOS...</h2>
-<div class="inline-flex bg-white/10 p-1 rounded-full mb-6">
-<button class="px-8 py-3 rounded-full bg-tertiary-fixed-dim text-primary font-bold transition-all" data-schedule-tab="grupales" type="button">Clases Grupales</button>
-<button class="px-8 py-3 rounded-full text-white font-medium hover:text-tertiary-fixed-dim transition-all" data-schedule-tab="personalizados" type="button">Personalizados</button>
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white uppercase mb-4 fit-section-heading-sm">HORARIOS</h2>
 </div>
+<div class="schedule-panel schedule-table-shell" id="schedule-table-wrapper">
+<div class="schedule-background">
+<img alt="Fondo de horarios Pulpo Box." id="schedule-background-image" src="/assets/brand/gym-class.jpg"/>
 </div>
-<div class="overflow-x-auto custom-scrollbar schedule-table-shell" id="schedule-table-wrapper">
-<table class="w-full border-collapse">
-<thead>
-<tr class="bg-white/5">
-<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">HORARIO</th>
-<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">LUNES</th>
-<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">MARTES</th>
-<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">MIÉRCOLES</th>
-<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">JUEVES</th>
-<th class="p-3 text-left font-display-lg text-body-sm text-tertiary-fixed-dim border border-white/10">VIERNES</th>
-</tr>
-</thead>
-<tbody class="text-white/80" id="schedule-body">
-<tr class="border-b border-white/5">
-<td class="p-3 font-label-caps border border-white/10">07:00 AM</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
-<td class="p-3 border border-white/10">--</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
-<td class="p-3 border border-white/10">--</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
-</tr>
-<tr class="border-b border-white/5">
-<td class="p-3 font-label-caps border border-white/10">09:00 AM</td>
-<td class="p-3 border border-white/10">--</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">HIIT</td>
-<td class="p-3 border border-white/10">--</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">HIIT</td>
-<td class="p-3 border border-white/10">--</td>
-</tr>
-<tr class="border-b border-white/5">
-<td class="p-3 font-label-caps border border-white/10">06:00 PM</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">Open Box</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">Open Box</td>
-<td class="p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white">CrossFit</td>
-</tr>
-</tbody>
-</table>
+<div class="schedule-content">
+<p class="schedule-subheading" id="schedule-caption">Sucursal Manuel Plaza</p>
+<div class="schedule-tabs" id="schedule-tabs" role="tablist" aria-label="Cambiar horario">
+<button aria-selected="true" class="schedule-tab is-active" data-schedule-tab="crossfit-manuel" role="tab" type="button">CROSSFIT</button>
+<button aria-selected="false" class="schedule-tab" data-schedule-tab="personalizados" role="tab" type="button">PERSONALIZADOS</button>
+<button aria-selected="false" class="schedule-tab" data-schedule-tab="bilbao" role="tab" type="button">BILBAO</button>
+</div>
+<div class="schedule-days-grid" id="schedule-grid"></div>
+</div>
 </div>
 </div>
 </section>
 <!-- Pricing Section -->
-<section class="py-24 bg-white fit-section" id="planes">
-<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center">
-<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary uppercase mb-4 fit-section-heading-sm">PLANES PULPOBOX</h2>
+<section class="py-24 fit-section pricing-section" id="planes">
+<div aria-hidden="true" class="pricing-section-ornament"></div>
+<div aria-hidden="true" class="pricing-section-glow"></div>
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center pricing-section-content">
+<img alt="Logo Pulpo Box" class="pricing-section-logo" src="/assets/brand/pulpo-box-logo.png"/>
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white uppercase mb-4 fit-section-heading-sm">PLANES PULPOBOX</h2>
+<div class="pricing-panel-shell">
+<div class="pricing-panel-inner">
 <div class="pricing-segmented mb-8" id="pricing-toggle" role="tablist" tabindex="0" aria-label="Cambiar tipo de plan">
 <div class="pricing-segmented-indicator" id="pricing-toggle-knob"></div>
-<button aria-selected="true" class="pricing-segmented-option is-active" data-pricing-tab="mensual" role="tab" type="button">MENSUAL</button>
+<button aria-selected="true" class="pricing-segmented-option is-active" data-pricing-tab="mensual" role="tab" type="button">MENSUALES</button>
 <button aria-selected="false" class="pricing-segmented-option" data-pricing-tab="pases" role="tab" type="button">PASES</button>
+<button aria-selected="false" class="pricing-segmented-option" data-pricing-tab="personalizados" role="tab" type="button">PERSONALIZADOS</button>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter pricing-grid" id="pricing-grid">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter pricing-grid items-stretch" id="pricing-grid">
 <!-- Plan 1 -->
-<div class="border border-border-subtle p-10 rounded-2xl flex flex-col items-center hover:border-tertiary-fixed-dim transition-all price-card" data-plan-card="0">
+<div class="bg-white border border-border-subtle p-10 rounded-2xl flex flex-col hover:border-tertiary-fixed-dim transition-all price-card" data-plan-card="0">
+<span aria-hidden="true" class="price-card-badge-spacer"></span>
 <span class="text-label-caps text-on-surface-variant tracking-widest mb-3" data-plan-period>MENSUAL</span>
 <h3 class="font-display-lg text-headline-md mb-4" data-plan-name>8 SESIONES</h3>
 <div class="text-display-lg mb-8 price-value" data-plan-price>$40.000 <span class="text-headline-md text-on-surface-variant font-normal">/clp</span></div>
@@ -544,10 +1281,11 @@
 <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Plan mensual</li>
 <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Ideal para comenzar</li>
 </ul>
-<a class="w-full py-4 border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all" href="#contacto">ELEGIR PLAN</a>
+<a class="w-full py-4 border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all" data-plan-cta="8 SESIONES" href="https://wa.me/56938794624?text=Hola%20Pulpo%20Box%2C%20me%20interesa%20el%20plan%208%20sesiones.%0ASede%20de%20interes%3A%20Manuel%20Plaza.%0AQuiero%20recibir%20ayuda%20para%20inscribirme.">ELEGIR PLAN</a>
 </div>
 <!-- Plan 2 -->
-<div class="border border-border-subtle p-10 rounded-2xl flex flex-col items-center hover:border-tertiary-fixed-dim transition-all price-card" data-plan-card="1">
+<div class="bg-white border border-border-subtle p-10 rounded-2xl flex flex-col hover:border-tertiary-fixed-dim transition-all price-card" data-plan-card="1">
+<span aria-hidden="true" class="price-card-badge-spacer"></span>
 <span class="text-label-caps text-on-surface-variant tracking-widest mb-3" data-plan-period>MENSUAL</span>
 <h3 class="font-display-lg text-headline-md mb-4" data-plan-name>12 SESIONES</h3>
 <div class="text-display-lg mb-8 price-value" data-plan-price>$45.000 <span class="text-headline-md text-on-surface-variant font-normal">/clp</span></div>
@@ -556,10 +1294,11 @@
 <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Plan mensual</li>
 <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Buen ritmo semanal</li>
 </ul>
-<a class="w-full py-4 border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all" href="#contacto">ELEGIR PLAN</a>
+<a class="w-full py-4 border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all" data-plan-cta="12 SESIONES" href="https://wa.me/56938794624?text=Hola%20Pulpo%20Box%2C%20me%20interesa%20el%20plan%2012%20sesiones.%0ASede%20de%20interes%3A%20Manuel%20Plaza.%0AQuiero%20recibir%20ayuda%20para%20inscribirme.">ELEGIR PLAN</a>
 </div>
 <!-- Plan 3 -->
-<div class="border border-border-subtle p-10 rounded-2xl flex flex-col items-center hover:border-tertiary-fixed-dim transition-all price-card" data-plan-card="2">
+<div class="bg-white border border-border-subtle p-10 rounded-2xl flex flex-col hover:border-tertiary-fixed-dim transition-all price-card" data-plan-card="2">
+<span aria-hidden="true" class="price-card-badge-spacer"></span>
 <span class="text-label-caps text-on-surface-variant tracking-widest mb-3" data-plan-period>MENSUAL</span>
 <h3 class="font-display-lg text-headline-md mb-4" data-plan-name>16 SESIONES</h3>
 <div class="text-display-lg mb-8 price-value" data-plan-price>$50.000 <span class="text-headline-md text-on-surface-variant font-normal">/clp</span></div>
@@ -568,20 +1307,22 @@
 <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Plan mensual</li>
 <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Para entrenar constante</li>
 </ul>
-<a class="w-full py-4 border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all" href="#contacto">ELEGIR PLAN</a>
+<a class="w-full py-4 border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all" data-plan-cta="16 SESIONES" href="https://wa.me/56938794624?text=Hola%20Pulpo%20Box%2C%20me%20interesa%20el%20plan%2016%20sesiones.%0ASede%20de%20interes%3A%20Manuel%20Plaza.%0AQuiero%20recibir%20ayuda%20para%20inscribirme.">ELEGIR PLAN</a>
 </div>
 <!-- Plan 4 -->
-<div class="bg-primary text-white p-10 rounded-2xl flex flex-col items-center scale-105 shadow-2xl relative price-card" data-plan-card="3">
-<div class="absolute -top-4 bg-tertiary-fixed-dim text-primary text-label-caps py-1 px-4 rounded-full font-bold">VIP</div>
-<span class="text-label-caps text-white/60 tracking-widest mb-3" data-plan-period>MENSUAL</span>
-<h3 class="font-display-lg text-headline-md text-white mb-4" data-plan-name>24 SESIONES</h3>
-<div class="text-display-lg mb-8 text-tertiary-fixed-dim price-value" data-plan-price>$55.000 <span class="text-headline-md text-white/60 font-normal">/clp</span></div>
-<ul class="text-white/80 space-y-3 mb-10 w-full fit-tight-list" data-plan-features>
+<div class="bg-white border border-border-subtle p-10 rounded-2xl flex flex-col hover:border-tertiary-fixed-dim transition-all price-card is-featured" data-plan-card="3">
+<div class="price-card-badge">VIP</div>
+<span class="text-label-caps text-on-surface-variant tracking-widest mb-3" data-plan-period>MENSUAL</span>
+<h3 class="font-display-lg text-headline-md mb-4" data-plan-name>24 SESIONES</h3>
+<div class="text-display-lg mb-8 text-tertiary-fixed-dim price-value" data-plan-price>$55.000 <span class="text-headline-md text-on-surface-variant font-normal">/clp</span></div>
+<ul class="text-on-surface-variant space-y-3 mb-10 w-full fit-tight-list">
 <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Membresia VIP</li>
 <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> 24 sesiones de entrenamiento</li>
 <li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> Acceso a las 2 sucursales</li>
 </ul>
-<a class="w-full py-4 bg-tertiary-fixed-dim text-primary rounded-xl font-bold hover:scale-105 transition-transform" href="#contacto">ELEGIR PLAN</a>
+<a class="w-full py-4 bg-tertiary-fixed-dim text-primary rounded-xl font-bold hover:scale-105 transition-transform" data-plan-cta="24 SESIONES" href="https://wa.me/56938794624?text=Hola%20Pulpo%20Box%2C%20me%20interesa%20el%20plan%2024%20sesiones.%0ASede%20de%20interes%3A%20Manuel%20Plaza.%0AQuiero%20recibir%20ayuda%20para%20inscribirme.">ELEGIR PLAN</a>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -592,20 +1333,58 @@
 <h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary uppercase fit-section-heading-sm">BENEFICIOS QUE FORTALECEN...</h2>
 </div>
 <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-gutter">
-<div class="flex flex-col items-center text-center p-6">
-<img alt="Physical Benefits" class="w-20 h-20 mb-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr_syUylEWt8FmLn-brv76L3P7E1xE7pAf6X1aHGIu34ckOIcZ2yNkgSssy0_CcC6iUq4hirdWeP7iFBt2oA3hjUnbb8HLsI3UUs4sYPwZpRExJ4S9ePhQXVJc7OkyVsa1kd-IGWKo1iy6rwsDK7p_gmiiwwtl2ToCuxcqQzqzQsSW3-QU9_gplEy6CpJi-db0Uuf-tSHtAIbgxeU69mdDhMtOCQYai8TLT3vlIJXIDpPoCaPnwXQVIhHL1ZvgK9TjjEhxKNdrsFI"/>
-<h3 class="font-headline-md text-primary mb-4">Salud Física</h3>
+<div class="benefit-card">
+<div class="benefit-card-media">
+<img alt="Atleta subiendo la cuerda en Pulpo Box." src="/assets/brand/rope-climb.jpg"/>
+</div>
+<div class="benefit-card-body">
+<span class="benefit-card-label">Pulpo Box</span>
+<h3 class="font-display-lg text-headline-md text-primary">Salud Física</h3>
 <p class="font-body-sm text-on-surface-variant">Mejora tu resistencia cardiovascular, fuerza muscular y flexibilidad en cada sesión.</p>
 </div>
-<div class="flex flex-col items-center text-center p-6">
-<img alt="Mental Benefits" class="w-20 h-20 mb-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAl0016_THQvGPl6UjplGgyJole8_rkuyv0JoU9AhxD9-ZS3bzCXEPi4kHexTWxFHWNNJ7xFQYATTK6wQgRkwkSIvNDJ5Mwfjuu8_G7aNet2WI3I4nd5D475pu6f1-02v-hGrpqkTgsa5e4yfnYeLDihsl33Fo20WpcCTK04xaZklqbCW-wBA7R_918ARZRpO1xTjIGVSinuzdaivZXvGbQJmggYnL4rYo1kSWEH0FdCbyfZbwL4kegF66qcsEHP9NV8WBEo45RFdk"/>
-<h3 class="font-headline-md text-primary mb-4">Bienestar Mental</h3>
+</div>
+<div class="benefit-card">
+<div class="benefit-card-media">
+<img alt="Coach explicando la planificacion del entrenamiento." src="/assets/brand/coach-board.jpg"/>
+</div>
+<div class="benefit-card-body">
+<span class="benefit-card-label">Pulpo Box</span>
+<h3 class="font-display-lg text-headline-md text-primary">Bienestar Mental</h3>
 <p class="font-body-sm text-on-surface-variant">Libera estrés y mejora tu foco cognitivo a través del ejercicio de alta intensidad.</p>
 </div>
-<div class="flex flex-col items-center text-center p-6">
-<img alt="Community Benefits" class="w-20 h-20 mb-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFdh2NyG2BBct6h6sgbuZDwB7MxMf75uzX8_Q6FdZyjh8o3adUucqlpKCQ2wtS7w3Mm9OE5MoVZIVJ79T7jYSHVHHLTHe1mhpr4t0KDibZQhV3T5Z7qeicYZRgNBylsWZlw092CQMS6yf1S11kNydMAOPz_d7VcpXjCObXIOGstxM9iG5K_FN5y5bjIUhqB7M0JMIj_cLNkPKpKiLVXga1Ciqmbxb0fcPp0BTfEOYh0EiAAm1CKXB6XkA6OhSse9itzltZq4pu70U"/>
-<h3 class="font-headline-md text-primary mb-4">Comunidad</h3>
+</div>
+<div class="benefit-card">
+<div class="benefit-card-media">
+<img alt="Staff de Pulpo Box reunido dentro del box." src="/assets/brand/team-lineup.jpg"/>
+</div>
+<div class="benefit-card-body">
+<span class="benefit-card-label">Pulpo Box</span>
+<h3 class="font-display-lg text-headline-md text-primary">Comunidad</h3>
 <p class="font-body-sm text-on-surface-variant">Forma parte de un grupo que te apoya y te impulsa a superar tus límites cada día.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Discounts Section -->
+<section class="py-24 bg-primary-container text-white fit-section" id="convenios">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center mb-10">
+<span class="discount-section-kicker">Alianzas locales</span>
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg uppercase fit-section-heading-sm">CONVENIOS Y DESCUENTOS</h2>
+<p class="discounts-intro font-body-md">Trabajamos con aliados locales para que tu membresia en Pulpo Box tambien se traduzca en beneficios fuera del box.</p>
+</div>
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop discounts-carousel-shell">
+<div class="discounts-carousel-head">
+<div class="discounts-controls">
+<button aria-label="Convenio anterior" class="discount-control" id="discount-prev" type="button">
+<span class="material-symbols-outlined">west</span>
+</button>
+<button aria-label="Siguiente convenio" class="discount-control" id="discount-next" type="button">
+<span class="material-symbols-outlined">east</span>
+</button>
+</div>
+</div>
+<div class="discounts-viewport" id="discounts-viewport">
+<div class="discounts-track" id="discounts-track"></div>
 </div>
 </div>
 </section>
@@ -616,7 +1395,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
 <div class="bg-surface-container-low rounded-2xl p-6 flex flex-col md:flex-row gap-6">
 <div class="w-full md:w-1/2 aspect-square bg-white rounded-xl overflow-hidden location-map">
-<img class="w-full h-full object-cover" data-alt="A clean, minimalist map illustration showing the urban location of Pulpo Box Manuel Plaza in Iquique, Chile. The map uses a sophisticated dark and teal color palette consistent with the fitness brand's identity, featuring a prominent pinpoint marker for the gym location." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-uic6JyIV7hm6Cm_O8SUAjCca5UgiecFvMsjhnKvevAlbkC8DSlt08oylqQjJ6aF41YQXBm8sBFoALNnY-9Z2yOFEtouN07Re5AuiIwaMd59QGioaddJ_I0kIvwijODjrOhs27oQy3rDY1EBks5wVAoa-29h0ivIN2riAVWISXEEkm5_-TQI__a7U1-MNVtva9tUK85o7dhQBcP7d5C4MU-be7zMtKLK_zez-76A2npwRsjljnJzRu4ZbO2pmqWyqS-qs4Hjllnk"/>
+<img class="w-full h-full object-cover" data-alt="Clase en la sede Manuel Plaza de Pulpo Box." src="/assets/brand/gym-class.jpg"/>
 </div>
 <div class="flex flex-col justify-center">
 <h3 class="font-display-lg text-headline-md text-primary mb-2">Manuel Plaza</h3>
@@ -628,7 +1407,7 @@
 </div>
 <div class="bg-surface-container-low rounded-2xl p-6 flex flex-col md:flex-row gap-6">
 <div class="w-full md:w-1/2 aspect-square bg-white rounded-xl overflow-hidden location-map">
-<img class="w-full h-full object-cover" data-alt="A clean, minimalist map illustration showing the urban location of Pulpo Box Bilbao in Iquique, Chile. The map is styled with a sleek dark mode appearance and vibrant teal highlights, clearly marking the gym's second location for easy navigation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBSnHm-_tKHzIpa7TmL9mXzH6ZCVqasmQnyQXm2Ac_rmK37l-Z2oHsP9n0lKiEyN89r_wvHjF3TGGjauNFDtyayuqWCipgAZR99Eabn10Fn3FPmfyciT825WKB1st25pUh4bR1j2xK5EMZkv9wzU4IQuu6KaCsMibTueTn4t0DA7QZ0g54LJUGjZLWHUx3_nOYmbGEokCRIxfIEsNjCfDTkOpF90yIZjmTXPJbk4QDTDZb_PR6WE8f8XQqg8nOhAJixq8I7l9BVIw"/>
+<img class="w-full h-full object-cover" data-alt="Comunidad entrenando en la sede Bilbao de Pulpo Box." src="/assets/brand/team-energy.jpg"/>
 </div>
 <div class="flex flex-col justify-center">
 <h3 class="font-display-lg text-headline-md text-primary mb-2">Bilbao</h3>
@@ -642,13 +1421,15 @@
 </div>
 </section>
 <!-- Coaches Section -->
-<section class="py-24 bg-primary-container fit-section" id="coaches">
-<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white text-center uppercase mb-10 fit-section-heading-sm">PERSONAS REALES GUIANDO TU PROGRESO</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<section class="py-24 fit-section" id="coaches">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center">
+<img alt="Logo Pulpo Box" class="section-logo" src="/assets/brand/pulpo-box-logo.png"/>
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white uppercase mb-10 fit-section-heading-sm">PERSONAS REALES GUIANDO TU PROGRESO</h2>
+<div class="coaches-carousel" aria-label="Equipo de coaches Pulpo Box">
+<div class="coaches-track" id="coaches-track">
 <div class="flex flex-col md:flex-row items-center gap-6 bg-white/5 p-6 rounded-2xl border border-white/10">
 <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-tertiary-fixed-dim flex-shrink-0 coach-avatar">
-<img class="w-full h-full object-cover" data-alt="Close-up professional portrait of Cristian Saez Muñoz, a senior CrossFit coach with an athletic build and a confident, friendly expression. The background is a softly blurred modern gym with cool teal studio lighting, conveying a professional yet approachable persona." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1dgcAg3X3Y6vZAb0xoz60Iy9kSfFUReC3JJQc5NSzw7xgoqu41Q1AiJTFTRXw8audUmLGu3xK1623qcnEu1qBKrQo1jiOssJiCSz2k8e2fCfECjcQePXT5J8fYT-0hrNLdPxjXnBBX46ToB75KYAjH3nhvaBGXUTQB_1KrM-fYOrB1MicWyBlfoJAEWJdKRjclPJQ7UyAnIeAaW5kLey9MB6j8nRkMx6eVyDcrpofewgVtPTWuxqr3d_1wW4acU81XLaz5Fhwya4"/>
+<img class="w-full h-full object-cover" data-alt="Retrato de Cristian Saez Munoz, head coach de Pulpo Box." src="/assets/brand/coach-cristian.jpeg"/>
 </div>
 <div>
 <h3 class="font-display-lg text-headline-md text-white mb-1">Cristian Saez Muñoz</h3>
@@ -658,12 +1439,13 @@
 </div>
 <div class="flex flex-col md:flex-row items-center gap-6 bg-white/5 p-6 rounded-2xl border border-white/10">
 <div class="w-40 h-40 rounded-full overflow-hidden border-4 border-tertiary-fixed-dim flex-shrink-0 coach-avatar">
-<img class="w-full h-full object-cover" data-alt="Close-up professional portrait of Javier Andres Pavelec Fuentes, a dynamic fitness trainer. He has an engaging smile and looks directly at the camera, projecting motivation and expertise. Set against a moody gym background with sophisticated teal and dark gray lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAbmxKk4o_aRLJGetUMXZdnp37rAEzSwNKDfq2oP3BhJC0Cj3DTvm3QWR7NLQmLfzkLiEnxYADCSTN1w-96RDPokIrEyMD8KL2NUui5ZS5uQ4zxvKEB8CcR5bJw17uYd0js80t4MEfJxSTddfWAQFq9c-b8B3gTJPaONXhiJAKBywB9blM7B2CC8O3rfr0tdUR4UGRyG89lUJaDEtICM6Gphg-kE41G2Qxgc9WCV-cyPsXmLaZBymSzHEOD9tJhSNfxqhn-jaIlYo"/>
+<img class="w-full h-full object-cover" data-alt="Retrato de Javier Andres Pavelec, coach de Pulpo Box." src="/assets/brand/coach-javier.jpeg"/>
 </div>
 <div>
 <h3 class="font-display-lg text-headline-md text-white mb-1">Javier Andres Pavelec</h3>
 <span class="text-tertiary-fixed-dim font-label-caps tracking-widest mb-3 block">COACH CROSSFIT L1</span>
 <p class="text-on-primary-container text-sm leading-relaxed">Experto en gimnasia deportiva y movilidad. Apasionado por la técnica perfecta y la seguridad de los atletas.</p>
+</div>
 </div>
 </div>
 </div>
@@ -674,7 +1456,7 @@
 <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 lg:grid-cols-4 gap-gutter mb-20">
 <!-- Brand Column -->
 <div class="lg:col-span-1">
-<div class="font-display-lg text-headline-md font-bold text-tertiary-fixed-dim mb-6">
+<div class="brand-wordmark text-headline-md font-bold text-tertiary-fixed-dim mb-6">
                     PULPO BOX FITNESS
                 </div>
 <p class="font-body-sm opacity-80 mb-8 max-w-xs">
@@ -692,6 +1474,7 @@
 <ul class="space-y-4">
 <li><a class="hover:text-tertiary-fixed-dim transition-colors" href="#servicios">Programas</a></li>
 <li><a class="hover:text-tertiary-fixed-dim transition-colors" href="#horarios">Horarios</a></li>
+<li><a class="hover:text-tertiary-fixed-dim transition-colors" href="#convenios">Convenios</a></li>
 <li><a class="hover:text-tertiary-fixed-dim transition-colors" href="#coaches">Nuestros Coaches</a></li>
 <li><a class="hover:text-tertiary-fixed-dim transition-colors" href="#sedes">Sedes</a></li>
 </ul>
@@ -701,22 +1484,22 @@
 <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-sm">Instagram @pulpobox</h4>
 <div class="grid grid-cols-3 gap-2">
 <div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram social media post showing a heavy kettlebell swing in a dark, moody gym environment. Teal accents and cinematic lighting highlight the intensity of the workout." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABnJQCPLO3tcmpDwvHjeL2ZzuOm6xzHRu9fx8H3HZ2T8Q4wpPleAKP5gIeB-K5QqeOUL2k0Av3iUtfheS41YvQXkpJ8Mh3xFWPKYSvutYujEtXsXdzp-wSIO4xIeD-EFCSPce4ud1ER8WZEYG558FbHRUe52eIk_obE0-FmwxvGzODF-u3sUWA9vFGNso2m0LJxlXeQJr5QioeVxVslr5nQvB6x-sgmGophKXsVFjWbbfkVAu8WYml1oSm20wqRPpa-TKo6DzsMHM"/>
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Post de Instagram con los planes grupales de Pulpo Box." src="/assets/brand/plans-group.jpeg"/>
 </div>
 <div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram post featuring a group of smiling athletes after a tough WOD. The atmosphere is warm and celebratory, set against a dark industrial gym backdrop with professional lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAytyQHCQRJ1oK6R1LjCre6_NNK0XXqQdTTqu-9S0SGgw9JqB4ARxU0Xh0SqLm5K_rHmujt_9qGa_RYsFZQzsOM_-vWi8b7v3vC99Pxvr9CFJh9ujByGXpD3olQDFTivYpg9gWVBcqUgt9xfGbiajvl3T1phefTSI7f9rDwlbaehtnOdva_7gMwcSeXifDsH3dk5Z4_Wm5RDf_eiXUp33SetMraqZjuzveo321ONyNWmNYI3BlKHkqP37S4HaACLKotkyosheZVW_4"/>
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Post de Instagram con los valores personalizados de Pulpo Box." src="/assets/brand/plans-personal.jpeg"/>
 </div>
 <div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram highlight showing a detailed shot of barbell weights on a rack. Sophisticated lighting highlights the texture of the equipment, in line with the premium gym's aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3juucQ4l9l_8r7xyeU-HU1zECSmRUTGTSYjp5C6BnZlWvZ9xHFg_J6HBM3BycvSY7knaq4szK72l2-6fbcexPjU-tLCv4BCm2CMR6WAeQpVgGNHI0qY5gSvBZO6ybzsdUg8WDEbBzk5RKq8p3Oj8mnOFIPUN5p5jLbKI92NEbtecri_FIfqu1p5S4cGMktziBUkQR6VAfG3EXKRd1UNBh-qNGdPBetWVVGpk5BzSIFZnfuIwU1io_uUmlWQiXEiuXJ4GjOrxBqMA"/>
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Post de Instagram con los horarios de CrossFit." src="/assets/brand/schedule-crossfit.jpeg"/>
 </div>
 <div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram post of a coach demonstrating proper pull-up form. The high-contrast, moody lighting creates a professional, instructive feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuaMR2XQLEOmM-TUaVTlAdysKbbAHGsy5WlJiAKR35Cu6R-FZ9rrW33V-oujednlBOxYFh2NPVNt9XAwVPYAgphz_evKMJ7kYNpx0Zkr9eEXS_s9EDK59K03IvoWxz5ZN_7Cs3TKUF8Fr5Ozf1-RLLf-ovdxoeC9Prl5oNvLCEQJWe8DXy3fKZIkY5HeMA1cx4mP03mQgg1dJQuc2yIGwypiml--JSfzx84rlgJRorMqOSBrdMOGAkQH2JOR3xXaAoeY9_ApvjhRU"/>
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Post de Instagram con los horarios personalizados." src="/assets/brand/schedule-personal.jpeg"/>
 </div>
 <div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Instagram lifestyle shot of a gym member preparing their gear. Focus on the details and textures in a premium, dark-themed fitness setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtue1qUPijcDE7VZqPgP5mtTn8Xs4wnX1WbC7dZZ5y6yrgsJ97T4IIPYiiN4DWz8CtdjN0QfTQqnkgKp6MdgffnHATQpE5SHcorfFMQ8QwpFPEEI6XAdknWh3qUaDp5dz2yZKc9p41M4bBsyCuygHDtckJJ0ExRA3673z_jfITglCi69WjGElIwsIw1-AL7Rtsszq6SQTxPybTjOmdM6i60rl-3T2M-wyycvEhv2v1zVHMyX0eRgJy6QIdosdWsXGCKvhuSDE92Y8"/>
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Post de competencia con atleta de Pulpo Box en Iquique Games." src="/assets/brand/competition.jpg"/>
 </div>
 <div class="aspect-square bg-white/5 rounded-lg overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Action-packed Instagram post showing a rope climb exercise. Dramatic low-angle shot with teal lighting highlights the height and effort." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAP2majrSaaZzVF11i0qrMVQdrvTFaKQTqZbqzZCQIMUpQxizmnT5RjnT9KPnNA98cJnO6dg-o_qTK9rz2GfkhQMumyPMbpsq1Jk0454oL54d8oZCWiJExBiPIVPC6OoFq0igPcXNWP8TVUiHUAnuD9yLT4Lx-TLtGW4uFBD0lsfXFhkg3EMrn5PDFQla43oTIgHVFiSwPM6_9Fvke46WC7sGLIZoc06XlO7TmyOiSkezCvFHu1FOFuNP0yQsh_qBlqrxLl6h4-ME0"/>
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Post de convenio de Pulpo Box con Padel Huayquique." src="/assets/brand/convenio-padel.jpeg"/>
 </div>
 </div>
 </div>
@@ -733,29 +1516,40 @@
 </div>
 </div>
 </footer>
+<script src="/site-content.js"></script>
 <script>
   const leadForm = document.querySelector("#lead-form");
   const leadSubmit = document.querySelector("#lead-submit");
   const leadStatus = document.querySelector("#lead-status");
+  const scheduleSection = document.querySelector("#horarios");
   const scheduleButtons = document.querySelectorAll("[data-schedule-tab]");
-  const scheduleBody = document.querySelector("#schedule-body");
+  const scheduleGrid = document.querySelector("#schedule-grid");
+  const scheduleCaption = document.querySelector("#schedule-caption");
+  const scheduleBackgroundImage = document.querySelector("#schedule-background-image");
   const scheduleTableWrapper = document.querySelector("#schedule-table-wrapper");
   const pricingButtons = document.querySelectorAll("[data-pricing-tab]");
   const pricingToggle = document.querySelector("#pricing-toggle");
   const pricingGrid = document.querySelector("#pricing-grid");
-
-  const scheduleRows = {
-    grupales: [
-      ["07:00 AM", "CrossFit", "--", "CrossFit", "--", "CrossFit"],
-      ["09:00 AM", "--", "HIIT", "--", "HIIT", "--"],
-      ["06:00 PM", "CrossFit", "Open Box", "CrossFit", "Open Box", "CrossFit"],
-    ],
-    personalizados: [
-      ["08:00 AM", "Coach Cristian", "Coach Javier", "Coach Cristian", "Coach Javier", "Coach Cristian"],
-      ["01:00 PM", "Evaluacion", "--", "Tecnica", "--", "Evaluacion"],
-      ["07:30 PM", "Fuerza", "Movilidad", "Fuerza", "Movilidad", "Planificacion"],
-    ],
-  };
+  const discountsViewport = document.querySelector("#discounts-viewport");
+  const discountsTrack = document.querySelector("#discounts-track");
+  const discountPrev = document.querySelector("#discount-prev");
+  const discountNext = document.querySelector("#discount-next");
+  const coachesCarousel = document.querySelector(".coaches-carousel");
+  const coachesTrack = document.querySelector("#coaches-track");
+  let scheduleConfig = window.PULPO_DEFAULT_CONTENT?.schedule || { tabs: [] };
+  let activeScheduleTab = scheduleConfig.tabs?.[0]?.id || "crossfit-manuel";
+  let discountsConfig = window.PULPO_DEFAULT_CONTENT?.discounts || { cards: [] };
+  let discountCards = [];
+  let discountIndex = 1;
+  let discountAutoTimer = null;
+  let discountPointerActive = false;
+  let discountPointerStartX = 0;
+  let discountPointerDeltaX = 0;
+  let coachesPointerActive = false;
+  let coachesPointerStartX = 0;
+  let coachesScrollStart = 0;
+  let coachesAutoFrame = null;
+  let coachesLastFrameTime = 0;
 
   const pricingPlans = {
     mensual: [
@@ -807,32 +1601,282 @@
         features: ["4 clases", "Ahorro por pack", "Valido para Pulpo Box"],
       },
     ],
+    personalizados: [
+      {
+        period: "PERSONALIZADO",
+        name: "8 CLASES",
+        price: "$100.000",
+        features: ["8 clases personalizadas", "Seguimiento de objetivos", "Ideal para comenzar"],
+      },
+      {
+        period: "PERSONALIZADO",
+        name: "12 CLASES",
+        price: "$120.000",
+        features: ["12 clases personalizadas", "Reintegro deportivo", "Mejor ritmo semanal"],
+      },
+      {
+        period: "PERSONALIZADO",
+        name: "16 CLASES",
+        price: "$135.000",
+        featured: true,
+        badge: "FOCO",
+        features: ["16 clases personalizadas", "Baja de % de grasa", "Acompanamiento constante"],
+      },
+      {
+        period: "PERSONALIZADO",
+        name: "20 CLASES",
+        price: "$150.000",
+        features: ["20 clases personalizadas", "Aumento de masa muscular", "Integracion a un estilo de vida saludable"],
+      },
+    ],
   };
 
-  function scheduleCellClass(value) {
-    return value === "--"
-      ? "p-3 border border-white/10"
-      : "p-3 bg-tertiary-fixed-dim/10 border border-white/10 font-bold text-white";
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
   }
 
-  function renderSchedule(type) {
-    if (!scheduleBody) return;
+  function buildDiscountCardMarkup(item) {
+    return `
+      <div class="discount-slide">
+        <article class="discount-card">
+          <div class="discount-card-media">
+            <img alt="${escapeHtml(item.title || "Convenio Pulpo Box")}" src="${escapeHtml(item.image || "/assets/brand/hero-team.jpg")}"/>
+          </div>
+          <div class="discount-card-overlay"></div>
+          <div class="discount-card-body">
+            <span class="discount-card-tag">${escapeHtml(item.tag || "Pulpo Box")}</span>
+            <h3 class="font-display-lg text-headline-md text-white">${escapeHtml(item.title || "Convenio")}</h3>
+            <p class="discount-card-subtitle">${escapeHtml(item.subtitle || "Beneficio disponible")}</p>
+            <div class="discount-card-highlight">${escapeHtml(item.highlight || "Beneficio")}</div>
+            <p class="discount-card-copy font-body-md">${escapeHtml(item.text || "")}</p>
+          </div>
+        </article>
+      </div>
+    `;
+  }
+
+  function getDiscountSlideWidth() {
+    const firstSlide = discountsTrack?.querySelector(".discount-slide");
+    if (!firstSlide || !discountsTrack) return 0;
+    const gap = Number.parseFloat(window.getComputedStyle(discountsTrack).gap || "0");
+    return firstSlide.getBoundingClientRect().width + gap;
+  }
+
+  function syncDiscountPosition(animate = true) {
+    if (!discountsTrack) return;
+    const slideWidth = getDiscountSlideWidth();
+    discountsTrack.style.transition = animate ? "transform 320ms ease" : "none";
+    discountsTrack.style.transform = `translateX(-${discountIndex * slideWidth}px)`;
+  }
+
+  function stopDiscountAutoPlay() {
+    if (discountAutoTimer) {
+      window.clearInterval(discountAutoTimer);
+      discountAutoTimer = null;
+    }
+  }
+
+  function startDiscountAutoPlay() {
+    stopDiscountAutoPlay();
+    if ((discountCards || []).length <= 1) return;
+    discountAutoTimer = window.setInterval(() => {
+      moveDiscountCarousel(1);
+    }, 4200);
+  }
+
+  function moveDiscountCarousel(direction) {
+    if (!discountsTrack || discountCards.length <= 1) return;
+    discountIndex += direction;
+    syncDiscountPosition(true);
+  }
+
+  function renderDiscountCarousel() {
+    if (!discountsTrack) return;
+    const cards = (discountsConfig?.cards || []).filter((item) =>
+      item && (item.title || item.highlight || item.text || item.image),
+    );
+
+    discountCards = cards;
+
+    if (!cards.length) {
+      discountsTrack.innerHTML = "";
+      stopDiscountAutoPlay();
+      return;
+    }
+
+    if (cards.length === 1) {
+      discountsTrack.innerHTML = [cards[0], cards[0], cards[0]].map(buildDiscountCardMarkup).join("");
+      discountIndex = 1;
+      syncDiscountPosition(false);
+      stopDiscountAutoPlay();
+      return;
+    }
+
+    const loopedCards = [cards[cards.length - 1], ...cards, cards[0]];
+    discountsTrack.innerHTML = loopedCards.map(buildDiscountCardMarkup).join("");
+    discountIndex = 1;
+    requestAnimationFrame(() => {
+      syncDiscountPosition(false);
+      startDiscountAutoPlay();
+    });
+  }
+
+  function getCoachesLoopWidth() {
+    if (!coachesTrack) return 0;
+    return coachesTrack.scrollWidth / 3;
+  }
+
+  function normalizeCoachesScroll() {
+    if (!coachesCarousel || !coachesTrack) return;
+    const loopWidth = getCoachesLoopWidth();
+    if (!loopWidth) return;
+    if (coachesCarousel.scrollLeft < loopWidth * 0.5) {
+      coachesCarousel.scrollLeft += loopWidth;
+    } else if (coachesCarousel.scrollLeft > loopWidth * 1.5) {
+      coachesCarousel.scrollLeft -= loopWidth;
+    }
+  }
+
+  function centerCoachesLoop() {
+    if (!coachesCarousel || !coachesTrack) return;
+    coachesCarousel.scrollLeft = getCoachesLoopWidth();
+  }
+
+  function stopCoachesAutoPlay() {
+    if (coachesAutoFrame) {
+      window.cancelAnimationFrame(coachesAutoFrame);
+      coachesAutoFrame = null;
+    }
+    coachesLastFrameTime = 0;
+  }
+
+  function startCoachesAutoPlay() {
+    stopCoachesAutoPlay();
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!coachesCarousel || !coachesTrack || reduceMotion) return;
+
+    const step = (time) => {
+      if (!coachesLastFrameTime) coachesLastFrameTime = time;
+      const delta = Math.min(time - coachesLastFrameTime, 48);
+      coachesLastFrameTime = time;
+      coachesCarousel.scrollLeft += delta * 0.018;
+      normalizeCoachesScroll();
+      coachesAutoFrame = window.requestAnimationFrame(step);
+    };
+
+    coachesAutoFrame = window.requestAnimationFrame(step);
+  }
+
+  function setupCoachesDrag() {
+    if (!coachesCarousel || !coachesTrack || coachesCarousel.dataset.dragReady === "true") return;
+    coachesCarousel.dataset.dragReady = "true";
+    window.setTimeout(() => {
+      centerCoachesLoop();
+      startCoachesAutoPlay();
+    }, 0);
+
+    coachesCarousel.addEventListener("pointerdown", (event) => {
+      coachesPointerActive = true;
+      coachesPointerStartX = event.clientX;
+      coachesScrollStart = coachesCarousel.scrollLeft;
+      coachesCarousel.classList.add("is-dragging");
+      stopCoachesAutoPlay();
+      coachesCarousel.setPointerCapture?.(event.pointerId);
+    });
+
+    coachesCarousel.addEventListener("pointermove", (event) => {
+      if (!coachesPointerActive) return;
+      event.preventDefault();
+      const deltaX = event.clientX - coachesPointerStartX;
+      coachesCarousel.scrollLeft = coachesScrollStart - deltaX;
+      normalizeCoachesScroll();
+    });
+
+    const finishCoachesPointer = (event) => {
+      if (!coachesPointerActive) return;
+      coachesPointerActive = false;
+      coachesCarousel.classList.remove("is-dragging");
+      if (event?.pointerId != null) {
+        try {
+          coachesCarousel.releasePointerCapture?.(event.pointerId);
+        } catch {}
+      }
+      normalizeCoachesScroll();
+      startCoachesAutoPlay();
+    };
+
+    coachesCarousel.addEventListener("mouseenter", stopCoachesAutoPlay);
+    coachesCarousel.addEventListener("mouseleave", () => {
+      if (!coachesPointerActive) startCoachesAutoPlay();
+    });
+    coachesCarousel.addEventListener("pointerup", finishCoachesPointer);
+    coachesCarousel.addEventListener("pointercancel", finishCoachesPointer);
+    coachesCarousel.addEventListener("pointerleave", finishCoachesPointer);
+    coachesCarousel.addEventListener("scroll", normalizeCoachesScroll, { passive: true });
+    window.addEventListener("resize", () => {
+      centerCoachesLoop();
+      startCoachesAutoPlay();
+    });
+  }
+
+  function scheduleSlotClass(value) {
+    if (value === "---") return "schedule-slot is-break";
+    if (value === "--") return "schedule-slot is-muted";
+    return "schedule-slot";
+  }
+
+  function formatScheduleSlot(value) {
+    const [main, detail] = String(value || "").split("|");
+    if (detail) {
+      return `<span>${main}<small>${detail}</small></span>`;
+    }
+    return `<span>${main}</span>`;
+  }
+
+  function syncScheduleTabs() {
+    const tabs = scheduleConfig?.tabs || [];
+    scheduleButtons.forEach((button, index) => {
+      const tab = tabs[index];
+      if (!tab) return;
+      button.textContent = tab.label;
+    });
+  }
+
+  function renderSchedule(type = activeScheduleTab) {
+    if (!scheduleGrid) return;
 
     scheduleTableWrapper?.classList.add("is-switching");
 
     window.setTimeout(() => {
-      scheduleBody.innerHTML = scheduleRows[type].map((row) => `
-        <tr class="border-b border-white/5">
-          <td class="p-3 font-label-caps border border-white/10">${row[0]}</td>
-          ${row.slice(1).map((value) => `<td class="${scheduleCellClass(value)}">${value}</td>`).join("")}
-        </tr>
+      const tabs = scheduleConfig?.tabs || [];
+      const active = tabs.find((tab) => tab.id === type) || tabs[0];
+      if (!active) return;
+
+      activeScheduleTab = active.id;
+      if (scheduleCaption) scheduleCaption.textContent = active.caption || "";
+      if (scheduleSection && active.image) {
+        scheduleSection.style.setProperty("--schedule-section-image", `url('${active.image}')`);
+      }
+      if (scheduleBackgroundImage && active.image) scheduleBackgroundImage.src = active.image;
+      scheduleGrid.innerHTML = (active.days || []).map((day) => `
+        <article class="schedule-day-card">
+          <div class="schedule-day-label">${day.label}</div>
+          <div class="schedule-slots">
+            ${(day.slots || []).map((slot) => `<div class="${scheduleSlotClass(slot)}">${formatScheduleSlot(slot)}</div>`).join("")}
+          </div>
+        </article>
       `).join("");
 
       scheduleButtons.forEach((button) => {
-        const isActive = button.dataset.scheduleTab === type;
+        const isActive = button.dataset.scheduleTab === active.id;
         button.className = isActive
-          ? "px-8 py-3 rounded-full bg-tertiary-fixed-dim text-primary font-bold transition-all"
-          : "px-8 py-3 rounded-full text-white font-medium hover:text-tertiary-fixed-dim transition-all";
+          ? "schedule-tab is-active"
+          : "schedule-tab";
+        button.setAttribute("aria-selected", isActive ? "true" : "false");
       });
 
       scheduleTableWrapper?.classList.remove("is-switching");
@@ -846,9 +1890,9 @@
 
     window.setTimeout(() => {
       const plans = pricingPlans[type] || pricingPlans.mensual;
-      pricingGrid.className = type === "mensual"
-        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter pricing-grid is-switching"
-        : "grid grid-cols-1 md:grid-cols-3 gap-gutter pricing-grid is-switching";
+      pricingGrid.className = plans.length === 3
+        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter pricing-grid items-stretch is-three-up is-switching"
+        : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter pricing-grid items-stretch is-switching";
       pricingGrid.innerHTML = plans.map((plan, index) => renderPlanCard(plan, index)).join("");
 
       pricingButtons.forEach((button) => {
@@ -859,7 +1903,9 @@
         button.setAttribute("aria-selected", isActive ? "true" : "false");
       });
 
-      pricingToggle?.classList.toggle("is-personalizado", type === "pases");
+      pricingToggle?.classList.remove("is-pases", "is-personalizados");
+      if (type === "pases") pricingToggle?.classList.add("is-pases");
+      if (type === "personalizados") pricingToggle?.classList.add("is-personalizados");
       pricingGrid?.classList.remove("is-switching");
     }, 160);
   }
@@ -867,40 +1913,99 @@
   function renderPlanCard(plan, index) {
     const featured = Boolean(plan.featured);
     const cardClass = featured
-      ? "bg-primary text-white p-10 rounded-2xl flex flex-col items-center scale-105 shadow-2xl relative price-card"
-      : "border border-border-subtle p-10 rounded-2xl flex flex-col items-center hover:border-tertiary-fixed-dim transition-all price-card";
-    const periodClass = featured
-      ? "text-label-caps text-white/60 tracking-widest mb-3"
-      : "text-label-caps text-on-surface-variant tracking-widest mb-3";
-    const nameClass = featured
-      ? "font-display-lg text-headline-md text-white mb-4"
-      : "font-display-lg text-headline-md mb-4";
+      ? "bg-white border border-border-subtle p-10 rounded-2xl flex flex-col hover:border-tertiary-fixed-dim transition-all price-card is-featured"
+      : "bg-white border border-border-subtle p-10 rounded-2xl flex flex-col hover:border-tertiary-fixed-dim transition-all price-card";
+    const periodClass = "text-label-caps text-on-surface-variant tracking-widest mb-3";
+    const nameClass = "font-display-lg text-headline-md mb-4";
     const priceClass = featured
       ? "text-display-lg mb-8 text-tertiary-fixed-dim price-value"
       : "text-display-lg mb-8 price-value";
-    const priceTone = featured
-      ? "text-headline-md text-white/60 font-normal"
-      : "text-headline-md text-on-surface-variant font-normal";
-    const listClass = featured
-      ? "text-white/80 space-y-3 mb-10 w-full fit-tight-list"
-      : "text-on-surface-variant space-y-3 mb-10 w-full fit-tight-list";
+    const priceTone = "text-headline-md text-on-surface-variant font-normal";
+    const listClass = "text-on-surface-variant space-y-3 mb-10 w-full fit-tight-list";
     const ctaClass = featured
-      ? "w-full py-4 bg-tertiary-fixed-dim text-primary rounded-xl font-bold hover:scale-105 transition-transform"
+      ? "w-full py-4 bg-tertiary-fixed-dim text-primary rounded-xl font-bold transition-transform"
       : "w-full py-4 border-2 border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all";
 
     return `
       <div class="${cardClass}" data-plan-card="${index}">
-        ${plan.badge ? `<div class="absolute -top-4 bg-tertiary-fixed-dim text-primary text-label-caps py-1 px-4 rounded-full font-bold">${plan.badge}</div>` : ""}
+        ${plan.badge ? `<div class="price-card-badge">${plan.badge}</div>` : `<span aria-hidden="true" class="price-card-badge-spacer"></span>`}
         <span class="${periodClass}" data-plan-period>${plan.period}</span>
         <h3 class="${nameClass}" data-plan-name>${plan.name}</h3>
         <div class="${priceClass}" data-plan-price>${plan.price} <span class="${priceTone}">/clp</span></div>
         <ul class="${listClass}" data-plan-features>
           ${plan.features.map((feature) => `<li class="flex items-center gap-2"><span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span> ${feature}</li>`).join("")}
         </ul>
-        <a class="${ctaClass}" href="#contacto">ELEGIR PLAN</a>
+        <a class="${ctaClass}" data-plan-cta="${plan.name}" href="${buildPlanWhatsappUrl(plan.name)}">ELEGIR PLAN</a>
       </div>
     `;
   }
+
+  discountsTrack?.addEventListener("transitionend", () => {
+    if (!discountCards.length || discountCards.length === 1) return;
+    if (discountIndex === 0) {
+      discountIndex = discountCards.length;
+      syncDiscountPosition(false);
+    } else if (discountIndex === discountCards.length + 1) {
+      discountIndex = 1;
+      syncDiscountPosition(false);
+    }
+  });
+
+  discountPrev?.addEventListener("click", () => {
+    stopDiscountAutoPlay();
+    moveDiscountCarousel(-1);
+    startDiscountAutoPlay();
+  });
+
+  discountNext?.addEventListener("click", () => {
+    stopDiscountAutoPlay();
+    moveDiscountCarousel(1);
+    startDiscountAutoPlay();
+  });
+
+  discountsViewport?.addEventListener("mouseenter", stopDiscountAutoPlay);
+  discountsViewport?.addEventListener("mouseleave", startDiscountAutoPlay);
+
+  discountsViewport?.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    discountPointerActive = true;
+    discountPointerStartX = event.clientX;
+    discountPointerDeltaX = 0;
+    discountsViewport.classList.add("is-dragging");
+    discountsTrack.style.transition = "none";
+  });
+
+  discountsViewport?.addEventListener("pointermove", (event) => {
+    if (!discountPointerActive || !discountsTrack) return;
+    discountPointerDeltaX = event.clientX - discountPointerStartX;
+    const slideWidth = getDiscountSlideWidth();
+    discountsTrack.style.transform = `translateX(-${discountIndex * slideWidth - discountPointerDeltaX}px)`;
+  });
+
+  function finishDiscountPointer() {
+    if (!discountPointerActive) return;
+    discountPointerActive = false;
+    discountsViewport?.classList.remove("is-dragging");
+    if (Math.abs(discountPointerDeltaX) > 60) {
+      moveDiscountCarousel(discountPointerDeltaX < 0 ? 1 : -1);
+    } else {
+      syncDiscountPosition(true);
+    }
+    discountPointerDeltaX = 0;
+    startDiscountAutoPlay();
+  }
+
+  discountsViewport?.addEventListener("pointerup", finishDiscountPointer);
+  discountsViewport?.addEventListener("pointercancel", finishDiscountPointer);
+  discountsViewport?.addEventListener("pointerleave", () => {
+    if (discountPointerActive) finishDiscountPointer();
+  });
+
+  window.addEventListener("resize", () => {
+    if (discountCards.length) syncDiscountPosition(false);
+  });
+
+  setupCoachesDrag();
 
   document.querySelectorAll("[data-scroll-target]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -912,13 +2017,38 @@
     button.addEventListener("click", () => renderSchedule(button.dataset.scheduleTab));
   });
 
+  document.addEventListener("pulpo:content-applied", (event) => {
+    if (!event.detail?.schedule) return;
+    scheduleConfig = event.detail.schedule;
+    syncScheduleTabs();
+    renderSchedule(activeScheduleTab);
+  });
+
+  document.addEventListener("pulpo:content-applied", (event) => {
+    if (!event.detail?.discounts) return;
+    discountsConfig = event.detail.discounts;
+    renderDiscountCarousel();
+    window.setTimeout(() => {
+      centerCoachesLoop();
+      startCoachesAutoPlay();
+    }, 0);
+  });
+
+  syncScheduleTabs();
+  renderSchedule(activeScheduleTab);
+  renderDiscountCarousel();
+
   pricingButtons.forEach((button) => {
     button.addEventListener("click", () => renderPricing(button.dataset.pricingTab));
   });
 
   pricingToggle?.addEventListener("click", (event) => {
     if (event.target.closest("[data-pricing-tab]")) return;
-    const nextType = pricingToggle?.classList.contains("is-personalizado") ? "mensual" : "pases";
+    const nextType = pricingToggle?.classList.contains("is-pases")
+      ? "personalizados"
+      : pricingToggle?.classList.contains("is-personalizados")
+        ? "mensual"
+        : "pases";
     renderPricing(nextType);
   });
 
@@ -934,17 +2064,51 @@
     leadStatus.className = `text-center text-body-sm font-bold ${type === "error" ? "text-error-container" : "text-tertiary-fixed-dim"}`;
   }
 
+  const locationWhatsappNumbers = {
+    manuel_plaza: "56938794624",
+    bilbao: "56938794624",
+  };
+
+  function getPreferredLocationValue() {
+    const locationSelect = leadForm?.querySelector('select[name="preferred_location"]');
+    return locationSelect?.value === "bilbao" ? "bilbao" : "manuel_plaza";
+  }
+
+  function getLocationLabel(locationValue) {
+    return locationValue === "bilbao" ? "Bilbao" : "Manuel Plaza";
+  }
+
+  function buildWaUrl(phone, message) {
+    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  }
+
   function buildWhatsappUrl(data) {
-    const locationLabel = data.preferred_location === "bilbao" ? "Bilbao" : "Manuel Plaza";
+    const locationValue = data.preferred_location === "bilbao" ? "bilbao" : "manuel_plaza";
+    const locationLabel = getLocationLabel(locationValue);
+    const phone = locationWhatsappNumbers[locationValue] || locationWhatsappNumbers.manuel_plaza;
     const message = [
-      "Hola Pulpo Box Fitness, quiero agendar una clase de prueba.",
+      "Hola Pulpo Box, quiero agendar una clase de prueba.",
       `Nombre: ${data.full_name}`,
       `Telefono: ${data.phone}`,
       data.email ? `Email: ${data.email}` : "",
       `Sede: ${locationLabel}`,
     ].filter(Boolean).join("\n");
 
-    return `https://wa.me/?text=${encodeURIComponent(message)}`;
+    return buildWaUrl(phone, message);
+  }
+
+  function buildPlanWhatsappUrl(planName) {
+    const locationValue = getPreferredLocationValue();
+    const locationLabel = getLocationLabel(locationValue);
+    const phone = locationWhatsappNumbers[locationValue] || locationWhatsappNumbers.manuel_plaza;
+    const message = [
+      "Hola Pulpo Box, me interesa este plan.",
+      `Plan: ${planName}`,
+      `Sede de interes: ${locationLabel}`,
+      "Quiero recibir ayuda para inscribirme.",
+    ].join("\n");
+
+    return buildWaUrl(phone, message);
   }
 
   leadForm?.addEventListener("submit", async (event) => {

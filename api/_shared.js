@@ -1,0 +1,148 @@
+const crypto = require("node:crypto");
+const { createClient } = require("@supabase/supabase-js");
+
+const COOKIE_NAME = "pb_admin_session";
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
+
+function json(res, statusCode, payload) {
+  return res.status(statusCode).json(payload);
+}
+
+function getSupabase() {
+  const missing = ["SUPABASE_URL", "SUPABASE_SECRET_KEY"].filter((name) => !process.env[name]);
+  if (missing.length > 0) {
+    const error = new Error(`Missing environment variables: ${missing.join(", ")}`);
+    error.statusCode = 500;
+    throw error;
+  }
+
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, {
+    auth: { persistSession: false },
+  });
+}
+
+function getAdminConfig() {
+  const missing = ["ADMIN_EMAIL", "ADMIN_PASSWORD", "SESSION_SECRET"].filter((name) => !process.env[name]);
+  if (missing.length > 0) {
+    const error = new Error(`Missing environment variables: ${missing.join(", ")}`);
+    error.statusCode = 500;
+    throw error;
+  }
+
+  if (String(process.env.SESSION_SECRET).length < 32) {
+    const error = new Error("SESSION_SECRET must be at least 32 characters.");
+    error.statusCode = 500;
+    throw error;
+  }
+
+  return {
+    email: String(process.env.ADMIN_EMAIL).toLowerCase(),
+    password: String(process.env.ADMIN_PASSWORD),
+    secret: String(process.env.SESSION_SECRET),
+  };
+}
+
+function parseCookies(req) {
+  const header = req.headers.cookie || "";
+  return Object.fromEntries(
+    header
+      .split(";")
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .map((entry) => {
+        const index = entry.indexOf("=");
+        if (index === -1) return [entry, ""];
+        return [entry.slice(0, index), decodeURIComponent(entry.slice(index + 1))];
+      }),
+  );
+}
+
+function sign(value, secret) {
+  return crypto.createHmac("sha256", secret).update(value).digest("base64url");
+}
+
+function createSessionCookie(email, req) {
+  const { secret } = getAdminConfig();
+  const payload = Buffer.from(
+    JSON.stringify({
+      email,
+      exp: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
+    }),
+  ).toString("base64url");
+  const token = `${payload}.${sign(payload, secret)}`;
+  const secure = req.headers["x-forwarded-proto"] === "https" ? "; Secure" : "";
+  return `${COOKIE_NAME}=${encodeURIComponent(token)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SECONDS}${secure}`;
+}
+
+function clearSessionCookie() {
+  return `${COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0`;
+}
+
+function getSession(req) {
+  const { email, secret } = getAdminConfig();
+  const token = parseCookies(req)[COOKIE_NAME];
+  if (!token) return null;
+
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature || sign(payload, secret) !== signature) return null;
+
+  try {
+    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    if (session.exp < Date.now()) return null;
+    if (String(session.email).toLowerCase() !== email) return null;
+    return session;
+  } catch {
+    return null;
+  }
+}
+
+function requireAdmin(req, res) {
+  try {
+    const session = getSession(req);
+    if (!session) {
+      json(res, 401, { error: "No autorizado." });
+      return null;
+    }
+    return session;
+  } catch (error) {
+    json(res, error.statusCode || 500, { error: error.message || "Error interno." });
+    return null;
+  }
+}
+
+async function readSiteContent() {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.from("site_content").select("content").eq("id", "main").maybeSingle();
+
+  if (error) {
+    error.statusCode = 500;
+    throw error;
+  }
+
+  return data?.content || null;
+}
+
+async function saveSiteContent(content) {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("site_content").upsert({
+    id: "main",
+    content,
+    updated_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    error.statusCode = 500;
+    throw error;
+  }
+}
+
+module.exports = {
+  clearSessionCookie,
+  createSessionCookie,
+  getAdminConfig,
+  getSupabase,
+  json,
+  readSiteContent,
+  requireAdmin,
+  saveSiteContent,
+};
