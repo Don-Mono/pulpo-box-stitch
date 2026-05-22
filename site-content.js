@@ -255,6 +255,20 @@
     `;
   }
 
+  function ensureSectionLogo(sectionSelector) {
+    const section = document.querySelector(sectionSelector);
+    if (!section || section.querySelector(":scope img.section-logo")) return;
+
+    const heading = section.querySelector("h2");
+    if (!heading) return;
+
+    const logo = document.createElement("img");
+    logo.alt = "Logo Pulpo Box";
+    logo.className = "section-logo section-logo-sm";
+    logo.src = "/assets/brand/pulpo-box-logo.png";
+    heading.before(logo);
+  }
+
   function applyRepeating(selector, items, updater) {
     document.querySelectorAll(selector).forEach((element, index) => {
       if (items[index]) updater(element, items[index], index);
@@ -285,6 +299,7 @@
     });
 
     setText("#contacto h2", data.contact.heading);
+    ensureSectionLogo("#servicios");
     setText("#servicios h2", data.services.heading);
     applyRepeating("#servicios .service-card", data.services.cards, (element, item) => {
       setImage("img", item.image, element);
@@ -307,11 +322,13 @@
 
     const discounts = document.querySelector("#convenios");
     if (discounts) {
+      ensureSectionLogo("#convenios");
       setText("h2", data.discounts.heading, discounts);
       setText(".discounts-intro", data.discounts.subtitle, discounts);
       discounts.dataset.discountCount = String((data.discounts.cards || []).length);
     }
 
+    ensureSectionLogo("#sedes");
     setText("#sedes h2", data.locations.heading);
     applyRepeating("#sedes .grid > div", data.locations.cards, (element, item) => {
       setImage("img", item.image, element);

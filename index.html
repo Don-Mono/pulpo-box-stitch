@@ -653,9 +653,9 @@
             z-index: 1;
         }
         .pricing-section-logo {
-            width: clamp(5rem, 8vw, 6.75rem);
-            height: clamp(5rem, 8vw, 6.75rem);
-            margin: 0 auto 1rem;
+            width: clamp(6rem, 9vw, 7.75rem);
+            height: clamp(6rem, 9vw, 7.75rem);
+            margin: 0 auto 0.9rem;
             border-radius: 9999px;
             border: 2px solid rgba(0, 230, 230, 0.38);
             box-shadow: 0 16px 34px rgba(0, 230, 230, 0.10);
@@ -671,6 +671,11 @@
             box-shadow: 0 18px 42px rgba(0, 230, 230, 0.14);
             object-fit: cover;
             display: block;
+        }
+        .section-logo-sm {
+            width: clamp(4.9rem, 7vw, 6.3rem);
+            height: clamp(4.9rem, 7vw, 6.3rem);
+            margin: 0 auto 0.8rem;
         }
         .hero-logo {
             width: clamp(7rem, 11vw, 9.5rem);
@@ -824,6 +829,17 @@
         #coaches > .max-w-container-max {
             position: relative;
             z-index: 1;
+        }
+        #coaches.fit-section {
+            justify-content: flex-start;
+            padding-top: clamp(5.5rem, 10vh, 7rem) !important;
+            padding-bottom: 3rem !important;
+        }
+        #coaches .section-logo {
+            margin-bottom: 0.85rem;
+        }
+        #coaches .fit-section-heading-sm {
+            margin-bottom: 2rem !important;
         }
         .coaches-carousel {
             width: 100%;
@@ -1283,6 +1299,7 @@
 <!-- Services Section -->
 <section class="py-24 bg-white fit-section" id="servicios">
 <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center mb-10">
+<img alt="Logo Pulpo Box" class="section-logo section-logo-sm" src="/assets/brand/pulpo-box-logo.png"/>
 <h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary uppercase fit-section-heading">ENTRENA CON ESTRUCTURA, ENERGÍA Y ACOMPAÑAMIENTO</h2>
 </div>
 <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-gutter">
@@ -1457,6 +1474,7 @@
 <!-- Discounts Section -->
 <section class="py-24 bg-primary-container text-white fit-section fluid-dark-section" id="convenios">
 <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center mb-10">
+<img alt="Logo Pulpo Box" class="section-logo section-logo-sm" src="/assets/brand/pulpo-box-logo.png"/>
 <span class="discount-section-kicker">Alianzas locales</span>
 <h2 class="font-display-lg text-display-lg-mobile md:text-display-lg uppercase fit-section-heading-sm">CONVENIOS Y DESCUENTOS</h2>
 <p class="discounts-intro font-body-md">Trabajamos con aliados locales para que tu membresia en Pulpo Box tambien se traduzca en beneficios fuera del box.</p>
@@ -1480,6 +1498,7 @@
 <!-- Locations Section -->
 <section class="py-24 bg-white fit-section location-section" id="sedes">
 <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<img alt="Logo Pulpo Box" class="section-logo section-logo-sm" src="/assets/brand/pulpo-box-logo.png"/>
 <h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary text-center uppercase mb-10 fit-section-heading-sm">DOS PUNTOS DE CONTACTO PARA EMPEZAR A ENTRENAR</h2>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
 <div class="bg-surface-container-low rounded-2xl p-6 flex flex-col md:flex-row gap-6">
@@ -1605,7 +1624,7 @@
 </div>
 </div>
 </footer>
-<script src="/site-content.js"></script>
+<script src="/site-content.js?v=20260522-section-logos"></script>
 <script>
   const leadForm = document.querySelector("#lead-form");
   const leadSubmit = document.querySelector("#lead-submit");
@@ -1999,6 +2018,36 @@
     }, 160);
   }
 
+  let hashScrollTimer = null;
+
+  function getNavOffset() {
+    return document.querySelector("nav")?.getBoundingClientRect().height || 0;
+  }
+
+  function applyCurrentHashScroll(behavior = "auto") {
+    if (!window.location.hash) return;
+
+    const targetId = decodeURIComponent(window.location.hash.slice(1));
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    const top = target.getBoundingClientRect().top + window.pageYOffset - getNavOffset();
+    window.scrollTo({ top, behavior });
+  }
+
+  function scrollToCurrentHash(options = {}) {
+    window.clearTimeout(hashScrollTimer);
+    hashScrollTimer = window.setTimeout(() => {
+      applyCurrentHashScroll(options.behavior || "auto");
+    }, options.delay ?? 120);
+  }
+
+  function settleCurrentHashScroll() {
+    [120, 420, 900].forEach((delay) => {
+      window.setTimeout(() => applyCurrentHashScroll("auto"), delay);
+    });
+  }
+
   function renderPlanCard(plan, index) {
     const featured = Boolean(plan.featured);
     const cardClass = featured
@@ -2111,6 +2160,7 @@
     scheduleConfig = event.detail.schedule;
     syncScheduleTabs();
     renderSchedule(activeScheduleTab);
+    settleCurrentHashScroll();
   });
 
   document.addEventListener("pulpo:content-applied", (event) => {
@@ -2121,11 +2171,21 @@
       centerCoachesLoop();
       startCoachesAutoPlay();
     }, 0);
+    settleCurrentHashScroll();
   });
 
   syncScheduleTabs();
   renderSchedule(activeScheduleTab);
   renderDiscountCarousel();
+  settleCurrentHashScroll();
+
+  window.addEventListener("load", () => {
+    settleCurrentHashScroll();
+  });
+
+  window.addEventListener("hashchange", () => {
+    scrollToCurrentHash({ behavior: "smooth", delay: 80 });
+  });
 
   pricingButtons.forEach((button) => {
     button.addEventListener("click", () => renderPricing(button.dataset.pricingTab));
