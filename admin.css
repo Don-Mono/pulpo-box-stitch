@@ -201,7 +201,21 @@ textarea {
 }
 
 .item-card h3 {
-  margin: 0 0 14px;
+  margin: 0;
+}
+
+.item-card-header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 18px;
 }
 
 .image-row {
@@ -254,6 +268,17 @@ textarea {
 .button.ghost {
   background: #e6edf4;
   color: var(--ink);
+}
+
+.button.danger {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.button.compact {
+  font-size: 13px;
+  min-height: 36px;
+  padding: 0 14px;
 }
 
 .status {

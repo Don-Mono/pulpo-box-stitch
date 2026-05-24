@@ -342,11 +342,9 @@
     const coachesTrack = document.querySelector("#coaches-track");
     if (coachesTrack) {
       const defaultCoaches = defaultContent.coaches.cards;
-      const coaches = [...(data.coaches.cards?.length ? data.coaches.cards : defaultCoaches)];
-      for (let index = coaches.length; index < 4; index += 1) {
-        coaches.push(defaultCoaches[index] || coaches[index % coaches.length]);
-      }
-      const visibleCoaches = coaches.slice(0, 4);
+      const coaches = (data.coaches.cards?.length ? data.coaches.cards : defaultCoaches)
+        .filter((coach) => coach?.name || coach?.role || coach?.text || coach?.image);
+      const visibleCoaches = coaches.length ? coaches : defaultCoaches;
       coachesTrack.innerHTML = [
         ...visibleCoaches.map((item) => renderCoachCard(item)),
         ...visibleCoaches.map((item) => renderCoachCard(item, true)),

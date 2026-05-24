@@ -91,8 +91,57 @@
     `;
   }
 
-  function itemCard(title, fields) {
-    return `<div class="item-card"><h3>${title}</h3><div class="grid">${fields.join("")}</div></div>`;
+  function itemCard(title, fields, actions = "") {
+    return `
+      <div class="item-card">
+        <div class="item-card-header">
+          <h3>${title}</h3>
+          ${actions}
+        </div>
+        <div class="grid">${fields.join("")}</div>
+      </div>
+    `;
+  }
+
+  function ensureArray(path) {
+    const value = getPath(path);
+    if (Array.isArray(value)) return value;
+    setPath(path, []);
+    return getPath(path);
+  }
+
+  function createCoach() {
+    return {
+      name: "Nuevo coach",
+      role: "COACH",
+      text: "Agrega una descripcion breve del coach.",
+      image: state.gallery[0] || "/assets/brand/coach-javier.jpeg",
+    };
+  }
+
+  function renderCoachesFields() {
+    const coaches = ensureArray("coaches.cards");
+    const visibleCoaches = coaches.length ? coaches : [createCoach()];
+    if (!coaches.length) setPath("coaches.cards", visibleCoaches);
+
+    return [
+      inputField("coaches.heading", "Titulo", { full: true }),
+      `<div class="section-actions"><button class="button accent" data-add-coach type="button">Agregar coach</button></div>`,
+      ...visibleCoaches.map((_, index) =>
+        itemCard(
+          `Coach ${index + 1}`,
+          [
+            inputField(`coaches.cards.${index}.name`, "Nombre"),
+            inputField(`coaches.cards.${index}.role`, "Rol"),
+            inputField(`coaches.cards.${index}.text`, "Descripcion", { multiline: true, full: true }),
+            imageField(`coaches.cards.${index}.image`, "Imagen"),
+          ],
+          visibleCoaches.length > 1
+            ? `<button class="button danger compact" data-remove-coach="${index}" type="button">Eliminar</button>`
+            : "",
+        ),
+      ),
+    ].join("");
   }
 
   function renderFields() {
@@ -213,17 +262,7 @@
     }
 
     if (id === "coaches") {
-      return [
-        inputField("coaches.heading", "Titulo", { full: true }),
-        ...[0, 1, 2, 3].map((index) =>
-          itemCard(`Coach ${index + 1}`, [
-            inputField(`coaches.cards.${index}.name`, "Nombre"),
-            inputField(`coaches.cards.${index}.role`, "Rol"),
-            inputField(`coaches.cards.${index}.text`, "Descripcion", { multiline: true, full: true }),
-            imageField(`coaches.cards.${index}.image`, "Imagen"),
-          ]),
-        ),
-      ].join("");
+      return renderCoachesFields();
     }
 
     if (id === "instagram") {
@@ -284,6 +323,25 @@
           .map((entry) => entry.trim())
           .filter(Boolean);
         setPath(input.dataset.slotsPath, slots);
+      });
+    });
+
+    $("#editorForm").querySelector("[data-add-coach]")?.addEventListener("click", () => {
+      ensureArray("coaches.cards").push(createCoach());
+      renderEditor();
+      setStatus($("#editorStatus"), "Coach agregado. Recuerda guardar para publicarlo.", "ok");
+    });
+
+    $("#editorForm").querySelectorAll("[data-remove-coach]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const coaches = ensureArray("coaches.cards");
+        if (coaches.length <= 1) {
+          setStatus($("#editorStatus"), "Debe quedar al menos un coach.", "error");
+          return;
+        }
+        coaches.splice(Number(button.dataset.removeCoach), 1);
+        renderEditor();
+        setStatus($("#editorStatus"), "Coach eliminado. Recuerda guardar para publicarlo.", "ok");
       });
     });
   }
