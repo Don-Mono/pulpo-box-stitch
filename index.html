@@ -318,6 +318,7 @@
             background: rgba(5, 7, 13, 0.46);
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
             backdrop-filter: blur(10px);
+            min-height: var(--schedule-panel-min-height, auto);
         }
         .schedule-panel::before {
             content: "";
@@ -1162,10 +1163,15 @@
             }
             .schedule-days-grid {
                 grid-template-columns: repeat(6, minmax(0, 1fr));
+                align-items: start;
             }
             #horarios.fit-section {
-                padding-top: 1.5rem !important;
-                padding-bottom: 1.5rem !important;
+                justify-content: flex-start;
+                padding-top: clamp(3.75rem, 7vh, 5rem) !important;
+                padding-bottom: 2.5rem !important;
+            }
+            #horarios .schedule-panel {
+                --schedule-panel-min-height: clamp(36rem, 72vh, 47.5rem);
             }
             .service-card-content {
                 padding: 1.5rem !important;
