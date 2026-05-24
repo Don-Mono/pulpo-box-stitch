@@ -328,10 +328,16 @@
   }
 
   async function loadAdminContent() {
-    const response = await fetch("/api/admin/site");
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || "No se pudo cargar el contenido.");
-    state.content = window.PULPO_MERGE_CONTENT(state.defaults, payload.content || {});
+    try {
+      const response = await fetch("/api/admin/site");
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "No se pudo cargar el contenido.");
+      state.content = window.PULPO_MERGE_CONTENT(state.defaults, payload.content || {});
+      state.adminLoadWarning = "";
+    } catch (error) {
+      state.content = clone(state.defaults);
+      state.adminLoadWarning = `${error.message} Puedes revisar el panel, pero para guardar cambios deben estar configuradas las variables de Supabase.`;
+    }
   }
 
   async function saveContent() {
@@ -357,6 +363,7 @@
     $("#loginView").classList.add("hidden");
     $("#editorView").classList.remove("hidden");
     renderEditor();
+    if (state.adminLoadWarning) setStatus($("#editorStatus"), state.adminLoadWarning, "error");
   }
 
   async function boot() {
@@ -402,6 +409,14 @@
     } catch (error) {
       setStatus(status, error.message, "error");
     }
+  });
+
+  $("#recoverAccessButton").addEventListener("click", () => {
+    setStatus(
+      $("#loginStatus"),
+      "La clave anterior no se puede recuperar por seguridad. Pide un restablecimiento del acceso; la clave vigente se configura de forma privada en Vercel.",
+      "error",
+    );
   });
 
   $("#sectionNav").addEventListener("click", (event) => {

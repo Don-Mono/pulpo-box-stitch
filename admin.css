@@ -77,6 +77,33 @@ body {
   margin: 0 0 24px;
 }
 
+.recover-access {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+  padding-top: 18px;
+}
+
+.recover-access button {
+  background: transparent;
+  border: 0;
+  color: #007b83;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0;
+  text-align: left;
+}
+
+.recover-access button:hover {
+  color: var(--dark);
+}
+
+.recover-access small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
 .sidebar {
   align-self: start;
   padding: 14px;
