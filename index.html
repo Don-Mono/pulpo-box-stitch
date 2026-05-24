@@ -262,44 +262,33 @@
             position: relative;
             overflow: hidden;
             isolation: isolate;
-            background: #0b1220;
+            background: var(--pulpo-dark-gradient);
+            background-size: var(--pulpo-gradient-size);
+            animation: sectionGradientFlow var(--pulpo-flow-duration) var(--pulpo-flow-easing) infinite alternate;
             padding-top: 2rem !important;
             padding-bottom: 2rem !important;
         }
         #horarios::before {
             content: "";
             position: absolute;
-            inset: 0;
-            background-image: var(--schedule-section-image, url("/assets/brand/gym-class.jpg"));
-            background-size: cover;
-            background-position: center;
-            opacity: 0.22;
-            transform: scale(1.04);
-            filter: saturate(0.95);
-            z-index: -2;
+            inset: -22% -16%;
+            background:
+                radial-gradient(circle at 18% 28%, rgba(0, 230, 230, 0.24), transparent 24rem),
+                radial-gradient(circle at 84% 22%, rgba(255, 255, 255, 0.09), transparent 22rem),
+                radial-gradient(circle at 48% 92%, rgba(0, 191, 201, 0.17), transparent 26rem);
+            animation: sectionGlowTravel var(--pulpo-glow-duration) var(--pulpo-flow-easing) infinite alternate;
+            pointer-events: none;
+            z-index: 0;
         }
         #horarios::after {
             content: "";
             position: absolute;
             inset: 0;
             background:
-                linear-gradient(180deg, rgba(11, 18, 32, 0.92) 0%, rgba(7, 11, 20, 0.74) 26%, rgba(5, 8, 15, 0.88) 100%),
-                radial-gradient(circle at 78% 24%, rgba(0, 230, 230, 0.24), transparent 34%),
-                radial-gradient(circle at 18% 82%, rgba(0, 191, 201, 0.16), transparent 36%);
-            background-size: 100% 100%, 180% 180%, 180% 180%;
-            animation: horariosOverlayFlow var(--pulpo-flow-duration) var(--pulpo-flow-easing) infinite alternate;
-            z-index: -1;
-        }
-        @keyframes horariosOverlayFlow {
-            0% {
-                background-position: center, 0% 50%, 100% 50%;
-            }
-            50% {
-                background-position: center, 70% 42%, 30% 58%;
-            }
-            100% {
-                background-position: center, 100% 50%, 0% 50%;
-            }
+                linear-gradient(90deg, transparent 0%, rgba(0, 230, 230, 0.16) 16%, rgba(255, 255, 255, 0.08) 84%, transparent 100%) bottom / 100% 1px no-repeat,
+                linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0%, transparent 38%, rgba(0, 230, 230, 0.03) 100%);
+            pointer-events: none;
+            z-index: 0;
         }
         #horarios > .max-w-container-max {
             position: relative;
@@ -958,7 +947,8 @@
             .pricing-section::before,
             #contacto-footer,
             #contacto-footer::before,
-            #horarios::after,
+            #horarios,
+            #horarios::before,
             #coaches,
             #coaches::before {
                 animation: none;
