@@ -964,6 +964,39 @@
                 animation: none;
             }
         }
+        .nav-link {
+            position: relative;
+            padding-bottom: 0.35rem;
+            color: #3f4650;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: color 180ms ease;
+        }
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 2px;
+            border-radius: 9999px;
+            background: #00e6e6;
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 220ms ease;
+        }
+        .nav-link:hover,
+        .nav-link.is-active {
+            color: #00dede;
+        }
+        .nav-link.is-active::after {
+            transform: scaleX(1);
+        }
+        @media (min-width: 1024px) {
+            .nav-link {
+                font-size: 0.94rem;
+            }
+        }
         @media (max-width: 767px) {
             nav > div {
                 height: 4.25rem !important;
@@ -1190,14 +1223,14 @@
                 PULPO BOX
             </div>
 <div class="hidden md:flex items-center gap-5 lg:gap-gutter">
-<a class="text-tertiary-fixed-dim font-semibold border-b-2 border-tertiary-fixed-dim pb-1 text-[0.9rem] lg:text-[0.94rem]" href="#inicio">Inicio</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#servicios">Programas</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#horarios">Horarios</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#planes">Planes</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#convenios">Convenios</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#sedes">Sedes</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#coaches">Entrenadores</a>
-<a class="text-on-surface-variant font-medium hover:text-tertiary-fixed-dim transition-colors duration-200 text-[0.9rem] lg:text-[0.94rem]" href="#contacto-footer">Contacto</a>
+<a class="nav-link is-active" data-nav-link href="#inicio">Inicio</a>
+<a class="nav-link" data-nav-link href="#servicios">Programas</a>
+<a class="nav-link" data-nav-link href="#horarios">Horarios</a>
+<a class="nav-link" data-nav-link href="#planes">Planes</a>
+<a class="nav-link" data-nav-link href="#convenios">Convenios</a>
+<a class="nav-link" data-nav-link href="#sedes">Sedes</a>
+<a class="nav-link" data-nav-link href="#coaches">Entrenadores</a>
+<a class="nav-link" data-nav-link href="#contacto-footer">Contacto</a>
 </div>
 <button class="bg-primary text-on-primary px-5 py-2.5 rounded-full font-bold text-[0.92rem] hover:bg-tertiary-fixed-dim transition-all duration-300" data-scroll-target="#contacto">
                 Prueba Gratis
@@ -1658,6 +1691,7 @@
   const discountNext = document.querySelector("#discount-next");
   const coachesCarousel = document.querySelector(".coaches-carousel");
   const coachesTrack = document.querySelector("#coaches-track");
+  const navLinks = document.querySelectorAll("[data-nav-link]");
   let scheduleConfig = window.PULPO_DEFAULT_CONTENT?.schedule || { tabs: [] };
   let activeScheduleTab = scheduleConfig.tabs?.[0]?.id || "crossfit-manuel";
   let discountsConfig = window.PULPO_DEFAULT_CONTENT?.discounts || { cards: [] };
@@ -2038,6 +2072,43 @@
     return document.querySelector("nav")?.getBoundingClientRect().height || 0;
   }
 
+  function setActiveNavLink(targetHash) {
+    const normalizedHash = targetHash || "#inicio";
+    navLinks.forEach((link) => {
+      const isActive = link.getAttribute("href") === normalizedHash;
+      link.classList.toggle("is-active", isActive);
+      if (isActive) {
+        link.setAttribute("aria-current", "page");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  function setupNavSectionTracking() {
+    const trackedSections = Array.from(navLinks)
+      .map((link) => document.querySelector(link.getAttribute("href")))
+      .filter(Boolean);
+
+    if (!trackedSections.length) return;
+
+    const updateFromViewport = () => {
+      const navOffset = getNavOffset();
+      const viewportFocus = navOffset + Math.min(window.innerHeight * 0.35, 260);
+      const currentSection = trackedSections.reduce((active, section) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= viewportFocus && rect.bottom > navOffset + 24) return section;
+        return active;
+      }, trackedSections[0]);
+
+      setActiveNavLink(`#${currentSection.id}`);
+    };
+
+    updateFromViewport();
+    window.addEventListener("scroll", updateFromViewport, { passive: true });
+    window.addEventListener("resize", updateFromViewport);
+  }
+
   function applyCurrentHashScroll(behavior = "auto") {
     if (!window.location.hash) return;
 
@@ -2198,8 +2269,16 @@
   });
 
   window.addEventListener("hashchange", () => {
+    setActiveNavLink(window.location.hash);
     scrollToCurrentHash({ behavior: "smooth", delay: 80 });
   });
+
+  navLinks.forEach((link) => {
+    link.addEventListener("click", () => setActiveNavLink(link.getAttribute("href")));
+  });
+
+  setActiveNavLink(window.location.hash || "#inicio");
+  setupNavSectionTracking();
 
   pricingButtons.forEach((button) => {
     button.addEventListener("click", () => renderPricing(button.dataset.pricingTab));
