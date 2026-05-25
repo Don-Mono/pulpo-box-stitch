@@ -1,6 +1,13 @@
 const { createClient } = require("@supabase/supabase-js");
 
 const requiredEnv = ["SUPABASE_URL", "SUPABASE_SECRET_KEY"];
+const MAX_LEAD_BODY_BYTES = 10 * 1024;
+const FIELD_LIMITS = {
+  full_name: 80,
+  phone: 30,
+  email: 120,
+  preferred_location: 40,
+};
 
 function getSupabase() {
   const missing = requiredEnv.filter((name) => !process.env[name]);
@@ -19,25 +26,47 @@ function clean(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function truncate(value, maxLength) {
+  return clean(value).slice(0, maxLength);
+}
+
+function getBodySize(req) {
+  const length = Number(req.headers["content-length"] || 0);
+  if (Number.isFinite(length) && length > 0) return length;
+  return 0;
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  if (getBodySize(req) > MAX_LEAD_BODY_BYTES) {
+    return res.status(413).json({ error: "Solicitud demasiado grande." });
+  }
+
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const lead = {
-      full_name: clean(body.full_name),
-      phone: clean(body.phone),
-      email: clean(body.email),
-      preferred_location: clean(body.preferred_location) || "manuel_plaza",
+      full_name: truncate(body.full_name, FIELD_LIMITS.full_name),
+      phone: truncate(body.phone, FIELD_LIMITS.phone),
+      email: truncate(body.email, FIELD_LIMITS.email),
+      preferred_location: truncate(body.preferred_location, FIELD_LIMITS.preferred_location) || "manuel_plaza",
       source: "pulpo_box_landing",
       user_agent: req.headers["user-agent"] || null,
     };
 
     if (!lead.full_name || !lead.phone) {
       return res.status(400).json({ error: "Nombre y telefono son obligatorios." });
+    }
+
+    if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) {
+      return res.status(400).json({ error: "Email invalido." });
+    }
+
+    if (!["manuel_plaza", "bilbao"].includes(lead.preferred_location)) {
+      lead.preferred_location = "manuel_plaza";
     }
 
     const supabase = getSupabase();

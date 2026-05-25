@@ -1,7 +1,9 @@
 const path = require("node:path");
 const { getSupabase, json, requireAdmin } = require("../_shared");
 
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const DEFAULT_MAX_UPLOAD_MB = 3;
+const MAX_UPLOAD_MB = Number(process.env.MAX_ADMIN_UPLOAD_MB || DEFAULT_MAX_UPLOAD_MB);
+const MAX_UPLOAD_BYTES = Math.max(1, Math.min(MAX_UPLOAD_MB, 5)) * 1024 * 1024;
 
 function parseDataUrl(dataUrl) {
   const match = String(dataUrl || "").match(/^data:(image\/(?:jpeg|jpg|png|webp));base64,(.+)$/);
@@ -10,7 +12,7 @@ function parseDataUrl(dataUrl) {
   const mimeType = match[1] === "image/jpg" ? "image/jpeg" : match[1];
   const buffer = Buffer.from(match[2], "base64");
   if (buffer.length > MAX_UPLOAD_BYTES) {
-    const error = new Error("La imagen supera 5MB.");
+    const error = new Error(`La imagen supera ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)}MB.`);
     error.statusCode = 400;
     throw error;
   }

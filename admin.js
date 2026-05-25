@@ -22,6 +22,7 @@
   };
 
   const $ = (selector) => document.querySelector(selector);
+  const MAX_ADMIN_UPLOAD_BYTES = 3 * 1024 * 1024;
 
   function getPath(path) {
     return path.split(".").reduce((current, key) => current?.[key], state.content);
@@ -356,6 +357,12 @@
     const status = $("#editorStatus");
     setStatus(status, "Subiendo imagen...");
     try {
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        throw new Error("Solo se permiten imagenes JPG, PNG o WebP.");
+      }
+      if (file.size > MAX_ADMIN_UPLOAD_BYTES) {
+        throw new Error("La imagen supera 3MB. Comprimela antes de subirla.");
+      }
       const dataUrl = await fileToDataUrl(file);
       const response = await fetch("/api/admin/upload", {
         method: "POST",
