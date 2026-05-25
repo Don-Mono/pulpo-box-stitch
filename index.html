@@ -576,10 +576,11 @@
             display: flex;
             gap: 1rem;
             will-change: transform;
-            transition: transform 320ms ease;
+            transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
         }
         .discount-slide {
-            flex: 0 0 clamp(16.5rem, 24vw, 18.5rem);
+            flex: 0 0 min(76vw, 17.75rem);
+            max-width: min(76vw, 17.75rem);
         }
         .discount-card {
             position: relative;
@@ -1122,6 +1123,7 @@
             }
             .discount-slide {
                 flex-basis: min(76vw, 17.75rem);
+                max-width: min(76vw, 17.75rem);
             }
             .coaches-carousel {
                 mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
@@ -1226,6 +1228,10 @@
             .service-card-content {
                 padding: 1.5rem !important;
             }
+            .discount-slide {
+                flex-basis: calc((100% - 2rem) / 3);
+                max-width: calc((100% - 2rem) / 3);
+            }
             .price-card {
                 padding: 1.75rem !important;
                 height: 29rem;
@@ -1266,6 +1272,10 @@
             .pricing-grid.is-three-up > .price-card {
                 flex: 0 0 calc((100% - 72px) / 4);
                 max-width: calc((100% - 72px) / 4);
+            }
+            .discount-slide {
+                flex-basis: calc((100% - 3rem) / 4);
+                max-width: calc((100% - 3rem) / 4);
             }
         }
     </style>
@@ -1757,6 +1767,8 @@
   let activeScheduleTab = scheduleConfig.tabs?.[0]?.id || "crossfit-manuel";
   let discountsConfig = window.PULPO_DEFAULT_CONTENT?.discounts || { cards: [] };
   let discountCards = [];
+  let discountSourceCount = 0;
+  let discountCloneCount = 1;
   let discountIndex = 1;
   let discountAutoTimer = null;
   let discountPointerActive = false;
@@ -1883,10 +1895,25 @@
     return firstSlide.getBoundingClientRect().width + gap;
   }
 
+  function getDiscountVisibleSlots() {
+    if (window.innerWidth >= 1280) return 4;
+    if (window.innerWidth >= 768) return 3;
+    return 1;
+  }
+
+  function normalizeDiscountCards(cards, minimumCount) {
+    if (!cards.length) return [];
+    const normalized = [...cards];
+    while (normalized.length < minimumCount) {
+      normalized.push(cards[normalized.length % cards.length]);
+    }
+    return normalized;
+  }
+
   function syncDiscountPosition(animate = true) {
     if (!discountsTrack) return;
     const slideWidth = getDiscountSlideWidth();
-    discountsTrack.style.transition = animate ? "transform 320ms ease" : "none";
+    discountsTrack.style.transition = animate ? "transform 520ms cubic-bezier(0.22, 1, 0.36, 1)" : "none";
     discountsTrack.style.transform = `translateX(-${discountIndex * slideWidth}px)`;
   }
 
@@ -1899,43 +1926,42 @@
 
   function startDiscountAutoPlay() {
     stopDiscountAutoPlay();
-    if ((discountCards || []).length <= 1) return;
+    if (discountSourceCount <= 1) return;
     discountAutoTimer = window.setInterval(() => {
       moveDiscountCarousel(1);
-    }, 4200);
+    }, 3600);
   }
 
   function moveDiscountCarousel(direction) {
-    if (!discountsTrack || discountCards.length <= 1) return;
+    if (!discountsTrack || discountSourceCount <= 1) return;
     discountIndex += direction;
     syncDiscountPosition(true);
   }
 
   function renderDiscountCarousel() {
     if (!discountsTrack) return;
-    const cards = (discountsConfig?.cards || []).filter((item) =>
+    const sourceCards = (discountsConfig?.cards || []).filter((item) =>
       item && (item.title || item.highlight || item.text || item.image),
     );
 
-    discountCards = cards;
+    discountSourceCount = sourceCards.length;
 
-    if (!cards.length) {
+    if (!sourceCards.length) {
       discountsTrack.innerHTML = "";
       stopDiscountAutoPlay();
       return;
     }
 
-    if (cards.length === 1) {
-      discountsTrack.innerHTML = [cards[0], cards[0], cards[0]].map(buildDiscountCardMarkup).join("");
-      discountIndex = 1;
-      syncDiscountPosition(false);
-      stopDiscountAutoPlay();
-      return;
-    }
+    const minimumCardCount = Math.max(4, getDiscountVisibleSlots());
+    const cards = normalizeDiscountCards(sourceCards, minimumCardCount);
+    discountCards = cards;
+    discountCloneCount = Math.min(getDiscountVisibleSlots(), cards.length);
 
-    const loopedCards = [cards[cards.length - 1], ...cards, cards[0]];
+    const headClones = cards.slice(-discountCloneCount);
+    const tailClones = cards.slice(0, discountCloneCount);
+    const loopedCards = [...headClones, ...cards, ...tailClones];
     discountsTrack.innerHTML = loopedCards.map(buildDiscountCardMarkup).join("");
-    discountIndex = 1;
+    discountIndex = discountCloneCount;
     requestAnimationFrame(() => {
       syncDiscountPosition(false);
       startDiscountAutoPlay();
@@ -2225,12 +2251,12 @@
   }
 
   discountsTrack?.addEventListener("transitionend", () => {
-    if (!discountCards.length || discountCards.length === 1) return;
-    if (discountIndex === 0) {
-      discountIndex = discountCards.length;
+    if (!discountCards.length || discountSourceCount <= 1) return;
+    if (discountIndex < discountCloneCount) {
+      discountIndex += discountCards.length;
       syncDiscountPosition(false);
-    } else if (discountIndex === discountCards.length + 1) {
-      discountIndex = 1;
+    } else if (discountIndex >= discountCloneCount + discountCards.length) {
+      discountIndex -= discountCards.length;
       syncDiscountPosition(false);
     }
   });
@@ -2286,7 +2312,11 @@
   });
 
   window.addEventListener("resize", () => {
-    if (discountCards.length) syncDiscountPosition(false);
+    if (discountSourceCount) {
+      renderDiscountCarousel();
+    } else if (discountCards.length) {
+      syncDiscountPosition(false);
+    }
   });
 
   setupCoachesDrag();
