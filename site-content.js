@@ -1,4 +1,5 @@
 (function () {
+  const siteContentCacheKey = "pulpo_site_content_v1";
   const galleryImages = Array.from({ length: 41 }, (_, index) => {
     const number = String(index + 1).padStart(2, "0");
     return `/assets/pulpo-gallery/pulpo-gallery-${number}.jpeg`;
@@ -236,6 +237,24 @@
     if (element && value) element.src = value;
   }
 
+  function setHeroImage(value) {
+    const image = document.querySelector("#inicio .hero-background-image");
+    if (!image || !value) return;
+
+    if (image.getAttribute("src") === value) {
+      revealHeroImage();
+      return;
+    }
+
+    const nextImage = new Image();
+    nextImage.onload = () => {
+      image.src = value;
+      revealHeroImage();
+    };
+    nextImage.onerror = revealHeroImage;
+    nextImage.src = value;
+  }
+
   function revealHeroImage() {
     const image = document.querySelector("#inicio .hero-background-image");
     if (!image) return;
@@ -296,7 +315,7 @@
 
     setText("nav .font-display-lg", data.brand.name);
     setText("nav button[data-scroll-target='#contacto']", "Prueba Gratis");
-    setImage("#inicio img", data.hero.image);
+    setHeroImage(data.hero.image);
     setHtml("#inicio h1", data.hero.titleHtml);
     setText("#inicio .font-body-md.text-on-primary-container", data.hero.subtitle);
     setText("#inicio button[data-scroll-target='#planes']", data.hero.primaryCta);
@@ -396,6 +415,24 @@
     }
   }
 
+  function getCachedPublishedContent() {
+    try {
+      const cached = JSON.parse(localStorage.getItem(siteContentCacheKey) || "null");
+      return cached?.content && typeof cached.content === "object" ? cached.content : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function cachePublishedContent(content) {
+    if (!content || !Object.keys(content).length) return;
+    try {
+      localStorage.setItem(siteContentCacheKey, JSON.stringify({ content, savedAt: Date.now() }));
+    } catch {
+      // If storage is unavailable, the site still works with the live content.
+    }
+  }
+
   window.PULPO_GALLERY_IMAGES = [...new Set([...galleryImages, ...Object.values(brandImages)])];
   window.PULPO_DEFAULT_CONTENT = defaultContent;
   window.PULPO_MERGE_CONTENT = mergeDeep;
@@ -403,7 +440,13 @@
   window.PULPO_LOAD_CONTENT = loadPublishedContent;
 
   document.addEventListener("DOMContentLoaded", async () => {
-    applySiteContent(await loadPublishedContent());
+    const cachedContent = getCachedPublishedContent();
+    applySiteContent(cachedContent);
+    revealHeroImage();
+
+    const publishedContent = await loadPublishedContent();
+    cachePublishedContent(publishedContent);
+    applySiteContent(publishedContent);
     revealHeroImage();
   });
 })();
