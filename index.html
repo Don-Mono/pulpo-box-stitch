@@ -482,6 +482,38 @@
         .benefit-card p {
             margin-top: auto;
         }
+        section:nth-of-type(2) .grid > div p,
+        #servicios .service-card-content p,
+        .benefit-card p,
+        #sedes .bg-surface-container-low p,
+        .coach-card p,
+        .price-card .fit-tight-list li,
+        .discount-card-subtitle,
+        .discount-card-copy {
+            font-family: "Teko", sans-serif !important;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.035em;
+            line-height: 1.05;
+            font-size: clamp(1.05rem, 1.15vw, 1.28rem);
+        }
+        section:nth-of-type(2) .grid > div p,
+        .benefit-card p,
+        #sedes .bg-surface-container-low p,
+        .price-card .fit-tight-list li {
+            color: rgba(19, 27, 46, 0.72) !important;
+        }
+        #servicios .service-card-content p,
+        .coach-card p,
+        .discount-card-subtitle,
+        .discount-card-copy {
+            color: rgba(255, 255, 255, 0.82) !important;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.34);
+        }
+        #servicios .service-card-content p,
+        .discount-card-subtitle {
+            color: #00E6E6 !important;
+        }
         .discount-section-kicker {
             display: inline-flex;
             align-items: center;
@@ -957,6 +989,16 @@
             font-size: 0.82rem;
             line-height: 1.32;
             margin-top: auto;
+        }
+        .coach-card p {
+            color: rgba(255, 255, 255, 0.82) !important;
+            font-family: "Teko", sans-serif !important;
+            font-size: clamp(1rem, 1vw, 1.14rem) !important;
+            font-weight: 600;
+            letter-spacing: 0.035em;
+            line-height: 1.08 !important;
+            text-transform: uppercase;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.34);
         }
         @media (prefers-reduced-motion: reduce) {
             .fluid-dark-section,
