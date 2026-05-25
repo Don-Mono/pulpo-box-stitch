@@ -115,8 +115,18 @@ async function readSiteContent() {
   const { data, error } = await supabase.from("site_content").select("content").eq("id", "main").maybeSingle();
 
   if (error) {
-    error.statusCode = 500;
-    throw error;
+    if (error.code !== "PGRST205") {
+      error.statusCode = 500;
+      throw error;
+    }
+
+    const fallback = await supabase.from("site_settings").select("json").eq("id", 1).maybeSingle();
+    if (fallback.error) {
+      fallback.error.statusCode = 500;
+      throw fallback.error;
+    }
+
+    return fallback.data?.json || null;
   }
 
   return data?.content || null;
@@ -131,8 +141,21 @@ async function saveSiteContent(content) {
   });
 
   if (error) {
-    error.statusCode = 500;
-    throw error;
+    if (error.code !== "PGRST205") {
+      error.statusCode = 500;
+      throw error;
+    }
+
+    const fallback = await supabase.from("site_settings").upsert({
+      id: 1,
+      json: content,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+
+    if (fallback.error) {
+      fallback.error.statusCode = 500;
+      throw fallback.error;
+    }
   }
 }
 

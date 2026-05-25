@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
     console.error("Admin site endpoint failed", error);
     return json(res, error.statusCode || 500, {
       error: error.message || "Error interno.",
-      hint: "Verifica que exista la tabla public.site_content en Supabase.",
+      hint: "Verifica que exista public.site_content o public.site_settings en Supabase.",
     });
   }
 };
