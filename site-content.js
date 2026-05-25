@@ -233,6 +233,19 @@
     if (element && value) element.src = value;
   }
 
+  function revealHeroImage() {
+    const image = document.querySelector("#inicio .hero-background-image");
+    if (!image) return;
+
+    const show = () => image.classList.add("is-loaded");
+    if (image.complete) {
+      show();
+    } else {
+      image.addEventListener("load", show, { once: true });
+      image.addEventListener("error", show, { once: true });
+    }
+  }
+
   function escapeHtml(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -383,7 +396,7 @@
   window.PULPO_LOAD_CONTENT = loadPublishedContent;
 
   document.addEventListener("DOMContentLoaded", async () => {
-    applySiteContent(defaultContent);
     applySiteContent(await loadPublishedContent());
+    revealHeroImage();
   });
 })();
