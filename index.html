@@ -8,6 +8,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Teko:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="preload" as="image" href="https://xflnmrnvzeujoxbstifn.supabase.co/storage/v1/object/public/pulpo-box-assets/site/1779669314280-whatsapp-image-2026-05-15-at-1-42-50-pm.jpg" fetchpriority="high"/>
+<script>
+  (function () {
+    try {
+      var cached = JSON.parse(localStorage.getItem("pulpo_site_content_v1") || "null");
+      window.PULPO_INITIAL_HERO_IMAGE = cached && cached.content && cached.content.hero && cached.content.hero.image;
+    } catch {
+      window.PULPO_INITIAL_HERO_IMAGE = "";
+    }
+  })();
+</script>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -1242,7 +1253,13 @@
 <!-- Hero Section -->
 <section class="relative min-h-screen flex flex-col justify-center pt-20 overflow-hidden" id="inicio">
 <div class="absolute inset-0 z-0">
-<img alt="Equipo de Pulpo Box en el box principal." class="hero-background-image is-loaded w-full h-full object-cover" src="/assets/brand/hero-team.jpg"/>
+<img alt="Equipo de Pulpo Box en el box principal." class="hero-background-image is-loaded w-full h-full object-cover" decoding="async" fetchpriority="high" src="https://xflnmrnvzeujoxbstifn.supabase.co/storage/v1/object/public/pulpo-box-assets/site/1779669314280-whatsapp-image-2026-05-15-at-1-42-50-pm.jpg"/>
+<script>
+  (function () {
+    var image = document.currentScript.previousElementSibling;
+    if (image && window.PULPO_INITIAL_HERO_IMAGE) image.src = window.PULPO_INITIAL_HERO_IMAGE;
+  })();
+</script>
 <div class="absolute inset-0 gradient-overlay"></div>
 </div>
 <div class="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop w-full py-24">
@@ -1673,7 +1690,7 @@
 </div>
 </div>
 </footer>
-<script src="/site-content.js?v=20260524-hero-cache"></script>
+<script src="/site-content.js?v=20260524-hero-initial"></script>
 <script>
   const leadForm = document.querySelector("#lead-form");
   const leadSubmit = document.querySelector("#lead-submit");

@@ -1,11 +1,12 @@
 (function () {
   const siteContentCacheKey = "pulpo_site_content_v1";
+  const currentHeroImage = "https://xflnmrnvzeujoxbstifn.supabase.co/storage/v1/object/public/pulpo-box-assets/site/1779669314280-whatsapp-image-2026-05-15-at-1-42-50-pm.jpg";
   const galleryImages = Array.from({ length: 41 }, (_, index) => {
     const number = String(index + 1).padStart(2, "0");
     return `/assets/pulpo-gallery/pulpo-gallery-${number}.jpeg`;
   });
   const brandImages = {
-    hero: "/assets/brand/hero-team.jpg",
+    hero: currentHeroImage,
     crossfit: "/assets/brand/gym-class.jpg",
     personal: "/assets/brand/coach-guidance.jpg",
     group: "/assets/brand/team-energy.jpg",
