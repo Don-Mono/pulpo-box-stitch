@@ -3,7 +3,7 @@
     { id: "brand", title: "Marca", hint: "Nombre principal y texto del footer." },
     { id: "hero", title: "Inicio", hint: "Primer pantallazo, imagen principal y estadisticas." },
     { id: "valueProps", title: "Propuesta", hint: "Bloque de beneficios iniciales." },
-    { id: "contact", title: "Contacto", hint: "Titulo del formulario de contacto." },
+    { id: "contact", title: "Contacto", hint: "Titulo del formulario y mensaje para WhatsApp." },
     { id: "services", title: "Programas", hint: "Tarjetas de servicios y sus imagenes." },
     { id: "schedule", title: "Horarios", hint: "Titulo de la seccion horarios." },
     { id: "pricing", title: "Planes", hint: "Titulo de la seccion pricing." },
@@ -184,7 +184,12 @@
       ].join("");
     }
 
-    if (id === "contact") return inputField("contact.heading", "Titulo", { full: true });
+    if (id === "contact") {
+      return [
+        inputField("contact.heading", "Titulo", { full: true }),
+        inputField("contact.whatsappMessage", "Mensaje inicial WhatsApp", { multiline: true, full: true }),
+      ].join("");
+    }
     if (id === "schedule") {
       return [
         inputField("schedule.heading", "Titulo general", { full: true }),
@@ -255,6 +260,7 @@
           itemCard(`Sede ${index + 1}`, [
             inputField(`locations.cards.${index}.title`, "Nombre"),
             inputField(`locations.cards.${index}.address`, "Direccion", { full: true }),
+            inputField(`locations.cards.${index}.whatsapp`, "WhatsApp sede (ej: 56912345678)", { full: true }),
             inputField(`locations.cards.${index}.mapUrl`, "Link Google Maps", { full: true }),
             imageField(`locations.cards.${index}.image`, "Imagen"),
           ]),

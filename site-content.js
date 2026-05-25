@@ -52,6 +52,7 @@
     },
     contact: {
       heading: "HABLA CON LA SEDE QUE TE ACOMODA",
+      whatsappMessage: "Hola Pulpo Box, quiero agendar una clase de prueba gratis.",
     },
     services: {
       heading: "ENTRENA CON ESTRUCTURA, ENERGIA Y ACOMPANAMIENTO",
@@ -155,12 +156,14 @@
         {
           title: "Manuel Plaza",
           address: "Manuel Plaza 2178, Iquique, Chile.",
+          whatsapp: "56938794624",
           image: brandImages.manuelPlaza,
           mapUrl: "https://www.google.com/maps/search/?api=1&query=Pulpo%20Box%20Manuel%20Plaza%202178%2C%20Iquique%2C%20Chile",
         },
         {
           title: "Bilbao",
           address: "Francisco Bilbao 3418, Iquique, Chile.",
+          whatsapp: "56938794624",
           image: brandImages.bilbao,
           mapUrl: "https://www.google.com/maps/search/?api=1&query=Pulpo%20Box%20Francisco%20Bilbao%203418%2C%20Iquique%2C%20Chile",
         },
@@ -312,6 +315,10 @@
     });
 
     setText("#contacto h2", data.contact.heading);
+    applyRepeating("#contacto select[name='preferred_location'] option", data.locations.cards, (element, item, index) => {
+      element.textContent = item.title;
+      element.value = index === 1 ? "bilbao" : "manuel_plaza";
+    });
     ensureSectionLogo("#servicios");
     setText("#servicios h2", data.services.heading);
     applyRepeating("#servicios .service-card", data.services.cards, (element, item) => {

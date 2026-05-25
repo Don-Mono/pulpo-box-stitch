@@ -1673,7 +1673,7 @@
 </div>
 </div>
 </footer>
-<script src="/site-content.js?v=20260524-hero-fade"></script>
+<script src="/site-content.js?v=20260524-whatsapp-sedes"></script>
 <script>
   const leadForm = document.querySelector("#lead-form");
   const leadSubmit = document.querySelector("#lead-submit");
@@ -2308,10 +2308,35 @@
     leadStatus.className = `text-center text-body-sm font-bold ${type === "error" ? "text-error-container" : "text-tertiary-fixed-dim"}`;
   }
 
-  const locationWhatsappNumbers = {
+  let locationWhatsappNumbers = {
     manuel_plaza: "56938794624",
     bilbao: "56938794624",
   };
+  let locationLabels = {
+    manuel_plaza: "Manuel Plaza",
+    bilbao: "Bilbao",
+  };
+  let trialWhatsappMessage = "Hola Pulpo Box, quiero agendar una clase de prueba gratis.";
+
+  function cleanWhatsappNumber(value) {
+    return String(value || "").replace(/\D/g, "");
+  }
+
+  function syncWhatsappSettings(content = window.PULPO_ACTIVE_CONTENT) {
+    const locations = content?.locations?.cards || [];
+    const manuel = locations[0] || {};
+    const bilbao = locations[1] || {};
+
+    locationWhatsappNumbers = {
+      manuel_plaza: cleanWhatsappNumber(manuel.whatsapp) || locationWhatsappNumbers.manuel_plaza,
+      bilbao: cleanWhatsappNumber(bilbao.whatsapp) || cleanWhatsappNumber(manuel.whatsapp) || locationWhatsappNumbers.bilbao,
+    };
+    locationLabels = {
+      manuel_plaza: manuel.title || "Manuel Plaza",
+      bilbao: bilbao.title || "Bilbao",
+    };
+    trialWhatsappMessage = content?.contact?.whatsappMessage || trialWhatsappMessage;
+  }
 
   function getPreferredLocationValue() {
     const locationSelect = leadForm?.querySelector('select[name="preferred_location"]');
@@ -2319,7 +2344,7 @@
   }
 
   function getLocationLabel(locationValue) {
-    return locationValue === "bilbao" ? "Bilbao" : "Manuel Plaza";
+    return locationLabels[locationValue] || locationLabels.manuel_plaza;
   }
 
   function buildWaUrl(phone, message) {
@@ -2331,11 +2356,11 @@
     const locationLabel = getLocationLabel(locationValue);
     const phone = locationWhatsappNumbers[locationValue] || locationWhatsappNumbers.manuel_plaza;
     const message = [
-      "Hola Pulpo Box, quiero agendar una clase de prueba.",
+      trialWhatsappMessage,
       `Nombre: ${data.full_name}`,
       `Telefono: ${data.phone}`,
       data.email ? `Email: ${data.email}` : "",
-      `Sede: ${locationLabel}`,
+      `Sede para clase de prueba gratis: ${locationLabel}`,
     ].filter(Boolean).join("\n");
 
     return buildWaUrl(phone, message);
@@ -2354,6 +2379,11 @@
 
     return buildWaUrl(phone, message);
   }
+
+  document.addEventListener("pulpo:content-applied", (event) => {
+    syncWhatsappSettings(event.detail);
+  });
+  syncWhatsappSettings();
 
   leadForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
