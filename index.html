@@ -1263,7 +1263,163 @@
                 height: 7.5rem !important;
             }
         }
-        @media (min-width: 1024px) {
+        @media (min-width: 1024px) and (max-width: 1399px) {
+            nav > div {
+                gap: 0.85rem;
+            }
+            nav .brand-wordmark {
+                font-size: 1.8rem !important;
+            }
+            nav .hidden.md\:flex {
+                gap: 1rem !important;
+            }
+            .nav-link {
+                font-size: 0.84rem;
+            }
+            nav button[data-scroll-target="#contacto"] {
+                padding: 0.8rem 1.3rem !important;
+                font-size: 0.94rem;
+            }
+            .fit-section {
+                padding-top: 2.85rem !important;
+                padding-bottom: 2.85rem !important;
+            }
+            .fit-section-heading-sm {
+                font-size: clamp(1.8rem, 2.2vw, 2.3rem) !important;
+            }
+            .section-logo,
+            .section-logo-sm,
+            .pricing-section-logo {
+                width: clamp(5.5rem, 7vw, 6.8rem);
+                height: clamp(5.5rem, 7vw, 6.8rem);
+                margin-bottom: 0.9rem;
+            }
+            #horarios.fit-section,
+            #convenios.fit-section,
+            #coaches.fit-section,
+            #sedes.location-section {
+                padding-top: 2.75rem !important;
+            }
+            #horarios .schedule-panel {
+                --schedule-panel-min-height: auto;
+            }
+            #horarios .schedule-content {
+                padding: 1.15rem;
+            }
+            #horarios .schedule-tabs {
+                max-width: 44rem;
+                margin-bottom: 1rem;
+            }
+            #horarios .schedule-tab {
+                min-height: 2.85rem;
+                font-size: 0.88rem;
+            }
+            #horarios .schedule-subheading {
+                font-size: 0.84rem;
+                margin-bottom: 0.65rem;
+            }
+            #horarios .schedule-days-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.7rem;
+            }
+            #horarios .schedule-day-card {
+                padding: 0.65rem;
+            }
+            #horarios .schedule-day-label {
+                min-height: 2.1rem;
+                font-size: 0.7rem;
+            }
+            #horarios .schedule-slot {
+                min-height: 2.5rem;
+                font-size: 0.78rem;
+            }
+            #planes .pricing-grid,
+            #planes .pricing-grid.is-three-up {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                justify-content: stretch !important;
+                gap: 1.25rem !important;
+            }
+            #planes .pricing-grid.is-three-up > .price-card {
+                flex: none;
+                max-width: none;
+            }
+            .price-card {
+                height: auto;
+                min-height: 26.5rem;
+                padding: 1.5rem !important;
+                transform: none !important;
+            }
+            .price-card-badge-spacer {
+                min-height: 2.4rem;
+            }
+            .discount-slide {
+                flex-basis: calc((100% - 2rem) / 3);
+                max-width: calc((100% - 2rem) / 3);
+            }
+            .discount-card {
+                height: 26.5rem;
+            }
+            .discount-card-body {
+                padding: 11rem 1rem 1.15rem;
+            }
+            .discount-card h3 {
+                font-size: clamp(1.75rem, 2.25vw, 2.2rem) !important;
+                max-width: 10rem;
+            }
+            .coaches-track {
+                gap: 1rem;
+            }
+            .coach-card {
+                flex: 0 0 calc((min(100vw - 64px, 1180px) - 32px) / 3);
+                width: calc((min(100vw - 64px, 1180px) - 32px) / 3);
+                height: 22.75rem;
+            }
+            .coach-card-body {
+                padding: 1rem 1rem 1.1rem;
+            }
+            .coach-card h3 {
+                font-size: 1.35rem !important;
+            }
+        }
+        @media (min-width: 1024px) and (max-height: 860px) {
+            .fit-section {
+                padding-top: 2.25rem !important;
+                padding-bottom: 2.25rem !important;
+            }
+            .section-logo,
+            .section-logo-sm,
+            .pricing-section-logo {
+                width: 5.5rem;
+                height: 5.5rem;
+                margin-bottom: 0.75rem;
+            }
+            #horarios.fit-section,
+            #convenios.fit-section,
+            #coaches.fit-section,
+            #sedes.location-section {
+                padding-top: 2.2rem !important;
+            }
+            #horarios .schedule-content {
+                padding: 1rem;
+            }
+            #horarios .schedule-tabs {
+                margin-bottom: 0.85rem;
+            }
+            #horarios .schedule-slot {
+                min-height: 2.3rem;
+            }
+            .price-card {
+                min-height: 24.75rem;
+            }
+            .discount-card {
+                height: 24.75rem;
+            }
+            .coach-card {
+                height: 21.75rem;
+            }
+        }
+        @media (min-width: 1400px) {
             .pricing-grid.is-three-up {
                 display: flex !important;
                 justify-content: center;
