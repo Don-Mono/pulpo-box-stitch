@@ -120,6 +120,17 @@
     };
   }
 
+  function createDiscount() {
+    return {
+      tag: "Aliado local",
+      title: "Nuevo convenio",
+      subtitle: "Beneficio disponible",
+      highlight: "Descuento",
+      text: "Agrega una descripcion breve del convenio.",
+      image: state.gallery[0] || state.defaults?.discounts?.cards?.[0]?.image || "/assets/brand/convenio-padel.jpeg",
+    };
+  }
+
   function renderCoachesFields() {
     const coaches = ensureArray("coaches.cards");
     const visibleCoaches = coaches.length ? coaches : [createCoach()];
@@ -142,6 +153,34 @@
             : "",
         ),
       ),
+    ].join("");
+  }
+
+  function renderDiscountFields() {
+    const discounts = ensureArray("discounts.cards");
+
+    return [
+      inputField("discounts.heading", "Titulo", { full: true }),
+      inputField("discounts.subtitle", "Bajada", { multiline: true, full: true }),
+      `<div class="section-actions"><button class="button accent" data-add-discount type="button">Agregar convenio</button></div>`,
+      ...(discounts.length
+        ? discounts.map((_, index) =>
+            itemCard(
+              `Convenio ${index + 1}`,
+              [
+                inputField(`discounts.cards.${index}.tag`, "Etiqueta"),
+                inputField(`discounts.cards.${index}.title`, "Titulo"),
+                inputField(`discounts.cards.${index}.subtitle`, "Subtitulo", { full: true }),
+                inputField(`discounts.cards.${index}.highlight`, "Destacado"),
+                inputField(`discounts.cards.${index}.text`, "Descripcion", { multiline: true, full: true }),
+                imageField(`discounts.cards.${index}.image`, "Imagen"),
+              ],
+              `<button class="button danger compact" data-remove-discount="${index}" type="button">Eliminar</button>`,
+            ),
+          )
+        : [
+            `<p class="status">No hay convenios cargados. Agrega uno nuevo para mostrarlo en la pagina.</p>`,
+          ]),
     ].join("");
   }
 
@@ -237,20 +276,7 @@
     }
 
     if (id === "discounts") {
-      return [
-        inputField("discounts.heading", "Titulo", { full: true }),
-        inputField("discounts.subtitle", "Bajada", { multiline: true, full: true }),
-        ...[0, 1, 2, 3, 4, 5].map((index) =>
-          itemCard(`Convenio ${index + 1}`, [
-            inputField(`discounts.cards.${index}.tag`, "Etiqueta"),
-            inputField(`discounts.cards.${index}.title`, "Titulo"),
-            inputField(`discounts.cards.${index}.subtitle`, "Subtitulo", { full: true }),
-            inputField(`discounts.cards.${index}.highlight`, "Destacado"),
-            inputField(`discounts.cards.${index}.text`, "Descripcion", { multiline: true, full: true }),
-            imageField(`discounts.cards.${index}.image`, "Imagen"),
-          ]),
-        ),
-      ].join("");
+      return renderDiscountFields();
     }
 
     if (id === "locations") {
@@ -349,6 +375,21 @@
         coaches.splice(Number(button.dataset.removeCoach), 1);
         renderEditor();
         setStatus($("#editorStatus"), "Coach eliminado. Recuerda guardar para publicarlo.", "ok");
+      });
+    });
+
+    $("#editorForm").querySelector("[data-add-discount]")?.addEventListener("click", () => {
+      ensureArray("discounts.cards").push(createDiscount());
+      renderEditor();
+      setStatus($("#editorStatus"), "Convenio agregado. Recuerda guardar para publicarlo.", "ok");
+    });
+
+    $("#editorForm").querySelectorAll("[data-remove-discount]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const discounts = ensureArray("discounts.cards");
+        discounts.splice(Number(button.dataset.removeDiscount), 1);
+        renderEditor();
+        setStatus($("#editorStatus"), "Convenio eliminado. Recuerda guardar para publicarlo.", "ok");
       });
     });
   }
