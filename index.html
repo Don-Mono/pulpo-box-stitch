@@ -1439,6 +1439,40 @@
                 max-width: min(calc((100% - 3rem) / 4), var(--discount-card-width));
             }
         }
+        @media (max-width: 767px), (hover: none) and (pointer: coarse) and (orientation: portrait) {
+            #servicios.fit-section,
+            #horarios.fit-section,
+            #planes.fit-section,
+            #convenios.fit-section,
+            #coaches.fit-section,
+            #sedes.location-section,
+            section.fit-section {
+                min-height: auto !important;
+                justify-content: flex-start !important;
+                padding-top: clamp(2.25rem, 7vw, 3.25rem) !important;
+                padding-bottom: clamp(2.25rem, 7vw, 3.25rem) !important;
+            }
+            #contacto-footer {
+                min-height: auto !important;
+            }
+            #planes .pricing-grid,
+            #planes .pricing-grid.is-three-up {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) !important;
+                gap: 1rem !important;
+                max-width: min(100%, 28rem);
+                margin-inline: auto;
+            }
+            #planes .pricing-grid.is-three-up > .price-card {
+                flex: none !important;
+                max-width: none !important;
+            }
+            #planes .price-card {
+                height: auto !important;
+                min-height: 0 !important;
+                transform: none !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-primary-container text-on-surface font-body-md overflow-x-hidden">
