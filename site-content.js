@@ -291,6 +291,14 @@
     `;
   }
 
+  function renderFooterGalleryItem(image, index, hidden = false) {
+    return `
+      <div class="footer-gallery-item group"${hidden ? ' aria-hidden="true"' : ""}>
+        <img class="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="${hidden ? "" : `Post de Instagram Pulpo Box ${index + 1}`}" src="${escapeHtml(image)}"/>
+      </div>
+    `;
+  }
+
   function ensureSectionLogo(sectionSelector) {
     const section = document.querySelector(sectionSelector);
     if (!section || section.querySelector(":scope img.section-logo")) return;
@@ -392,12 +400,18 @@
       ].join("");
     }
 
-    setText("#contacto-footer .font-display-lg", data.brand.name);
-    setText("#contacto-footer .lg\\:col-span-1 p", data.brand.footerText);
-    setText("#contacto-footer .lg\\:col-span-2 h4", data.instagram.heading);
-    applyRepeating("#contacto-footer .lg\\:col-span-2 .grid > div", data.instagram.images.map((image) => ({ image })), (element, item) => {
-      setImage("img", item.image, element);
-    });
+    setText("#contacto-footer .footer-brand-name", data.brand.name);
+    setText("#contacto-footer .footer-brand-column p", data.brand.footerText);
+    setText("#contacto-footer .footer-gallery-panel h4", data.instagram.heading);
+    const footerGalleryTrack = document.querySelector("#footer-gallery-track");
+    if (footerGalleryTrack) {
+      const defaultImages = defaultContent.instagram.images;
+      const images = (data.instagram.images || []).filter(Boolean);
+      const visibleImages = images.length ? images : defaultImages;
+      const loopedImages = [...visibleImages, ...visibleImages, ...visibleImages];
+      footerGalleryTrack.style.setProperty("--footer-gallery-count", String(visibleImages.length));
+      footerGalleryTrack.innerHTML = loopedImages.map((image, index) => renderFooterGalleryItem(image, index, index >= visibleImages.length)).join("");
+    }
 
     window.PULPO_ACTIVE_CONTENT = data;
     document.dispatchEvent(new CustomEvent("pulpo:content-applied", { detail: data }));
