@@ -25,3 +25,14 @@ Run `supabase_leads.sql` in the Supabase project to create the `public.leads` ta
 npm install
 npm run preview
 ```
+
+## Sistema de gestion
+
+La evolucion del proyecto hacia gestion de alumnos, coaches, rutinas y progreso esta documentada en:
+
+- `docs/sistema-gestion-plan.md`
+- `docs/sistema-gestion-modelo-datos.md`
+- `docs/seguridad-privacidad.md`
+- `docs/operacion-desarrollo-seguro.md`
+
+El archivo `supabase_management_schema.sql` contiene una propuesta inicial de tablas para Supabase. Revisar antes de ejecutar en produccion.
