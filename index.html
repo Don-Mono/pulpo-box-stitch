@@ -1112,21 +1112,43 @@
         }
         @media (max-width: 767px) {
             nav > div {
-                height: 4.25rem !important;
-                gap: 0.75rem;
+                height: 3.15rem !important;
+                gap: 0.25rem;
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
             }
-            nav .font-display-lg {
-                font-size: 1.05rem !important;
-                line-height: 1.2 !important;
-                max-width: 11rem;
+            nav .brand-wordmark {
+                font-size: clamp(0.78rem, 3vw, 0.98rem) !important;
+                line-height: 0.92 !important;
+                max-width: 4.4rem;
+                letter-spacing: 0.02em;
+            }
+            nav .hidden.md\:flex {
+                display: flex !important;
+                flex: 1 1 auto;
+                min-width: 0;
+                justify-content: center;
+                gap: clamp(0.16rem, 0.75vw, 0.34rem) !important;
+                overflow: hidden;
+            }
+            nav .nav-link {
+                flex: 0 1 auto;
+                padding-bottom: 0.18rem;
+                font-size: clamp(0.36rem, 1.45vw, 0.5rem);
+                line-height: 1;
+                white-space: nowrap;
+                letter-spacing: -0.01em;
             }
             nav button {
-                padding: 0.65rem 1rem !important;
-                font-size: 0.9rem;
-                white-space: nowrap;
+                max-width: 4.15rem;
+                padding: 0.46rem 0.56rem !important;
+                font-size: clamp(0.5rem, 1.65vw, 0.6rem) !important;
+                line-height: 1.05;
+                text-align: center;
+                white-space: normal;
             }
             section {
-                scroll-margin-top: 4.25rem;
+                scroll-margin-top: 3.15rem;
             }
             .fit-section {
                 padding-top: 3.5rem !important;
@@ -1248,6 +1270,68 @@
                 --footer-card-width: clamp(9.5rem, 34vw, 12rem);
                 --footer-gallery-gap: 0.7rem;
                 animation-duration: 24s;
+            }
+            body {
+                -webkit-text-size-adjust: 100%;
+                text-size-adjust: 100%;
+            }
+            #inicio .max-w-3xl {
+                max-width: min(100%, 34rem);
+            }
+            #inicio h1 {
+                font-size: clamp(1.65rem, 6.2vw, 2.15rem) !important;
+                line-height: 0.92 !important;
+                letter-spacing: 0.035em;
+            }
+            #inicio p {
+                font-size: clamp(0.74rem, 2.2vw, 0.9rem) !important;
+                line-height: 1.35 !important;
+                max-width: 24rem;
+            }
+            #inicio .flex.flex-col.sm\:flex-row {
+                flex-direction: row !important;
+                align-items: center;
+                gap: 0.65rem !important;
+            }
+            #inicio button {
+                min-width: 0;
+                padding: 0.76rem 1rem !important;
+                font-size: clamp(0.72rem, 2.2vw, 0.88rem) !important;
+                line-height: 1;
+                white-space: nowrap;
+            }
+            #inicio .grid .text-display-lg-mobile {
+                font-size: clamp(1.65rem, 6.5vw, 2.15rem) !important;
+            }
+            #inicio .grid .text-label-caps {
+                font-size: clamp(0.48rem, 1.65vw, 0.62rem) !important;
+                line-height: 1.1 !important;
+            }
+            section:nth-of-type(2) {
+                padding-top: 3rem !important;
+                padding-bottom: 3rem !important;
+            }
+            section:nth-of-type(2) > .max-w-container-max:first-child {
+                margin-bottom: 2rem !important;
+            }
+            section:nth-of-type(2) h2 {
+                font-size: clamp(1.55rem, 5.7vw, 2rem) !important;
+                line-height: 0.98 !important;
+            }
+            section:nth-of-type(2) .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 0.75rem !important;
+            }
+            section:nth-of-type(2) .grid > div {
+                padding: 1rem !important;
+            }
+            section:nth-of-type(2) .grid h3 {
+                font-size: clamp(0.64rem, 2vw, 0.82rem) !important;
+                margin-bottom: 0.4rem !important;
+            }
+            section:nth-of-type(2) .grid p {
+                font-size: clamp(0.58rem, 1.8vw, 0.72rem) !important;
+                line-height: 1.25 !important;
             }
         }
         @media (min-width: 768px) {
@@ -1559,36 +1643,36 @@
         }
         @media (max-width: 767px), (hover: none) and (pointer: coarse) and (orientation: portrait) {
             :root {
-                --pulpo-mobile-section-height: clamp(36rem, 82svh, 44rem);
+                --pulpo-mobile-section-height: clamp(28rem, 66svh, 34rem);
             }
             #inicio {
                 min-height: var(--pulpo-mobile-section-height) !important;
-                padding-top: 4.25rem !important;
+                padding-top: 3.15rem !important;
             }
             #inicio > .relative {
-                padding-top: clamp(2rem, 6vw, 3rem) !important;
-                padding-bottom: clamp(2rem, 6vw, 3rem) !important;
+                padding-top: clamp(1.4rem, 4.5vw, 2.25rem) !important;
+                padding-bottom: clamp(1.4rem, 4.5vw, 2.25rem) !important;
             }
             #inicio .hero-logo {
-                width: clamp(4.5rem, 14vw, 5.75rem);
-                height: clamp(4.5rem, 14vw, 5.75rem);
-                margin-bottom: 0.75rem;
+                width: clamp(3.65rem, 12vw, 4.8rem);
+                height: clamp(3.65rem, 12vw, 4.8rem);
+                margin-bottom: 0.55rem;
             }
             #inicio h1 {
-                margin-bottom: 0.85rem !important;
+                margin-bottom: 0.55rem !important;
             }
             #inicio p {
-                margin-bottom: 1.35rem !important;
+                margin-bottom: 1rem !important;
             }
             #inicio .flex.flex-col.sm\:flex-row {
-                margin-bottom: 1.75rem !important;
+                margin-bottom: 1.1rem !important;
             }
             #inicio .grid {
-                gap: 0.75rem !important;
+                gap: 0.55rem !important;
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
             }
             #inicio .grid > div {
-                padding: 0.8rem 0.55rem !important;
+                padding: 0.65rem 0.45rem !important;
             }
             #servicios.fit-section,
             #horarios.fit-section,
