@@ -1481,20 +1481,57 @@
             }
         }
         @media (max-width: 767px), (hover: none) and (pointer: coarse) and (orientation: portrait) {
+            :root {
+                --pulpo-mobile-section-height: clamp(36rem, 82svh, 44rem);
+            }
+            #inicio {
+                min-height: var(--pulpo-mobile-section-height) !important;
+                padding-top: 4.25rem !important;
+            }
+            #inicio > .relative {
+                padding-top: clamp(2rem, 6vw, 3rem) !important;
+                padding-bottom: clamp(2rem, 6vw, 3rem) !important;
+            }
+            #inicio .hero-logo {
+                width: clamp(4.5rem, 14vw, 5.75rem);
+                height: clamp(4.5rem, 14vw, 5.75rem);
+                margin-bottom: 0.75rem;
+            }
+            #inicio h1 {
+                margin-bottom: 0.85rem !important;
+            }
+            #inicio p {
+                margin-bottom: 1.35rem !important;
+            }
+            #inicio .flex.flex-col.sm\:flex-row {
+                margin-bottom: 1.75rem !important;
+            }
+            #inicio .grid {
+                gap: 0.75rem !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            }
+            #inicio .grid > div {
+                padding: 0.8rem 0.55rem !important;
+            }
             #servicios.fit-section,
             #horarios.fit-section,
             #planes.fit-section,
             #convenios.fit-section,
             #coaches.fit-section,
+            #contacto.fit-section,
             #sedes.location-section,
             section.fit-section {
-                min-height: auto !important;
-                justify-content: flex-start !important;
+                min-height: var(--pulpo-mobile-section-height) !important;
+                justify-content: center !important;
                 padding-top: clamp(2.25rem, 7vw, 3.25rem) !important;
                 padding-bottom: clamp(2.25rem, 7vw, 3.25rem) !important;
             }
+            #horarios.fit-section,
+            #planes.fit-section {
+                justify-content: flex-start !important;
+            }
             #contacto-footer {
-                min-height: auto !important;
+                min-height: var(--pulpo-mobile-section-height) !important;
             }
         }
     </style>
