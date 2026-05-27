@@ -936,10 +936,11 @@
             width: max-content;
         }
         .coach-card {
+            --coach-image-height: 58%;
             position: relative;
             flex: 0 0 calc((min(100vw - 80px, 1280px) - 72px) / 4);
             width: calc((min(100vw - 80px, 1280px) - 72px) / 4);
-            height: 24rem;
+            height: 27rem;
             overflow: hidden;
             border-radius: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -950,9 +951,9 @@
         }
         .coach-card img {
             width: 100%;
-            height: 58%;
+            height: var(--coach-image-height);
             object-fit: cover;
-            flex: 0 0 58%;
+            flex: 0 0 var(--coach-image-height);
             border-bottom: 1px solid rgba(0, 230, 230, 0.20);
         }
         .coach-card::after {
@@ -965,17 +966,19 @@
         .coach-card-body {
             position: relative;
             z-index: 1;
-            flex: 1;
-            padding: 1.15rem 1.2rem 1.25rem;
+            flex: 1 1 auto;
+            padding: 1rem 1.05rem 1.1rem;
             color: #ffffff;
             text-align: left;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
+            gap: 0.15rem;
         }
         .coach-card h3 {
-            font-size: 1.6rem !important;
-            margin-bottom: 0.15rem;
+            font-size: 1.5rem !important;
+            line-height: 0.96 !important;
+            margin-bottom: 0;
         }
         .coach-card-role {
             color: #00E6E6;
@@ -983,21 +986,21 @@
             font-size: 0.72rem;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            margin: 0.2rem 0 0.65rem;
+            margin: 0.15rem 0 0.35rem;
         }
         .coach-card p {
             color: rgba(239, 241, 243, 0.78);
             font-size: 0.82rem;
             line-height: 1.32;
-            margin-top: auto;
+            margin: 0;
         }
         .coach-card p {
             color: rgba(255, 255, 255, 0.82) !important;
             font-family: "Teko", sans-serif !important;
-            font-size: clamp(1rem, 1vw, 1.14rem) !important;
+            font-size: 1rem !important;
             font-weight: 600;
             letter-spacing: 0.035em;
-            line-height: 1.08 !important;
+            line-height: 1.04 !important;
             text-transform: uppercase;
             text-shadow: 0 2px 12px rgba(0, 0, 0, 0.34);
         }
@@ -1126,18 +1129,19 @@
                 animation-duration: 26s;
             }
             .coach-card {
+                --coach-image-height: 58%;
                 flex-basis: min(76vw, 19rem);
                 width: min(76vw, 19rem);
-                height: 23rem;
+                height: 26rem;
             }
             .coach-card-body {
-                padding: 1rem;
+                padding: 0.95rem 0.95rem 1rem;
             }
             .coach-card h3 {
                 font-size: 1.35rem !important;
             }
             .coach-card p {
-                font-size: 0.78rem;
+                font-size: 0.88rem !important;
             }
             .service-card-content {
                 padding: 1.25rem !important;
@@ -1367,12 +1371,13 @@
                 gap: 1rem;
             }
             .coach-card {
+                --coach-image-height: 58%;
                 flex: 0 0 calc((min(100vw - 64px, 1180px) - 32px) / 3);
                 width: calc((min(100vw - 64px, 1180px) - 32px) / 3);
-                height: 22.75rem;
+                height: 25.5rem;
             }
             .coach-card-body {
-                padding: 1rem 1rem 1.1rem;
+                padding: 0.95rem 0.95rem 1rem;
             }
             .coach-card h3 {
                 font-size: 1.35rem !important;
@@ -1412,7 +1417,8 @@
                 height: 24.75rem;
             }
             .coach-card {
-                height: 21.75rem;
+                --coach-image-height: 58%;
+                height: 24.75rem;
             }
         }
         @media (min-width: 1400px) {
