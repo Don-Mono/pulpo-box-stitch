@@ -1370,9 +1370,11 @@
             }
             #horarios .schedule-panel {
                 --schedule-panel-min-height: auto;
+                max-width: min(100%, 76rem);
+                margin-inline: auto;
             }
             #horarios .schedule-content {
-                padding: 1.15rem;
+                padding: clamp(0.8rem, 1vw, 1.15rem);
             }
             #horarios .schedule-tabs {
                 max-width: 44rem;
@@ -1387,19 +1389,26 @@
                 margin-bottom: 0.65rem;
             }
             #horarios .schedule-days-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: 0.7rem;
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+                gap: clamp(0.45rem, 0.65vw, 0.7rem);
             }
             #horarios .schedule-day-card {
-                padding: 0.65rem;
+                padding: clamp(0.45rem, 0.55vw, 0.65rem);
+                border-radius: clamp(0.9rem, 1.1vw, 1.15rem);
             }
             #horarios .schedule-day-label {
-                min-height: 2.1rem;
-                font-size: 0.7rem;
+                min-height: clamp(1.85rem, 2.1vw, 2.1rem);
+                margin-bottom: clamp(0.42rem, 0.55vw, 0.62rem);
+                font-size: clamp(0.62rem, 0.68vw, 0.7rem);
             }
             #horarios .schedule-slot {
-                min-height: 2.5rem;
-                font-size: 0.78rem;
+                min-height: clamp(1.85rem, 2.35vw, 2.3rem);
+                border-radius: clamp(0.65rem, 0.85vw, 0.8rem);
+                font-size: clamp(0.62rem, 0.72vw, 0.76rem);
+                padding-inline: clamp(0.18rem, 0.3vw, 0.35rem);
+            }
+            #horarios .schedule-slot small {
+                font-size: clamp(0.46rem, 0.52vw, 0.54rem);
             }
             #planes .pricing-grid,
             #planes .pricing-grid.is-three-up {
