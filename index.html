@@ -1335,19 +1335,31 @@
             }
             #planes .pricing-grid,
             #planes .pricing-grid.is-three-up {
-                display: grid !important;
-                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-                justify-content: stretch !important;
+                display: flex !important;
+                grid-template-columns: none !important;
+                justify-content: flex-start !important;
+                flex-wrap: nowrap !important;
                 gap: 1.25rem !important;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 0 1rem 0.75rem;
+                scroll-snap-type: x proximity;
+                scrollbar-width: none;
+            }
+            #planes .pricing-grid::-webkit-scrollbar {
+                display: none;
             }
             #planes .pricing-grid.is-three-up > .price-card {
-                flex: none;
+                flex: 0 0 18rem;
                 max-width: none;
             }
             .price-card {
-                height: auto;
+                flex: 0 0 18rem !important;
+                width: 18rem;
+                height: 26.5rem;
                 min-height: 26.5rem;
                 padding: 1.5rem !important;
+                scroll-snap-align: center;
                 transform: none !important;
             }
             .price-card-badge-spacer {
@@ -1439,6 +1451,35 @@
                 max-width: min(calc((100% - 3rem) / 4), var(--discount-card-width));
             }
         }
+        @media (max-width: 1399px) {
+            #planes .pricing-grid,
+            #planes .pricing-grid.is-three-up {
+                display: flex !important;
+                grid-template-columns: none !important;
+                justify-content: flex-start !important;
+                flex-wrap: nowrap !important;
+                gap: 1rem !important;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 0 1rem 0.75rem;
+                scroll-snap-type: x proximity;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+            }
+            #planes .pricing-grid::-webkit-scrollbar {
+                display: none;
+            }
+            #planes .pricing-grid.is-three-up > .price-card,
+            #planes .price-card {
+                flex: 0 0 clamp(17rem, 76vw, 19rem) !important;
+                width: clamp(17rem, 76vw, 19rem);
+                max-width: none !important;
+                height: 27rem !important;
+                min-height: 27rem !important;
+                scroll-snap-align: center;
+                transform: none !important;
+            }
+        }
         @media (max-width: 767px), (hover: none) and (pointer: coarse) and (orientation: portrait) {
             #servicios.fit-section,
             #horarios.fit-section,
@@ -1454,23 +1495,6 @@
             }
             #contacto-footer {
                 min-height: auto !important;
-            }
-            #planes .pricing-grid,
-            #planes .pricing-grid.is-three-up {
-                display: grid !important;
-                grid-template-columns: minmax(0, 1fr) !important;
-                gap: 1rem !important;
-                max-width: min(100%, 28rem);
-                margin-inline: auto;
-            }
-            #planes .pricing-grid.is-three-up > .price-card {
-                flex: none !important;
-                max-width: none !important;
-            }
-            #planes .price-card {
-                height: auto !important;
-                min-height: 0 !important;
-                transform: none !important;
             }
         }
     </style>
