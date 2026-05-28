@@ -101,6 +101,8 @@ Primera implementacion de alumnos:
 
 - `/students.html`: pantalla privada para admin.
 - `/api/admin/students`: API para listar, crear y activar/desactivar alumnos.
+- `/coaches-admin.html`: pantalla privada para crear coaches.
+- `/api/admin/coaches`: API para listar, crear y activar/desactivar coaches.
 - La pantalla avisa si falta ejecutar el esquema de Supabase.
 
 ### Etapa 3 - Rutinas
