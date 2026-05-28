@@ -85,7 +85,8 @@ Primera implementacion:
 - `/admin.html`: panel clasico de contenido, se mantiene disponible.
 - Rol activo inicial: `admin`.
 - Login extendido: usuarios creados en Supabase Auth pueden entrar si tienen perfil activo en `pb_profiles`.
-- Roles `coach` y `student`: acceso validado y dashboard preparado; vistas dedicadas quedan pendientes de permisos por rol.
+- Rol `student`: redirige a `/student.html` para ver rutinas asignadas y registrar resultados propios.
+- Rol `coach`: acceso validado y dashboard preparado; vista dedicada queda pendiente de permisos por coach.
 
 ### Etapa 2 - Alumnos y coaches
 
@@ -137,6 +138,8 @@ Primera implementacion:
 
 - `/results.html`: pantalla privada para registrar resultados.
 - `/api/admin/results`: API para listar y guardar marcas de entrenamiento.
+- `/student.html`: permite al alumno registrar sus propios resultados.
+- `/api/student/overview`: API protegida por rol alumno.
 - Conecta alumno, rutina y ejercicio cuando esos datos existen.
 
 ### Etapa 5 - Progreso

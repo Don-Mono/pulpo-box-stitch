@@ -49,6 +49,7 @@ La rama de gestion incorpora una entrada privada inicial:
 - `/results.html`: primera base del modulo resultados.
 - `/progress.html`: primera base del modulo progreso.
 - `/medical.html`: primera base del modulo de datos medicos sensibles.
+- `/student.html`: primera vista privada para alumno.
 - `/admin.html`: panel clasico de contenido, se mantiene compatible.
 
 El login acepta el admin actual por variables de entorno y tambien usuarios creados en Supabase Auth con perfil en `pb_profiles`.

@@ -118,6 +118,21 @@ function requireAdmin(req, res) {
   }
 }
 
+function requireRole(req, res, roles) {
+  try {
+    const allowedRoles = Array.isArray(roles) ? roles : [roles];
+    const session = getSession(req);
+    if (!session || !allowedRoles.includes(session.role)) {
+      json(res, 401, { error: "No autorizado." });
+      return null;
+    }
+    return session;
+  } catch (error) {
+    json(res, error.statusCode || 500, { error: error.message || "Error interno." });
+    return null;
+  }
+}
+
 async function readSiteContent() {
   const supabase = getSupabase();
   const { data, error } = await supabase.from("site_content").select("content").eq("id", "main").maybeSingle();
@@ -176,5 +191,6 @@ module.exports = {
   json,
   readSiteContent,
   requireAdmin,
+  requireRole,
   saveSiteContent,
 };
