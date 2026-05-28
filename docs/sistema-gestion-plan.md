@@ -86,7 +86,7 @@ Primera implementacion:
 - Rol activo inicial: `admin`.
 - Login extendido: usuarios creados en Supabase Auth pueden entrar si tienen perfil activo en `pb_profiles`.
 - Rol `student`: redirige a `/student.html` para ver rutinas asignadas y registrar resultados propios.
-- Rol `coach`: acceso validado y dashboard preparado; vista dedicada queda pendiente de permisos por coach.
+- Rol `coach`: redirige a `/coach.html` para ver alumnos asignados y ultimas marcas.
 
 ### Etapa 2 - Alumnos y coaches
 
@@ -105,6 +105,8 @@ Primera implementacion de alumnos:
 - `/api/admin/students`: API para listar, crear y activar/desactivar alumnos.
 - `/coaches-admin.html`: pantalla privada para crear coaches.
 - `/api/admin/coaches`: API para listar, crear y activar/desactivar coaches.
+- `/coach.html`: primera vista privada de coach.
+- `/api/coach/overview`: API protegida por rol coach.
 - La pantalla avisa si falta ejecutar el esquema de Supabase.
 
 ### Etapa 3 - Rutinas

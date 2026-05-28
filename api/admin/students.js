@@ -23,6 +23,7 @@ function isMissingManagementSchema(error) {
 function setupPayload() {
   return {
     students: [],
+    coaches: [],
     setupRequired: true,
     message: "Para activar alumnos debes ejecutar primero supabase_management_schema.sql en Supabase.",
   };
@@ -62,6 +63,8 @@ async function listStudents(supabase) {
 
   return students.map((student) => ({
     id: student.profile_id,
+    primary_coach_id: student.primary_coach_id || "",
+    location_id: student.location_id || "",
     full_name: profileMap.get(student.profile_id)?.full_name || "Alumno sin nombre",
     email: profileMap.get(student.profile_id)?.email || "",
     phone: profileMap.get(student.profile_id)?.phone || "",
@@ -75,11 +78,29 @@ async function listStudents(supabase) {
   }));
 }
 
+async function listCoaches(supabase) {
+  const { data: coaches, error } = await supabase.from("pb_coaches").select("profile_id").limit(100);
+  if (error) throw error;
+  if (!coaches?.length) return [];
+
+  const profileIds = coaches.map((coach) => coach.profile_id);
+  const { data: profiles, error: profilesError } = await supabase
+    .from("pb_profiles")
+    .select("id, full_name, email")
+    .in("id", profileIds)
+    .eq("role", "coach")
+    .eq("is_active", true);
+
+  if (profilesError) throw profilesError;
+  return profiles || [];
+}
+
 async function createStudent(supabase, body) {
   const fullName = clean(body.full_name, 120);
   const email = clean(body.email, 160).toLowerCase();
   const phone = clean(body.phone, 40);
   const goal = clean(body.goal, 280);
+  const primaryCoachId = clean(body.primary_coach_id, 90) || null;
   const heightCm = body.height_cm === "" || body.height_cm == null ? null : Number(body.height_cm);
   const currentWeightKg = body.current_weight_kg === "" || body.current_weight_kg == null ? null : Number(body.current_weight_kg);
 
@@ -135,6 +156,7 @@ async function createStudent(supabase, body) {
 
     const { error: studentError } = await supabase.from("pb_students").insert({
       profile_id: userId,
+      primary_coach_id: primaryCoachId,
       goal,
       height_cm: heightCm,
       current_weight_kg: currentWeightKg,
@@ -182,8 +204,11 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "GET") {
       try {
-        const students = await listStudents(supabase);
-        return json(res, 200, { students, setupRequired: false });
+        const [students, coaches] = await Promise.all([
+          listStudents(supabase),
+          listCoaches(supabase),
+        ]);
+        return json(res, 200, { students, coaches, setupRequired: false });
       } catch (error) {
         if (isMissingManagementSchema(error)) return json(res, 200, setupPayload());
         throw error;

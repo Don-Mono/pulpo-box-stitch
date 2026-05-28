@@ -6,6 +6,7 @@
   const studentsBody = document.querySelector("#studentsBody");
   const refreshButton = document.querySelector("#refreshButton");
   const logoutButton = document.querySelector("#logoutButton");
+  const coachSelect = document.querySelector("#primary_coach_id");
 
   let setupRequired = false;
 
@@ -73,6 +74,14 @@
     }).join("");
   }
 
+  function renderCoaches(coaches) {
+    const options = ['<option value="">Sin coach asignado</option>'];
+    coaches.forEach((coach) => {
+      options.push(`<option value="${escapeHtml(coach.id)}">${escapeHtml(coach.full_name)}${coach.email ? ` - ${escapeHtml(coach.email)}` : ""}</option>`);
+    });
+    coachSelect.innerHTML = options.join("");
+  }
+
   async function loadStudents() {
     renderEmpty("Cargando alumnos...");
     setupMessage.textContent = "Revisando tablas de gestion...";
@@ -84,9 +93,11 @@
       setupMessage.textContent = setupRequired
         ? payload.message
         : "Modulo conectado. Ya puedes registrar alumnos cuando lo necesites.";
+      renderCoaches(payload.coaches || []);
       renderStudents(payload.students || []);
     } catch (error) {
       setupMessage.textContent = error.message;
+      renderCoaches([]);
       renderEmpty(error.message);
     }
   }

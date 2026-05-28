@@ -25,6 +25,7 @@ function isMissingManagementSchema(error) {
 }
 
 function redirectForRole(role) {
+  if (role === "coach") return "/coach.html";
   if (role === "student") return "/student.html";
   return "/dashboard.html";
 }
