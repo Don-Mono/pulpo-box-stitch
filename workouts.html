@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rutinas Pulpo Box</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&family=Teko:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/gestion.css" />
+  </head>
+  <body>
+    <main class="management-shell">
+      <div class="management-container">
+        <header class="management-topbar">
+          <a class="brand-lockup" href="/dashboard.html">
+            <img alt="Logo Pulpo Box" src="/assets/brand/pulpo-box-logo.png" />
+            <span>
+              <strong>Pulpo Box</strong>
+              <span>Gestion de rutinas</span>
+            </span>
+          </a>
+          <div class="topbar-actions">
+            <a class="button ghost" href="/dashboard.html">Dashboard</a>
+            <a class="button ghost" href="/">Ver pagina</a>
+            <button class="button primary" id="logoutButton" type="button">Salir</button>
+          </div>
+        </header>
+
+        <section class="dashboard-header">
+          <div>
+            <span class="status-pill">Etapa 3</span>
+            <h1 class="dashboard-title">Rutinas</h1>
+            <p class="muted">Crea rutinas escritas, agrega un ejercicio base, video y asignacion inicial a un alumno.</p>
+          </div>
+          <div>
+            <span class="muted" id="userEmail"></span>
+          </div>
+        </section>
+
+        <section class="dashboard-row student-layout">
+          <article class="panel-card">
+            <h2>Nueva rutina</h2>
+            <p>Parte con una rutina simple; luego podremos agregar multiples ejercicios y plantillas semanales.</p>
+            <form class="student-form" id="workoutForm">
+              <div class="form-grid-two">
+                <div class="field">
+                  <label for="title">Titulo</label>
+                  <input id="title" name="title" placeholder="Ej: Tren superior fuerza" required />
+                </div>
+                <div class="field">
+                  <label for="workout_date">Fecha</label>
+                  <input id="workout_date" name="workout_date" type="date" />
+                </div>
+              </div>
+              <div class="form-grid-two">
+                <div class="field">
+                  <label for="level">Nivel</label>
+                  <input id="level" name="level" placeholder="Base, intermedio, avanzado" />
+                </div>
+                <div class="field">
+                  <label for="student_id">Asignar alumno</label>
+                  <select id="student_id" name="student_id">
+                    <option value="">Sin asignar por ahora</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="summary">Resumen</label>
+                <input id="summary" name="summary" placeholder="Objetivo de la rutina y foco principal" />
+              </div>
+              <div class="field">
+                <label for="exercise_name">Ejercicio principal</label>
+                <input id="exercise_name" name="exercise_name" placeholder="Ej: Back squat" />
+              </div>
+              <div class="form-grid-two">
+                <div class="field">
+                  <label for="sets">Series</label>
+                  <input id="sets" name="sets" inputmode="numeric" placeholder="4" />
+                </div>
+                <div class="field">
+                  <label for="reps">Reps / trabajo</label>
+                  <input id="reps" name="reps" placeholder="8 reps / 40 seg" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="prescription">Indicacion escrita</label>
+                <input id="prescription" name="prescription" placeholder="RPE 7, descanso 90 segundos, tecnica primero" />
+              </div>
+              <div class="field">
+                <label for="video_url">Video URL</label>
+                <input id="video_url" name="video_url" placeholder="https://..." />
+              </div>
+              <div class="field">
+                <label for="notes">Notas internas</label>
+                <input id="notes" name="notes" placeholder="Notas para coach/admin" />
+              </div>
+              <span class="status" id="workoutStatus"></span>
+              <button class="button accent" type="submit">Crear rutina</button>
+            </form>
+          </article>
+
+          <article class="panel-card">
+            <h2>Estado del modulo</h2>
+            <p id="setupMessage">Cargando estado...</p>
+            <ul class="check-list">
+              <li>Rutinas protegidas por admin.</li>
+              <li>Ejercicio base con descripcion y video.</li>
+              <li>Asignacion inicial a alumno disponible.</li>
+            </ul>
+          </article>
+        </section>
+
+        <section class="panel-card students-table-card">
+          <div class="table-header">
+            <div>
+              <h2>Rutinas creadas</h2>
+              <p class="muted">Listado inicial para controlar lo que vamos cargando.</p>
+            </div>
+            <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+          </div>
+          <div id="workoutsList" class="workout-list">
+            <p class="muted">Cargando rutinas...</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/workouts.js"></script>
+  </body>
+</html>

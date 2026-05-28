@@ -229,7 +229,8 @@ body {
   text-transform: uppercase;
 }
 
-.field input {
+.field input,
+.field select {
   background: #fbfdff;
   border: 1px solid #cfd7e3;
   border-radius: 0.85rem;
@@ -238,6 +239,10 @@ body {
   min-height: 3rem;
   padding: 0.8rem 1rem;
   width: 100%;
+}
+
+.field select {
+  appearance: none;
 }
 
 .status {
@@ -398,6 +403,52 @@ body {
   color: #b42318;
 }
 
+.workout-list {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.workout-card {
+  background:
+    radial-gradient(circle at 95% 5%, rgba(0, 230, 230, 0.12), transparent 13rem),
+    #f9fbfd;
+  border: 1px solid var(--pb-line);
+  border-radius: 1.2rem;
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem;
+}
+
+.workout-card h3 {
+  color: var(--pb-dark);
+  font-family: Teko, Impact, sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+  margin: 0.8rem 0 0.35rem;
+  text-transform: uppercase;
+}
+
+.workout-card p {
+  margin: 0;
+}
+
+.workout-meta {
+  color: var(--pb-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.workout-meta span {
+  background: #edf4f7;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.35rem 0.7rem;
+}
+
 .check-list {
   color: var(--pb-muted);
   line-height: 1.8;
@@ -427,6 +478,10 @@ body {
   }
 
   .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workout-list {
     grid-template-columns: 1fr;
   }
 

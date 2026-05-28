@@ -107,11 +107,19 @@ Primera implementacion de alumnos:
 
 ### Etapa 3 - Rutinas
 
+Estado: modulo inicial de rutinas en desarrollo.
+
 - Crear rutinas por dia o semana.
 - Agregar ejercicios.
 - Agregar descripcion escrita.
 - Agregar enlace de video.
 - Asignar rutina a uno o varios alumnos.
+
+Primera implementacion:
+
+- `/workouts.html`: pantalla privada para crear rutinas simples.
+- `/api/admin/workouts`: API para listar y crear rutinas con ejercicio base.
+- Permite asignacion inicial a un alumno si ya existe en la base.
 
 ### Etapa 4 - Registro de resultados
 

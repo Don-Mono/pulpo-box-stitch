@@ -45,6 +45,7 @@ La rama de gestion incorpora una entrada privada inicial:
 - `/dashboard.html`: panel privado protegido por sesion.
 - `/students.html`: primera base del modulo alumnos.
 - `/coaches-admin.html`: primera base del modulo coaches.
+- `/workouts.html`: primera base del modulo rutinas.
 - `/admin.html`: panel clasico de contenido, se mantiene compatible.
 
 Por ahora el rol activo es `admin` usando las credenciales actuales. Los roles `coach` y `student` quedan preparados para activarse en las siguientes etapas.
