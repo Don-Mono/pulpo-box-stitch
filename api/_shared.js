@@ -61,10 +61,11 @@ function sign(value, secret) {
   return crypto.createHmac("sha256", secret).update(value).digest("base64url");
 }
 
-function createSessionCookie(email, req, role = "admin") {
+function createSessionCookie(email, req, role = "admin", extra = {}) {
   const { secret } = getAdminConfig();
   const payload = Buffer.from(
     JSON.stringify({
+      ...extra,
       email,
       role,
       exp: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
@@ -80,7 +81,7 @@ function clearSessionCookie() {
 }
 
 function getSession(req) {
-  const { email, secret } = getAdminConfig();
+  const { email: adminEmail, secret } = getAdminConfig();
   const token = parseCookies(req)[COOKIE_NAME];
   if (!token) return null;
 
@@ -90,7 +91,12 @@ function getSession(req) {
   try {
     const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
     if (session.exp < Date.now()) return null;
-    if (String(session.email).toLowerCase() !== email) return null;
+    const role = session.role || "admin";
+    const provider = session.provider || "admin";
+    const allowedRoles = ["admin", "coach", "student"];
+    if (!allowedRoles.includes(role)) return null;
+    if (provider === "admin" && String(session.email).toLowerCase() !== adminEmail) return null;
+    if (provider === "supabase" && (!session.userId || !session.email)) return null;
     session.role = session.role || "admin";
     return session;
   } catch {

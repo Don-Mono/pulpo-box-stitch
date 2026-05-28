@@ -14,7 +14,8 @@ module.exports = async function handler(req, res) {
       user: {
         email: session.email,
         role: session.role || "admin",
-        name: session.role === "admin" ? "Administrador Pulpo Box" : session.email,
+        name: session.name || (session.role === "admin" ? "Administrador Pulpo Box" : session.email),
+        userId: session.userId || null,
       },
     });
   } catch (error) {

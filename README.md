@@ -51,4 +51,5 @@ La rama de gestion incorpora una entrada privada inicial:
 - `/medical.html`: primera base del modulo de datos medicos sensibles.
 - `/admin.html`: panel clasico de contenido, se mantiene compatible.
 
-Por ahora el rol activo es `admin` usando las credenciales actuales. Los roles `coach` y `student` quedan preparados para activarse en las siguientes etapas.
+El login acepta el admin actual por variables de entorno y tambien usuarios creados en Supabase Auth con perfil en `pb_profiles`.
+Las vistas especificas de coach y alumno quedan preparadas, pero los modulos operativos siguen protegidos para admin hasta crear permisos dedicados.

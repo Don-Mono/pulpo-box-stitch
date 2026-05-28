@@ -84,7 +84,8 @@ Primera implementacion:
 - `/dashboard.html`: panel privado protegido.
 - `/admin.html`: panel clasico de contenido, se mantiene disponible.
 - Rol activo inicial: `admin`.
-- Roles preparados para siguientes etapas: `coach`, `student`.
+- Login extendido: usuarios creados en Supabase Auth pueden entrar si tienen perfil activo en `pb_profiles`.
+- Roles `coach` y `student`: acceso validado y dashboard preparado; vistas dedicadas quedan pendientes de permisos por rol.
 
 ### Etapa 2 - Alumnos y coaches
 

@@ -31,7 +31,7 @@
             <span class="auth-kicker">Gestion Pulpo Box</span>
             <h1 class="auth-title">Un solo acceso para todo el box</h1>
             <p class="auth-copy">
-              Esta es la nueva entrada para el sistema privado. En esta primera etapa el acceso activo es administrador; coach y alumno quedan preparados para activarse sin tocar la landing publica.
+              Esta es la nueva entrada para el sistema privado. Puedes entrar como administrador o con accesos de coach/alumno creados desde Supabase.
             </p>
 
             <div class="role-preview" aria-label="Roles del sistema">
@@ -61,11 +61,11 @@
 
           <section class="auth-card">
             <h2 class="panel-card-title">Ingresar</h2>
-            <p class="muted">Usa por ahora el acceso administrador actual.</p>
+            <p class="muted">Usa tu correo y clave privada del sistema.</p>
             <form id="roleLoginForm">
               <div class="field">
                 <label for="email">Correo</label>
-                <input id="email" name="email" autocomplete="email" type="email" required />
+                <input id="email" name="email" autocomplete="email" placeholder="tu-correo@pulpo.cl" type="email" required />
               </div>
               <div class="field">
                 <label for="password">Clave</label>

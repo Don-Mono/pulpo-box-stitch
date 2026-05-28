@@ -14,6 +14,7 @@ Los datos medicos o restricciones fisicas son datos sensibles y requieren mayor 
 - Mantener el repositorio privado.
 - Usar roles claros: admin, coach, alumno.
 - Guardar roles de acceso en datos controlados por el sistema, no en campos editables por alumnos.
+- Validar usuarios de Supabase contra `pb_profiles` antes de crear sesion privada.
 - Activar Row Level Security en Supabase.
 - Registrar consentimiento antes de guardar datos medicos.
 - Evitar borrar alumnos con historial; mejor desactivar.

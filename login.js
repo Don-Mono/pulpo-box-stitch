@@ -39,6 +39,5 @@
     }
   });
 
-  email.value = "miguelangelsaez12@gmail.com";
   checkSession();
 })();
