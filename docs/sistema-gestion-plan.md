@@ -123,12 +123,20 @@ Primera implementacion:
 
 ### Etapa 4 - Registro de resultados
 
+Estado: modulo inicial de resultados en desarrollo.
+
 - Registrar peso usado.
 - Registrar repeticiones.
 - Registrar tiempo.
 - Registrar rondas.
 - Registrar notas del alumno.
 - Registrar feedback del coach.
+
+Primera implementacion:
+
+- `/results.html`: pantalla privada para registrar resultados.
+- `/api/admin/results`: API para listar y guardar marcas de entrenamiento.
+- Conecta alumno, rutina y ejercicio cuando esos datos existen.
 
 ### Etapa 5 - Progreso
 
