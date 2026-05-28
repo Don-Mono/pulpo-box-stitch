@@ -326,6 +326,11 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.inline-field {
+  margin: 0;
+  min-width: min(100%, 20rem);
+}
+
 .students-table-card {
   margin-top: 1rem;
 }
@@ -449,6 +454,61 @@ body {
   padding: 0.35rem 0.7rem;
 }
 
+.metric-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.metric-card {
+  background: var(--pb-dark);
+  border-radius: 1rem;
+  color: white;
+  min-height: 7rem;
+  padding: 1rem;
+}
+
+.metric-card span {
+  color: rgba(255, 255, 255, 0.68);
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metric-card strong {
+  color: var(--pb-cyan);
+  display: block;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  margin-top: 0.55rem;
+}
+
+.mini-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.mini-list-item {
+  background: #f8fbfd;
+  border: 1px solid var(--pb-line);
+  border-radius: 0.95rem;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem;
+}
+
+.mini-list-item span {
+  color: var(--pb-ink);
+  font-weight: 800;
+}
+
+.mini-list-item small {
+  color: var(--pb-muted);
+}
+
 .check-list {
   color: var(--pb-muted);
   line-height: 1.8;
@@ -483,6 +543,10 @@ body {
 
   .workout-list {
     grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .form-grid-two,

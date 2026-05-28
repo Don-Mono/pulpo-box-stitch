@@ -140,12 +140,20 @@ Primera implementacion:
 
 ### Etapa 5 - Progreso
 
+Estado: modulo inicial de progreso en desarrollo.
+
 - Historial por ejercicio.
 - Grafico de progreso.
 - Peso corporal.
 - Estatura.
 - Medidas opcionales.
 - Marcas personales.
+
+Primera implementacion:
+
+- `/progress.html`: pantalla privada de seguimiento por alumno.
+- `/api/admin/progress`: API para consultar historial y registrar mediciones corporales.
+- Resume peso, estatura, cintura y cantidad de marcas recientes.
 
 ### Etapa 6 - Datos medicos
 
