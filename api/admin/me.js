@@ -9,5 +9,5 @@ module.exports = async function handler(req, res) {
   const session = requireAdmin(req, res);
   if (!session) return;
 
-  return json(res, 200, { email: session.email });
+  return json(res, 200, { email: session.email, role: session.role || "admin" });
 };

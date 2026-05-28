@@ -67,6 +67,8 @@ Estado: en preparacion.
 
 ### Etapa 1 - Login por rol
 
+Estado: base inicial creada.
+
 - Mantener login administrador actual.
 - Preparar login extendido para coaches y alumnos.
 - Crear rutas privadas:
@@ -75,6 +77,14 @@ Estado: en preparacion.
   - `/alumno`
 - Redirigir segun rol.
 - Bloquear rutas privadas sin sesion.
+
+Primera implementacion:
+
+- `/login.html`: entrada central al sistema.
+- `/dashboard.html`: panel privado protegido.
+- `/admin.html`: panel clasico de contenido, se mantiene disponible.
+- Rol activo inicial: `admin`.
+- Roles preparados para siguientes etapas: `coach`, `student`.
 
 ### Etapa 2 - Alumnos y coaches
 
@@ -153,4 +163,3 @@ Cada etapa debe cumplir esto antes de pasar a la siguiente:
 - Tiene permisos correctos.
 - Esta documentada.
 - Se puede revertir sin perder datos.
-

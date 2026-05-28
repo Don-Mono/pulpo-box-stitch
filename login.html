@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login Pulpo Box</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&family=Teko:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/gestion.css" />
+  </head>
+  <body>
+    <main class="management-shell">
+      <div class="management-container">
+        <header class="management-topbar">
+          <a class="brand-lockup" href="/">
+            <img alt="Logo Pulpo Box" src="/assets/brand/pulpo-box-logo.png" />
+            <span>
+              <strong>Pulpo Box</strong>
+              <span>Sistema privado</span>
+            </span>
+          </a>
+          <div class="topbar-actions">
+            <a class="button ghost" href="/">Ver pagina</a>
+            <a class="button primary" href="/admin.html">Admin clasico</a>
+          </div>
+        </header>
+
+        <section class="auth-layout">
+          <div class="auth-hero">
+            <span class="auth-kicker">Gestion Pulpo Box</span>
+            <h1 class="auth-title">Un solo acceso para todo el box</h1>
+            <p class="auth-copy">
+              Esta es la nueva entrada para el sistema privado. En esta primera etapa el acceso activo es administrador; coach y alumno quedan preparados para activarse sin tocar la landing publica.
+            </p>
+
+            <div class="role-preview" aria-label="Roles del sistema">
+              <div class="role-preview-card">
+                <span class="role-pill">Admin</span>
+                <div>
+                  <strong>Gestion completa</strong>
+                  <span class="muted">Contenido, alumnos, coaches y rutinas.</span>
+                </div>
+              </div>
+              <div class="role-preview-card">
+                <span class="role-pill">Coach</span>
+                <div>
+                  <strong>Seguimiento deportivo</strong>
+                  <span class="muted">Alumnos asignados, rutinas y resultados.</span>
+                </div>
+              </div>
+              <div class="role-preview-card">
+                <span class="role-pill">Alumno</span>
+                <div>
+                  <strong>Progreso personal</strong>
+                  <span class="muted">Rutinas, videos, marcas e historial.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <section class="auth-card">
+            <h2 class="panel-card-title">Ingresar</h2>
+            <p class="muted">Usa por ahora el acceso administrador actual.</p>
+            <form id="roleLoginForm">
+              <div class="field">
+                <label for="email">Correo</label>
+                <input id="email" name="email" autocomplete="email" type="email" required />
+              </div>
+              <div class="field">
+                <label for="password">Clave</label>
+                <input id="password" name="password" autocomplete="current-password" type="password" required />
+              </div>
+              <span class="status" id="loginStatus"></span>
+              <button class="button accent" type="submit">Entrar al sistema</button>
+            </form>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <script src="/login.js"></script>
+  </body>
+</html>

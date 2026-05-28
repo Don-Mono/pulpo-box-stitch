@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard Pulpo Box</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&family=Teko:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/gestion.css" />
+  </head>
+  <body>
+    <main class="management-shell">
+      <div class="management-container">
+        <header class="management-topbar">
+          <a class="brand-lockup" href="/">
+            <img alt="Logo Pulpo Box" src="/assets/brand/pulpo-box-logo.png" />
+            <span>
+              <strong>Pulpo Box</strong>
+              <span>Panel privado</span>
+            </span>
+          </a>
+          <div class="topbar-actions">
+            <a class="button ghost" href="/">Ver pagina</a>
+            <button class="button primary" id="logoutButton" type="button">Salir</button>
+          </div>
+        </header>
+
+        <section class="dashboard-header">
+          <div>
+            <span class="status-pill" id="rolePill">Cargando</span>
+            <h1 class="dashboard-title" id="dashboardTitle">Preparando panel</h1>
+            <p class="muted" id="dashboardIntro">Estamos validando tu sesion.</p>
+          </div>
+          <div>
+            <span class="muted" id="userEmail"></span>
+          </div>
+        </section>
+
+        <section class="dashboard-grid" id="modulesGrid" aria-label="Modulos del sistema">
+          <article class="module-card" data-module-role="admin">
+            <span class="role-pill">Admin</span>
+            <h3>Contenido web</h3>
+            <p>Edita textos, imagenes, planes, sedes, horarios, coaches y convenios de la landing.</p>
+            <a class="button accent" href="/admin.html">Abrir admin actual</a>
+          </article>
+          <article class="module-card" data-module-role="admin">
+            <span class="role-pill">Etapa 2</span>
+            <h3>Alumnos</h3>
+            <p>Base para crear alumnos, asignar sede, coach y estado de membresia.</p>
+            <button class="button ghost is-disabled" type="button" disabled>Proxima etapa</button>
+          </article>
+          <article class="module-card" data-module-role="admin coach">
+            <span class="role-pill">Etapa 3</span>
+            <h3>Rutinas</h3>
+            <p>Creacion de rutinas escritas, videos, ejercicios y asignacion a alumnos.</p>
+            <button class="button ghost is-disabled" type="button" disabled>Proxima etapa</button>
+          </article>
+          <article class="module-card" data-module-role="coach student">
+            <span class="role-pill">Etapa 4</span>
+            <h3>Resultados</h3>
+            <p>Registro de pesos, tiempos, repeticiones, rondas y notas de entrenamiento.</p>
+            <button class="button ghost is-disabled" type="button" disabled>Proxima etapa</button>
+          </article>
+          <article class="module-card" data-module-role="admin coach student">
+            <span class="role-pill">Etapa 5</span>
+            <h3>Progreso</h3>
+            <p>Graficos, historial por ejercicio y seguimiento fisico del alumno.</p>
+            <button class="button ghost is-disabled" type="button" disabled>Proxima etapa</button>
+          </article>
+          <article class="module-card" data-module-role="admin coach">
+            <span class="role-pill">Seguro</span>
+            <h3>Datos medicos</h3>
+            <p>Espacio reservado para datos sensibles con consentimiento y permisos estrictos.</p>
+            <button class="button ghost is-disabled" type="button" disabled>Proxima etapa</button>
+          </article>
+        </section>
+
+        <section class="dashboard-row">
+          <article class="panel-card">
+            <h2>Como avanzamos</h2>
+            <p>Esta pantalla es el esqueleto seguro del sistema. Desde aqui activaremos modulos sin tocar la landing publica.</p>
+            <ul class="check-list">
+              <li>Login central creado.</li>
+              <li>Rol admin detectado.</li>
+              <li>Dashboard privado protegido.</li>
+              <li>Modulos futuros visibles pero bloqueados.</li>
+            </ul>
+          </article>
+          <article class="panel-card">
+            <h2>Estado actual</h2>
+            <p id="systemStatus">Validando sesion...</p>
+          </article>
+        </section>
+      </div>
+    </main>
+
+    <script src="/dashboard.js"></script>
+  </body>
+</html>

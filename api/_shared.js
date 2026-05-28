@@ -61,11 +61,12 @@ function sign(value, secret) {
   return crypto.createHmac("sha256", secret).update(value).digest("base64url");
 }
 
-function createSessionCookie(email, req) {
+function createSessionCookie(email, req, role = "admin") {
   const { secret } = getAdminConfig();
   const payload = Buffer.from(
     JSON.stringify({
       email,
+      role,
       exp: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
     }),
   ).toString("base64url");
@@ -90,6 +91,7 @@ function getSession(req) {
     const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
     if (session.exp < Date.now()) return null;
     if (String(session.email).toLowerCase() !== email) return null;
+    session.role = session.role || "admin";
     return session;
   } catch {
     return null;
@@ -99,7 +101,7 @@ function getSession(req) {
 function requireAdmin(req, res) {
   try {
     const session = getSession(req);
-    if (!session) {
+    if (!session || session.role !== "admin") {
       json(res, 401, { error: "No autorizado." });
       return null;
     }
@@ -163,6 +165,7 @@ module.exports = {
   clearSessionCookie,
   createSessionCookie,
   getAdminConfig,
+  getSession,
   getSupabase,
   json,
   readSiteContent,
