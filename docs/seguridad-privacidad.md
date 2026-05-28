@@ -55,6 +55,7 @@ Antes de guardar datos medicos, se recomienda:
 - Permitir solicitar eliminacion o correccion.
 - Limitar acceso a admin y coach autorizado.
 - Separar datos medicos en tabla propia.
+- Registrar solo informacion necesaria para entrenar de forma segura.
 
 ## Buenas practicas de acceso
 

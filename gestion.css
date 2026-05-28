@@ -245,6 +245,21 @@ body {
   appearance: none;
 }
 
+.check-field {
+  align-items: flex-start;
+  color: var(--pb-muted);
+  display: flex;
+  font-weight: 700;
+  gap: 0.65rem;
+  line-height: 1.45;
+  margin: 0 0 1rem;
+}
+
+.check-field input {
+  accent-color: var(--pb-cyan);
+  margin-top: 0.2rem;
+}
+
 .status {
   color: var(--pb-muted);
   display: block;
@@ -507,6 +522,39 @@ body {
 
 .mini-list-item small {
   color: var(--pb-muted);
+}
+
+.warning-card {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 1.1rem;
+  color: #7c2d12;
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.warning-card strong {
+  display: block;
+  font-weight: 900;
+  margin-bottom: 0.35rem;
+}
+
+.warning-card p {
+  margin: 0 0 0.6rem;
+}
+
+.warning-card span {
+  background: rgba(124, 45, 18, 0.1);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 900;
+  padding: 0.3rem 0.7rem;
+}
+
+.warning-card span.is-ok {
+  background: rgba(0, 230, 230, 0.18);
+  color: #006c73;
 }
 
 .check-list {

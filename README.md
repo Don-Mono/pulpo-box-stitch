@@ -48,6 +48,7 @@ La rama de gestion incorpora una entrada privada inicial:
 - `/workouts.html`: primera base del modulo rutinas.
 - `/results.html`: primera base del modulo resultados.
 - `/progress.html`: primera base del modulo progreso.
+- `/medical.html`: primera base del modulo de datos medicos sensibles.
 - `/admin.html`: panel clasico de contenido, se mantiene compatible.
 
 Por ahora el rol activo es `admin` usando las credenciales actuales. Los roles `coach` y `student` quedan preparados para activarse en las siguientes etapas.

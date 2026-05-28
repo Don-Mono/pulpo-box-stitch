@@ -157,11 +157,19 @@ Primera implementacion:
 
 ### Etapa 6 - Datos medicos
 
+Estado: modulo inicial de datos medicos en desarrollo.
+
 - Lesiones.
 - Restricciones.
 - Medicamentos relevantes si el alumno acepta informarlo.
 - Contacto de emergencia.
 - Consentimiento de tratamiento de datos sensibles.
+
+Primera implementacion:
+
+- `/medical.html`: pantalla privada solo para admin.
+- `/api/admin/medical`: API para listar y crear notas sensibles.
+- Requiere confirmacion explicita de consentimiento antes de guardar.
 
 ### Etapa 7 - Mejoras futuras
 
