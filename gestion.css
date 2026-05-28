@@ -335,6 +335,40 @@ body {
   margin-top: 1.25rem;
 }
 
+.exercise-library-box {
+  background:
+    radial-gradient(circle at 95% 0%, rgba(0, 230, 230, 0.18), transparent 12rem),
+    #f7fbfd;
+  border: 1px solid var(--pb-line);
+  border-radius: 1.1rem;
+  margin: 0 0 1rem;
+  padding: 1rem;
+}
+
+.exercise-library-box h3 {
+  color: var(--pb-dark);
+  font-family: Teko, Impact, sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+}
+
+.exercise-library-box p {
+  margin: 0 0 1rem;
+}
+
+.library-hint {
+  background: rgba(0, 230, 230, 0.1);
+  border-radius: 0.8rem;
+  color: #036b73 !important;
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.45;
+  padding: 0.75rem 0.85rem;
+}
+
 .form-grid-two {
   display: grid;
   gap: 1rem;

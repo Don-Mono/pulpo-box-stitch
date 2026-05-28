@@ -46,6 +46,7 @@ La rama de gestion incorpora una entrada privada inicial:
 - `/students.html`: primera base del modulo alumnos.
 - `/coaches-admin.html`: primera base del modulo coaches.
 - `/workouts.html`: primera base del modulo rutinas.
+- `/api/admin/exercises`: biblioteca base de ejercicios para el creador de rutinas.
 - `/results.html`: primera base del modulo resultados.
 - `/progress.html`: primera base del modulo progreso.
 - `/medical.html`: primera base del modulo de datos medicos sensibles.
@@ -55,3 +56,5 @@ La rama de gestion incorpora una entrada privada inicial:
 
 El login acepta el admin actual por variables de entorno y tambien usuarios creados en Supabase Auth con perfil en `pb_profiles`.
 Las vistas especificas de coach y alumno quedan preparadas, pero los modulos operativos siguen protegidos para admin hasta crear permisos dedicados.
+
+La biblioteca inicial de ejercicios se genero desde `Glosario.xlsx` y queda versionada en `data/exercise-library.js`. Incluye las secciones Ejercicios, Progresiones, Movilidad y Core; los videos quedan como dato opcional para completar despues.

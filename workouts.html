@@ -69,10 +69,34 @@
                 <label for="summary">Resumen</label>
                 <input id="summary" name="summary" placeholder="Objetivo de la rutina y foco principal" />
               </div>
+              <div class="exercise-library-box">
+                <div>
+                  <h3>Biblioteca de ejercicios</h3>
+                  <p>Glosario base cargado en 4 secciones. Los videos quedan pendientes y se pueden agregar despues.</p>
+                </div>
+                <div class="form-grid-two">
+                  <div class="field">
+                    <label for="library_section">Seccion</label>
+                    <select id="library_section">
+                      <option value="">Cargando biblioteca...</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="library_exercise">Ejercicio</label>
+                    <select id="library_exercise">
+                      <option value="">Selecciona una seccion</option>
+                    </select>
+                  </div>
+                </div>
+                <p class="library-hint" id="libraryHint">Puedes usar el selector o escribir el ejercicio manualmente.</p>
+              </div>
               <div class="field">
                 <label for="exercise_name">Ejercicio principal</label>
                 <input id="exercise_name" name="exercise_name" placeholder="Ej: Back squat" />
               </div>
+              <input id="exercise_id" name="exercise_id" type="hidden" />
+              <input id="exercise_description" name="exercise_description" type="hidden" />
+              <input id="movement_type" name="movement_type" type="hidden" />
               <div class="form-grid-two">
                 <div class="field">
                   <label for="sets">Series</label>
@@ -105,7 +129,8 @@
             <p id="setupMessage">Cargando estado...</p>
             <ul class="check-list">
               <li>Rutinas protegidas por admin.</li>
-              <li>Ejercicio base con descripcion y video.</li>
+              <li>Biblioteca base con 4 secciones del glosario.</li>
+              <li>Ejercicio base con descripcion y video opcional.</li>
               <li>Asignacion inicial a alumno disponible.</li>
             </ul>
           </article>

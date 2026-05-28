@@ -18,6 +18,10 @@ function cleanNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 function isMissingManagementSchema(error) {
   if (!error) return false;
   const message = `${error.message || ""} ${error.details || ""} ${error.hint || ""}`.toLowerCase();
@@ -156,12 +160,40 @@ async function listWorkouts(supabase) {
   };
 }
 
+async function findOrCreateExercise(supabase, exerciseInput) {
+  if (exerciseInput.exerciseId) return exerciseInput.exerciseId;
+
+  const { data: matches, error: findError } = await supabase
+    .from("pb_exercises")
+    .select("id")
+    .eq("name", exerciseInput.name)
+    .limit(1);
+
+  if (findError) throw findError;
+  if (matches?.[0]?.id) return matches[0].id;
+
+  const { data: exercise, error: exerciseError } = await supabase
+    .from("pb_exercises")
+    .insert({
+      name: exerciseInput.name,
+      description: exerciseInput.description,
+      movement_type: exerciseInput.movementType,
+      video_url: exerciseInput.videoUrl,
+    })
+    .select("id")
+    .single();
+
+  if (exerciseError) throw exerciseError;
+  return exercise?.id || null;
+}
+
 async function createWorkout(supabase, body) {
   const title = clean(body.title, 140);
   const summary = clean(body.summary, 500);
   const workoutDate = cleanDate(body.workout_date);
   const level = clean(body.level, 80);
   const notes = clean(body.notes, 800);
+  const exerciseId = clean(body.exercise_id, 90);
   const exerciseName = clean(body.exercise_name, 140);
   const exerciseDescription = clean(body.exercise_description, 500);
   const movementType = clean(body.movement_type, 80);
@@ -199,23 +231,18 @@ async function createWorkout(supabase, body) {
     throw error;
   }
 
-  if (exerciseName) {
-    const { data: exercise, error: exerciseError } = await supabase
-      .from("pb_exercises")
-      .insert({
-        name: exerciseName,
-        description: exerciseDescription,
-        movement_type: movementType,
-        video_url: videoUrl,
-      })
-      .select("id")
-      .single();
-
-    if (exerciseError) throw exerciseError;
+  if (exerciseName || isUuid(exerciseId)) {
+    const resolvedExerciseId = await findOrCreateExercise(supabase, {
+      exerciseId: isUuid(exerciseId) ? exerciseId : "",
+      name: exerciseName,
+      description: exerciseDescription,
+      movementType,
+      videoUrl,
+    });
 
     const { error: workoutExerciseError } = await supabase.from("pb_workout_exercises").insert({
       workout_id: workoutId,
-      exercise_id: exercise?.id || null,
+      exercise_id: resolvedExerciseId,
       position: 1,
       prescription,
       sets,
