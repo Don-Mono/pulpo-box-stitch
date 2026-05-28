@@ -88,12 +88,20 @@ Primera implementacion:
 
 ### Etapa 2 - Alumnos y coaches
 
+Estado: modulo inicial de alumnos en desarrollo.
+
 - Crear alumnos.
 - Editar alumnos.
 - Desactivar alumnos sin borrar historial.
 - Crear coaches.
 - Asignar coach principal a cada alumno.
 - Ver ficha del alumno.
+
+Primera implementacion de alumnos:
+
+- `/students.html`: pantalla privada para admin.
+- `/api/admin/students`: API para listar, crear y activar/desactivar alumnos.
+- La pantalla avisa si falta ejecutar el esquema de Supabase.
 
 ### Etapa 3 - Rutinas
 

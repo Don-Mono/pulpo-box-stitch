@@ -13,6 +13,7 @@ Los datos medicos o restricciones fisicas son datos sensibles y requieren mayor 
 - Usar variables de entorno en Vercel.
 - Mantener el repositorio privado.
 - Usar roles claros: admin, coach, alumno.
+- Guardar roles de acceso en datos controlados por el sistema, no en campos editables por alumnos.
 - Activar Row Level Security en Supabase.
 - Registrar consentimiento antes de guardar datos medicos.
 - Evitar borrar alumnos con historial; mejor desactivar.
@@ -73,4 +74,3 @@ flowchart TD
 - Exportar esquema SQL antes de cambios grandes.
 - No ejecutar migraciones directamente en produccion sin probar.
 - Mantener preview de Vercel para pruebas.
-

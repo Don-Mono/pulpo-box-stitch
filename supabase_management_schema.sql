@@ -167,3 +167,17 @@ create index if not exists pb_performance_logs_student_idx on public.pb_performa
 create index if not exists pb_body_measurements_student_idx on public.pb_body_measurements(student_id, measured_at desc);
 create index if not exists pb_medical_notes_student_idx on public.pb_medical_notes(student_id, created_at desc);
 
+-- El panel privado usa SUPABASE_SECRET_KEY desde Vercel, por eso solo el rol
+-- service_role necesita operar estas tablas en esta primera etapa.
+grant usage on schema public to service_role;
+grant all on table public.pb_locations to service_role;
+grant all on table public.pb_profiles to service_role;
+grant all on table public.pb_coaches to service_role;
+grant all on table public.pb_students to service_role;
+grant all on table public.pb_exercises to service_role;
+grant all on table public.pb_workouts to service_role;
+grant all on table public.pb_workout_exercises to service_role;
+grant all on table public.pb_workout_assignments to service_role;
+grant all on table public.pb_performance_logs to service_role;
+grant all on table public.pb_body_measurements to service_role;
+grant all on table public.pb_medical_notes to service_role;
