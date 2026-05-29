@@ -21,11 +21,15 @@
     title.textContent = `Panel ${label}`;
     intro.textContent = role === "admin"
       ? "Tienes acceso al admin actual y a la base de los nuevos modulos de gestion."
-      : "Tu acceso ya existe. Las vistas especificas para coach y alumno se activaran con permisos dedicados.";
+      : role === "coach"
+        ? "Tu sesion de coach ya puede revisar alumnos, dejar feedback tecnico y crear rutinas para tus asignados."
+        : "Tu panel de alumno ya existe para ver rutinas y registrar marcas personales.";
     userEmail.textContent = user.email || "";
     systemStatus.textContent = role === "admin"
       ? "Base privada activa. Los modulos de alumnos, coaches, rutinas, resultados y progreso ya tienen esqueleto inicial."
-      : "Sesion validada. Falta conectar las pantallas dedicadas a tu rol antes de usar datos reales.";
+      : role === "coach"
+        ? "Sesion validada. Ya tienes panel propio, feedback sobre resultados y un modulo dedicado para crear rutinas."
+        : "Sesion validada. El panel alumno ya registra marcas sobre ejercicios de sus rutinas asignadas.";
 
     modules.forEach((module) => {
       const allowedRoles = String(module.dataset.moduleRole || "").split(" ");

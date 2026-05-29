@@ -129,6 +129,8 @@ Primera implementacion:
 - Permite asignacion inicial a un alumno si ya existe en la base.
 - El creador de rutinas puede seleccionar ejercicios desde el glosario o escribir uno manualmente.
 - El creador de rutinas ya permite agregar varios ejercicios ordenados en una misma rutina.
+- `/coach-workouts.html`: pantalla privada para que el coach cree rutinas y las asigne solo a sus alumnos activos.
+- `/api/coach/workouts`: API protegida por rol coach para listar rutinas relacionadas, cargar biblioteca y crear nuevas rutinas.
 
 ### Etapa 4 - Registro de resultados
 
