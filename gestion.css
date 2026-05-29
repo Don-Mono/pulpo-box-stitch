@@ -369,6 +369,51 @@ body {
   padding: 0.75rem 0.85rem;
 }
 
+.full-button {
+  width: 100%;
+}
+
+.routine-builder-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.routine-builder-item {
+  align-items: center;
+  background: #f8fbfd;
+  border: 1px solid var(--pb-line);
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 0.85rem;
+}
+
+.routine-builder-index {
+  align-items: center;
+  background: var(--pb-dark);
+  border-radius: 999px;
+  color: white;
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 900;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+.routine-builder-item strong {
+  display: block;
+}
+
+.routine-builder-item small {
+  color: var(--pb-muted);
+  display: block;
+  line-height: 1.45;
+  margin-top: 0.25rem;
+}
+
 .form-grid-two {
   display: grid;
   gap: 1rem;

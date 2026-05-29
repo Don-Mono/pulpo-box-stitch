@@ -59,7 +59,14 @@
       const workout = assignment.workout || {};
       const exercises = assignment.exercises || [];
       const exerciseSummary = exercises.length
-        ? exercises.map((exercise) => `<li>${escapeHtml(exercise.prescription || "Ejercicio asignado")}</li>`).join("")
+        ? exercises.map((exercise) => {
+          const details = [
+            exercise.sets ? `${exercise.sets} series` : "",
+            exercise.reps || "",
+            exercise.prescription || "",
+          ].filter(Boolean).join(" / ");
+          return `<li><strong>${escapeHtml(exercise.exercise_name || "Ejercicio")}</strong>${details ? `: ${escapeHtml(details)}` : ""}</li>`;
+        }).join("")
         : "<li>Revisa las indicaciones con tu coach.</li>";
 
       return `

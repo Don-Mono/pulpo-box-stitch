@@ -72,23 +72,29 @@ async function loadStudentOverview(supabase, studentId) {
     ...(assignments || []).map((assignment) => assignment.workout_id),
     ...(results || []).map((result) => result.workout_id),
   ].filter(Boolean))];
-  const exerciseIds = [...new Set((results || []).map((result) => result.exercise_id).filter(Boolean))];
 
   const [
     { data: workouts, error: workoutsError },
-    { data: exercises, error: exercisesError },
     { data: workoutExercises, error: workoutExercisesError },
   ] = await Promise.all([
     workoutIds.length ? supabase.from("pb_workouts").select("id, title, summary, workout_date, level").in("id", workoutIds) : Promise.resolve({ data: [], error: null }),
-    exerciseIds.length ? supabase.from("pb_exercises").select("id, name").in("id", exerciseIds) : Promise.resolve({ data: [], error: null }),
     workoutIds.length
       ? supabase.from("pb_workout_exercises").select("workout_id, prescription, sets, reps, exercise_id").in("workout_id", workoutIds).order("position", { ascending: true })
       : Promise.resolve({ data: [], error: null }),
   ]);
 
   if (workoutsError) throw workoutsError;
-  if (exercisesError) throw exercisesError;
   if (workoutExercisesError) throw workoutExercisesError;
+
+  const exerciseIds = [...new Set([
+    ...(results || []).map((result) => result.exercise_id),
+    ...(workoutExercises || []).map((exercise) => exercise.exercise_id),
+  ].filter(Boolean))];
+  const { data: exercises, error: exercisesError } = exerciseIds.length
+    ? await supabase.from("pb_exercises").select("id, name").in("id", exerciseIds)
+    : { data: [], error: null };
+
+  if (exercisesError) throw exercisesError;
 
   const workoutMap = new Map((workouts || []).map((workout) => [workout.id, workout]));
   const exerciseMap = new Map((exercises || []).map((exercise) => [exercise.id, exercise]));
@@ -96,7 +102,10 @@ async function loadStudentOverview(supabase, studentId) {
 
   (workoutExercises || []).forEach((item) => {
     const list = workoutExerciseMap.get(item.workout_id) || [];
-    list.push(item);
+    list.push({
+      ...item,
+      exercise_name: exerciseMap.get(item.exercise_id)?.name || "",
+    });
     workoutExerciseMap.set(item.workout_id, list);
   });
 

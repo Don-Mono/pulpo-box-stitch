@@ -15,10 +15,17 @@
   const exerciseDescriptionInput = document.querySelector("#exercise_description");
   const movementTypeInput = document.querySelector("#movement_type");
   const videoUrlInput = document.querySelector("#video_url");
+  const exercisesJsonInput = document.querySelector("#exercises_json");
+  const addExerciseButton = document.querySelector("#addExerciseButton");
+  const selectedExercisesList = document.querySelector("#selectedExercisesList");
+  const setsInput = document.querySelector("#sets");
+  const repsInput = document.querySelector("#reps");
+  const prescriptionInput = document.querySelector("#prescription");
 
   let setupRequired = false;
   let exerciseLibrary = [];
   let exerciseByKey = new Map();
+  let selectedExercises = [];
 
   function setStatus(element, message, type = "") {
     element.textContent = message;
@@ -114,6 +121,81 @@
     movementTypeInput.value = "";
   }
 
+  function getExerciseDraft() {
+    return {
+      exercise_id: exerciseIdInput.value,
+      exercise_name: exerciseNameInput.value.trim(),
+      exercise_description: exerciseDescriptionInput.value,
+      movement_type: movementTypeInput.value,
+      video_url: videoUrlInput.value.trim(),
+      prescription: prescriptionInput.value.trim(),
+      sets: setsInput.value.trim(),
+      reps: repsInput.value.trim(),
+    };
+  }
+
+  function resetExerciseDraft() {
+    exerciseIdInput.value = "";
+    exerciseNameInput.value = "";
+    exerciseDescriptionInput.value = "";
+    movementTypeInput.value = "";
+    videoUrlInput.value = "";
+    setsInput.value = "";
+    repsInput.value = "";
+    prescriptionInput.value = "";
+    libraryExerciseSelect.value = "";
+  }
+
+  function syncExercisesJson() {
+    exercisesJsonInput.value = selectedExercises.length ? JSON.stringify(selectedExercises) : "";
+  }
+
+  function renderSelectedExercises() {
+    syncExercisesJson();
+
+    if (!selectedExercises.length) {
+      selectedExercisesList.innerHTML = '<p class="muted">Aun no agregas ejercicios. Si escribes uno y creas la rutina, se guardara como ejercicio unico.</p>';
+      return;
+    }
+
+    selectedExercisesList.innerHTML = selectedExercises.map((exercise, index) => {
+      const details = [
+        exercise.sets ? `${exercise.sets} series` : "",
+        exercise.reps || "",
+        exercise.prescription || "",
+      ].filter(Boolean).join(" / ") || "Sin indicacion detallada";
+
+      return `
+        <article class="routine-builder-item">
+          <span class="routine-builder-index">${index + 1}</span>
+          <div>
+            <strong>${escapeHtml(exercise.exercise_name)}</strong>
+            <small>${escapeHtml(details)}</small>
+          </div>
+          <button class="button ghost compact-button" data-remove-exercise="${index}" type="button">Eliminar</button>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function addExerciseToRoutine() {
+    const draft = getExerciseDraft();
+    if (!draft.exercise_name && !draft.exercise_id) {
+      setStatus(workoutStatus, "Selecciona o escribe un ejercicio antes de agregarlo.", "error");
+      return;
+    }
+
+    selectedExercises.push(draft);
+    resetExerciseDraft();
+    renderSelectedExercises();
+    setStatus(workoutStatus, "Ejercicio agregado a la rutina.", "ok");
+  }
+
+  function removeExerciseFromRoutine(index) {
+    selectedExercises = selectedExercises.filter((_, itemIndex) => itemIndex !== index);
+    renderSelectedExercises();
+  }
+
   async function loadExerciseLibrary() {
     try {
       const response = await fetch("/api/admin/exercises");
@@ -147,7 +229,14 @@
       const exercises = workout.exercises || [];
       const assignments = workout.assignments || [];
       const exerciseSummary = exercises.length
-        ? exercises.map((exercise) => `<li><strong>${escapeHtml(exercise.name)}</strong>${exercise.prescription ? `: ${escapeHtml(exercise.prescription)}` : ""}</li>`).join("")
+        ? exercises.map((exercise) => {
+          const details = [
+            exercise.sets ? `${exercise.sets} series` : "",
+            exercise.reps || "",
+            exercise.prescription || "",
+          ].filter(Boolean).join(" / ");
+          return `<li><strong>${escapeHtml(exercise.name)}</strong>${details ? `: ${escapeHtml(details)}` : ""}</li>`;
+        }).join("")
         : "<li>Sin ejercicios cargados.</li>";
       const assignedSummary = assignments.length
         ? assignments.map((assignment) => escapeHtml(assignment.student_name)).join(", ")
@@ -214,8 +303,10 @@
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo crear la rutina.");
       workoutForm.reset();
+      selectedExercises = [];
       clearSelectedExerciseId();
       renderExerciseOptions(librarySectionSelect.value);
+      renderSelectedExercises();
       setStatus(workoutStatus, payload.message, "ok");
       await loadWorkouts();
     } catch (error) {
@@ -224,6 +315,12 @@
   }
 
   workoutForm.addEventListener("submit", createWorkout);
+  addExerciseButton.addEventListener("click", addExerciseToRoutine);
+  selectedExercisesList.addEventListener("click", (event) => {
+    const removeButton = event.target.closest("[data-remove-exercise]");
+    if (!removeButton) return;
+    removeExerciseFromRoutine(Number(removeButton.dataset.removeExercise));
+  });
   librarySectionSelect.addEventListener("change", () => renderExerciseOptions(librarySectionSelect.value));
   libraryExerciseSelect.addEventListener("change", applyExerciseSelection);
   exerciseNameInput.addEventListener("input", clearSelectedExerciseId);

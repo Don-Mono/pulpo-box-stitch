@@ -41,7 +41,7 @@
         <section class="dashboard-row student-layout">
           <article class="panel-card">
             <h2>Nueva rutina</h2>
-            <p>Parte con una rutina simple; luego podremos agregar multiples ejercicios y plantillas semanales.</p>
+            <p>Arma una rutina completa agregando uno o varios ejercicios desde el glosario.</p>
             <form class="student-form" id="workoutForm">
               <div class="form-grid-two">
                 <div class="field">
@@ -71,8 +71,8 @@
               </div>
               <div class="exercise-library-box">
                 <div>
-                  <h3>Biblioteca de ejercicios</h3>
-                  <p>Glosario base cargado en 4 secciones. Los videos quedan pendientes y se pueden agregar despues.</p>
+                  <h3>Agregar ejercicio</h3>
+                  <p>Selecciona desde el glosario o escribe uno manualmente. Los videos quedan como dato opcional.</p>
                 </div>
                 <div class="form-grid-two">
                   <div class="field">
@@ -91,12 +91,13 @@
                 <p class="library-hint" id="libraryHint">Puedes usar el selector o escribir el ejercicio manualmente.</p>
               </div>
               <div class="field">
-                <label for="exercise_name">Ejercicio principal</label>
+                <label for="exercise_name">Nombre del ejercicio</label>
                 <input id="exercise_name" name="exercise_name" placeholder="Ej: Back squat" />
               </div>
               <input id="exercise_id" name="exercise_id" type="hidden" />
               <input id="exercise_description" name="exercise_description" type="hidden" />
               <input id="movement_type" name="movement_type" type="hidden" />
+              <input id="exercises_json" name="exercises_json" type="hidden" />
               <div class="form-grid-two">
                 <div class="field">
                   <label for="sets">Series</label>
@@ -114,6 +115,10 @@
               <div class="field">
                 <label for="video_url">Video URL</label>
                 <input id="video_url" name="video_url" placeholder="https://..." />
+              </div>
+              <button class="button ghost full-button" id="addExerciseButton" type="button">Agregar ejercicio a la rutina</button>
+              <div class="routine-builder-list" id="selectedExercisesList">
+                <p class="muted">Aun no agregas ejercicios. Si escribes uno y creas la rutina, se guardara como ejercicio unico.</p>
               </div>
               <div class="field">
                 <label for="notes">Notas internas</label>
