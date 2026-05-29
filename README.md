@@ -47,6 +47,7 @@ La rama de gestion incorpora una entrada privada inicial:
 - `/coaches-admin.html`: primera base del modulo coaches.
 - `/workouts.html`: primera base del modulo rutinas.
 - `/api/admin/exercises`: biblioteca base de ejercicios para el creador de rutinas.
+- `/exercises.html`: administracion basica de ejercicios personalizados.
 - `/results.html`: primera base del modulo resultados.
 - `/progress.html`: primera base del modulo progreso.
 - `/medical.html`: primera base del modulo de datos medicos sensibles.
@@ -59,3 +60,4 @@ Las vistas especificas de coach y alumno quedan preparadas, pero los modulos ope
 
 La biblioteca inicial de ejercicios se genero desde `Glosario.xlsx` y queda versionada en `data/exercise-library.js`. Incluye las secciones Ejercicios, Progresiones, Movilidad y Core; los videos quedan como dato opcional para completar despues.
 El creador de rutinas puede guardar varios ejercicios por rutina, manteniendo compatibilidad con rutinas simples de un solo ejercicio.
+Los ejercicios personalizados se pueden agregar y desactivar desde `/exercises.html` sin borrar el historial de rutinas.

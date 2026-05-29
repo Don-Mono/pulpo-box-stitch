@@ -125,6 +125,7 @@ Primera implementacion:
 - `/api/admin/workouts`: API para listar y crear rutinas con ejercicio base.
 - `/api/admin/exercises`: API para exponer la biblioteca base de ejercicios.
 - `data/exercise-library.js`: biblioteca generada desde `Glosario.xlsx` con 342 ejercicios en 4 secciones: Ejercicios, Progresiones, Movilidad y Core.
+- `/exercises.html`: pantalla privada para agregar y desactivar ejercicios personalizados.
 - Permite asignacion inicial a un alumno si ya existe en la base.
 - El creador de rutinas puede seleccionar ejercicios desde el glosario o escribir uno manualmente.
 - El creador de rutinas ya permite agregar varios ejercicios ordenados en una misma rutina.
