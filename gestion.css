@@ -432,6 +432,19 @@ body {
   min-width: min(100%, 20rem);
 }
 
+.filter-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(16rem, 1.1fr);
+  margin-bottom: 1rem;
+}
+
+.filter-helper {
+  align-self: end;
+  margin: 0;
+  min-height: 100%;
+}
+
 .students-table-card {
   margin-top: 1rem;
 }
@@ -701,7 +714,8 @@ body {
   }
 
   .form-grid-two,
-  .table-header {
+  .table-header,
+  .filter-grid {
     display: block;
   }
 

@@ -1,7 +1,10 @@
 const { getSupabase, json, requireRole } = require("../_shared");
 
 const OPTION_LIMIT = 200;
-const HISTORY_LIMIT = 20;
+const ASSIGNMENT_HISTORY_LIMIT = 20;
+const MEASUREMENT_HISTORY_LIMIT = 24;
+const RESULT_HISTORY_LIMIT = 60;
+const MEDICAL_HISTORY_LIMIT = 20;
 
 function clean(value, maxLength = 220) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -116,26 +119,26 @@ async function loadStudentDetail(supabase, coachId, studentId) {
       .select("id, workout_id, status, assigned_at")
       .eq("student_id", selectedStudentId)
       .order("assigned_at", { ascending: false })
-      .limit(HISTORY_LIMIT),
+      .limit(ASSIGNMENT_HISTORY_LIMIT),
     supabase
       .from("pb_body_measurements")
       .select("id, measured_at, body_weight_kg, height_cm, waist_cm, chest_cm, hip_cm, notes")
       .eq("student_id", selectedStudentId)
       .order("measured_at", { ascending: false })
-      .limit(HISTORY_LIMIT),
+      .limit(MEASUREMENT_HISTORY_LIMIT),
     supabase
       .from("pb_performance_logs")
       .select("id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes")
       .eq("student_id", selectedStudentId)
       .order("logged_at", { ascending: false })
-      .limit(HISTORY_LIMIT),
+      .limit(RESULT_HISTORY_LIMIT),
     supabase
       .from("pb_medical_notes")
       .select("id, note_type, description, created_at")
       .eq("student_id", selectedStudentId)
       .eq("visible_to_coach", true)
       .order("created_at", { ascending: false })
-      .limit(HISTORY_LIMIT),
+      .limit(MEDICAL_HISTORY_LIMIT),
   ]);
 
   if (studentProfileError) throw studentProfileError;

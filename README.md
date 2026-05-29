@@ -65,3 +65,4 @@ El portal alumno ya puede registrar marcas vinculadas a ejercicios concretos de 
 El portal coach ya puede revisar resultados de sus alumnos asignados y guardar feedback tecnico sobre cada marca.
 El coach ya cuenta con un modulo propio de rutinas para crear trabajo y asignarlo solo a sus alumnos activos.
 El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, mediciones, marcas y notas medicas visibles para seguimiento.
+La ficha del coach ya permite filtrar historial por rutina y ejercicio, con indicadores rapidos para leer tendencias sin salir de la vista.

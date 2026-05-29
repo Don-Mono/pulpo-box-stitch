@@ -109,6 +109,7 @@ Primera implementacion de alumnos:
 - `/api/coach/overview`: API protegida por rol coach.
 - `/coach-student.html`: ficha detallada para seguimiento individual desde coach.
 - `/api/coach/student-detail`: API protegida por rol coach para ver rutinas, mediciones, marcas y notas visibles de sus alumnos asignados.
+- La ficha del coach ya filtra el historial por rutina y ejercicio, y entrega lectura rapida de tendencia sobre el filtro activo.
 - La pantalla avisa si falta ejecutar el esquema de Supabase.
 
 ### Etapa 3 - Rutinas

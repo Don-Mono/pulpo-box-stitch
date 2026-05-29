@@ -57,7 +57,7 @@
               <strong>--</strong>
             </article>
             <article class="metric-card">
-              <span>Estatura</span>
+              <span>Cambio peso</span>
               <strong>--</strong>
             </article>
             <article class="metric-card">
@@ -65,7 +65,15 @@
               <strong>--</strong>
             </article>
             <article class="metric-card">
+              <span>Cambio cintura</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
               <span>Marcas</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Mediciones</span>
               <strong>--</strong>
             </article>
           </div>
@@ -141,6 +149,43 @@
                 <p class="muted">Resultados recientes del alumno seleccionado.</p>
               </div>
               <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+            </div>
+            <div class="filter-grid">
+              <div class="field inline-field">
+                <label for="workoutFilter">Rutina</label>
+                <select id="workoutFilter">
+                  <option value="">Todas las rutinas</option>
+                </select>
+              </div>
+              <div class="field inline-field">
+                <label for="exerciseFilter">Ejercicio</label>
+                <select id="exerciseFilter">
+                  <option value="">Todos los ejercicios</option>
+                </select>
+              </div>
+              <article class="mini-list-item filter-helper">
+                <strong>Lectura rapida</strong>
+                <span id="resultsFilterHint">Filtra por rutina o ejercicio para revisar una tendencia puntual.</span>
+                <small>Los indicadores de abajo cambian segun el filtro activo.</small>
+              </article>
+            </div>
+            <div class="metric-grid compact-metrics" id="resultsSummaryGrid">
+              <article class="metric-card">
+                <span>Registros</span>
+                <strong>--</strong>
+              </article>
+              <article class="metric-card">
+                <span>Ultimo registro</span>
+                <strong>--</strong>
+              </article>
+              <article class="metric-card">
+                <span>Mejor carga</span>
+                <strong>--</strong>
+              </article>
+              <article class="metric-card">
+                <span>Mayor reps</span>
+                <strong>--</strong>
+              </article>
             </div>
             <div class="table-shell">
               <table class="data-table">
