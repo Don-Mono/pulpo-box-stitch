@@ -46,13 +46,33 @@
           </article>
 
           <article class="panel-card">
-            <h2>Estado del coach</h2>
-            <p>Esta primera vista permite revisar alumnos y ultimas marcas. La creacion de rutinas por coach queda para la siguiente iteracion de permisos.</p>
-            <ul class="check-list">
-              <li>Solo muestra alumnos asignados a este coach.</li>
-              <li>No muestra datos medicos por defecto.</li>
-              <li>Usa el identificador de sesion del coach.</li>
-            </ul>
+            <h2>Feedback tecnico</h2>
+            <p>Selecciona una marca reciente y deja correcciones o seguimiento para ese alumno.</p>
+            <form class="student-form" id="feedbackForm">
+              <div class="field">
+                <label for="feedback_student_id">Alumno</label>
+                <select id="feedback_student_id" name="feedback_student_id">
+                  <option value="">Todos mis alumnos</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="feedback_result_id">Resultado</label>
+                <select id="feedback_result_id" name="feedback_result_id">
+                  <option value="">Selecciona un resultado</option>
+                </select>
+              </div>
+              <div class="mini-list-item" id="resultContext">
+                <strong>Selecciona un resultado</strong>
+                <span>Aqui veras la marca, la fecha y las notas del alumno antes de guardar tu feedback.</span>
+                <small>El coach solo puede intervenir resultados de sus alumnos asignados.</small>
+              </div>
+              <div class="field">
+                <label for="coach_feedback">Feedback coach</label>
+                <textarea id="coach_feedback" name="coach_feedback" placeholder="Correccion tecnica, sensacion observada o siguiente foco de trabajo"></textarea>
+              </div>
+              <span class="status" id="feedbackStatus"></span>
+              <button class="button accent" id="saveFeedbackButton" type="submit">Guardar feedback</button>
+            </form>
           </article>
         </section>
 
@@ -71,12 +91,13 @@
                   <th>Alumno</th>
                   <th>Rutina / Ejercicio</th>
                   <th>Marca</th>
+                  <th>Notas</th>
                   <th>Fecha</th>
                 </tr>
               </thead>
               <tbody id="resultsBody">
                 <tr>
-                  <td colspan="4">Cargando marcas...</td>
+                  <td colspan="5">Cargando marcas...</td>
                 </tr>
               </tbody>
             </table>

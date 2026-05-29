@@ -149,6 +149,7 @@ Primera implementacion:
 - `/api/student/overview`: API protegida por rol alumno.
 - Conecta alumno, rutina y ejercicio cuando esos datos existen.
 - El alumno registra resultados sobre ejercicios reales de sus rutinas asignadas.
+- El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
 
 ### Etapa 5 - Progreso
 

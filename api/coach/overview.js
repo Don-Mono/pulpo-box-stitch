@@ -57,7 +57,7 @@ async function loadCoachOverview(supabase, coachId) {
     supabase.from("pb_profiles").select("id, full_name, email, phone").in("id", studentIds),
     supabase
       .from("pb_performance_logs")
-      .select("id, student_id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text")
+      .select("id, student_id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes")
       .in("student_id", studentIds)
       .order("logged_at", { ascending: false })
       .limit(RESULT_LIMIT),
