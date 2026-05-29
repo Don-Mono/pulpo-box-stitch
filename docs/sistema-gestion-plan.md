@@ -107,6 +107,8 @@ Primera implementacion de alumnos:
 - `/api/admin/coaches`: API para listar, crear y activar/desactivar coaches.
 - `/coach.html`: primera vista privada de coach.
 - `/api/coach/overview`: API protegida por rol coach.
+- `/coach-student.html`: ficha detallada para seguimiento individual desde coach.
+- `/api/coach/student-detail`: API protegida por rol coach para ver rutinas, mediciones, marcas y notas visibles de sus alumnos asignados.
 - La pantalla avisa si falta ejecutar el esquema de Supabase.
 
 ### Etapa 3 - Rutinas

@@ -64,3 +64,4 @@ Los ejercicios personalizados se pueden agregar y desactivar desde `/exercises.h
 El portal alumno ya puede registrar marcas vinculadas a ejercicios concretos de sus rutinas asignadas.
 El portal coach ya puede revisar resultados de sus alumnos asignados y guardar feedback tecnico sobre cada marca.
 El coach ya cuenta con un modulo propio de rutinas para crear trabajo y asignarlo solo a sus alumnos activos.
+El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, mediciones, marcas y notas medicas visibles para seguimiento.

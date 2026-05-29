@@ -58,8 +58,8 @@
     }
 
     resultContext.innerHTML = `
-      <strong>${escapeHtml(result.student_name || "Alumno")} · ${escapeHtml(result.workout_title || "Sin rutina")}</strong>
-      <span>${escapeHtml(result.exercise_name || "Sin ejercicio")} · ${escapeHtml(formatMark(result))} · ${escapeHtml(formatDate(result.logged_at))}</span>
+      <strong>${escapeHtml(result.student_name || "Alumno")} - ${escapeHtml(result.workout_title || "Sin rutina")}</strong>
+      <span>${escapeHtml(result.exercise_name || "Sin ejercicio")} - ${escapeHtml(formatMark(result))} - ${escapeHtml(formatDate(result.logged_at))}</span>
       <small>${escapeHtml(result.student_notes || "El alumno no dejo notas en este resultado.")}</small>
     `;
     feedbackNotesInput.value = result.coach_notes || "";
@@ -87,7 +87,7 @@
           result.workout_title || "Sin rutina",
           result.exercise_name || "Sin ejercicio",
           formatDate(result.logged_at),
-        ].join(" · ");
+        ].join(" - ");
         return `<option value="${escapeHtml(result.id)}">${escapeHtml(label)}</option>`;
       }),
     ].join("");
@@ -111,10 +111,13 @@
     }
 
     studentsList.innerHTML = students.map((student) => `
-      <article class="mini-list-item">
-        <strong>${escapeHtml(student.full_name)}</strong>
-        <span>${escapeHtml(student.goal || "Objetivo pendiente")}</span>
-        <small>${escapeHtml([student.email, student.phone].filter(Boolean).join(" / ") || "Sin contacto")}</small>
+      <article class="mini-list-item action-list-item">
+        <div>
+          <strong>${escapeHtml(student.full_name)}</strong>
+          <span>${escapeHtml(student.goal || "Objetivo pendiente")}</span>
+          <small>${escapeHtml([student.email, student.phone].filter(Boolean).join(" / ") || "Sin contacto")}</small>
+        </div>
+        <a class="button ghost compact-button" href="/coach-student.html?id=${encodeURIComponent(student.profile_id || "")}">Ver ficha</a>
       </article>
     `).join("");
 
@@ -138,7 +141,7 @@
 
       return `
         <tr>
-          <td><strong>${escapeHtml(result.student_name)}</strong></td>
+          <td><a href="/coach-student.html?id=${encodeURIComponent(result.student_id || "")}"><strong>${escapeHtml(result.student_name)}</strong></a></td>
           <td>
             ${escapeHtml(result.workout_title || "Sin rutina")}
             <small>${escapeHtml(result.exercise_name || "Sin ejercicio")}</small>
