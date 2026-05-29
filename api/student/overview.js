@@ -1,6 +1,8 @@
 const { getSupabase, json, requireRole } = require("../_shared");
 
-const HISTORY_LIMIT = 20;
+const ASSIGNMENT_HISTORY_LIMIT = 20;
+const RESULT_HISTORY_LIMIT = 60;
+const MEASUREMENT_HISTORY_LIMIT = 24;
 
 function clean(value, maxLength = 220) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -30,6 +32,7 @@ function setupPayload() {
     assignments: [],
     results: [],
     measurements: [],
+    summary: null,
     setupRequired: true,
     message: "Tu panel de alumno aun no esta activo en Supabase.",
   };
@@ -38,32 +41,39 @@ function setupPayload() {
 async function loadStudentOverview(supabase, studentId) {
   const [
     { data: profile, error: profileError },
+    { data: studentDetails, error: studentDetailsError },
     { data: assignments, error: assignmentsError },
     { data: results, error: resultsError },
     { data: measurements, error: measurementsError },
   ] = await Promise.all([
     supabase.from("pb_profiles").select("id, full_name, email").eq("id", studentId).maybeSingle(),
     supabase
+      .from("pb_students")
+      .select("goal, height_cm, current_weight_kg")
+      .eq("profile_id", studentId)
+      .maybeSingle(),
+    supabase
       .from("pb_workout_assignments")
       .select("id, workout_id, status, assigned_at")
       .eq("student_id", studentId)
       .order("assigned_at", { ascending: false })
-      .limit(HISTORY_LIMIT),
+      .limit(ASSIGNMENT_HISTORY_LIMIT),
     supabase
       .from("pb_performance_logs")
-      .select("id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes")
+      .select("id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes")
       .eq("student_id", studentId)
       .order("logged_at", { ascending: false })
-      .limit(HISTORY_LIMIT),
+      .limit(RESULT_HISTORY_LIMIT),
     supabase
       .from("pb_body_measurements")
       .select("id, measured_at, body_weight_kg, height_cm, waist_cm")
       .eq("student_id", studentId)
       .order("measured_at", { ascending: false })
-      .limit(6),
+      .limit(MEASUREMENT_HISTORY_LIMIT),
   ]);
 
   if (profileError) throw profileError;
+  if (studentDetailsError) throw studentDetailsError;
   if (assignmentsError) throw assignmentsError;
   if (resultsError) throw resultsError;
   if (measurementsError) throw measurementsError;
@@ -99,6 +109,7 @@ async function loadStudentOverview(supabase, studentId) {
   const workoutMap = new Map((workouts || []).map((workout) => [workout.id, workout]));
   const exerciseMap = new Map((exercises || []).map((exercise) => [exercise.id, exercise]));
   const workoutExerciseMap = new Map();
+  const latestMeasurement = measurements?.[0] || null;
 
   (workoutExercises || []).forEach((item) => {
     const list = workoutExerciseMap.get(item.workout_id) || [];
@@ -111,6 +122,7 @@ async function loadStudentOverview(supabase, studentId) {
 
   return {
     profile,
+    studentDetails: studentDetails || null,
     assignments: (assignments || []).map((assignment) => ({
       ...assignment,
       workout: workoutMap.get(assignment.workout_id) || null,
@@ -122,6 +134,13 @@ async function loadStudentOverview(supabase, studentId) {
       exercise_name: exerciseMap.get(result.exercise_id)?.name || "",
     })),
     measurements: measurements || [],
+    summary: {
+      latest_weight_kg: latestMeasurement?.body_weight_kg || studentDetails?.current_weight_kg || null,
+      latest_height_cm: latestMeasurement?.height_cm || studentDetails?.height_cm || null,
+      latest_waist_cm: latestMeasurement?.waist_cm || null,
+      result_count: results?.length || 0,
+      measurement_count: measurements?.length || 0,
+    },
   };
 }
 

@@ -37,6 +37,41 @@
           </div>
         </section>
 
+        <section class="panel-card">
+          <div class="table-header">
+            <div>
+              <h2>Mi progreso</h2>
+              <p class="muted">Resumen rapido de tus mediciones y resultados mas recientes.</p>
+            </div>
+          </div>
+          <div class="metric-grid" id="summaryGrid">
+            <article class="metric-card">
+              <span>Peso actual</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Cambio peso</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Cintura</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Cambio cintura</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Marcas</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Mediciones</span>
+              <strong>--</strong>
+            </article>
+          </div>
+        </section>
+
         <section class="dashboard-row student-layout">
           <article class="panel-card">
             <h2>Rutinas asignadas</h2>
@@ -99,18 +134,56 @@
         <section class="dashboard-row student-layout">
           <article class="panel-card">
             <h2>Mis ultimas marcas</h2>
+            <div class="filter-grid">
+              <div class="field inline-field">
+                <label for="workoutHistoryFilter">Rutina</label>
+                <select id="workoutHistoryFilter">
+                  <option value="">Todas las rutinas</option>
+                </select>
+              </div>
+              <div class="field inline-field">
+                <label for="exerciseHistoryFilter">Ejercicio</label>
+                <select id="exerciseHistoryFilter">
+                  <option value="">Todos los ejercicios</option>
+                </select>
+              </div>
+              <article class="mini-list-item filter-helper">
+                <strong>Lectura rapida</strong>
+                <span id="resultsFilterHint">Filtra por rutina o ejercicio para revisar una tendencia puntual.</span>
+                <small>Los indicadores de abajo cambian segun el filtro activo.</small>
+              </article>
+            </div>
+            <div class="metric-grid compact-metrics" id="resultsSummaryGrid">
+              <article class="metric-card">
+                <span>Registros</span>
+                <strong>--</strong>
+              </article>
+              <article class="metric-card">
+                <span>Ultimo registro</span>
+                <strong>--</strong>
+              </article>
+              <article class="metric-card">
+                <span>Mejor carga</span>
+                <strong>--</strong>
+              </article>
+              <article class="metric-card">
+                <span>Mayor reps</span>
+                <strong>--</strong>
+              </article>
+            </div>
             <div class="table-shell">
               <table class="data-table compact-data-table">
                 <thead>
                   <tr>
-                    <th>Rutina</th>
+                    <th>Rutina / Ejercicio</th>
                     <th>Marca</th>
+                    <th>Notas</th>
                     <th>Fecha</th>
                   </tr>
                 </thead>
                 <tbody id="resultsBody">
                   <tr>
-                    <td colspan="3">Cargando marcas...</td>
+                    <td colspan="4">Cargando marcas...</td>
                   </tr>
                 </tbody>
               </table>
