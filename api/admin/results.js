@@ -13,6 +13,31 @@ function cleanNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+async function loadWorkoutExercises(supabase, workoutIds) {
+  if (!workoutIds.length) return [];
+
+  const { data: workoutExercises, error: workoutExercisesError } = await supabase
+    .from("pb_workout_exercises")
+    .select("workout_id, exercise_id, prescription, sets, reps, position")
+    .in("workout_id", workoutIds)
+    .order("position", { ascending: true });
+
+  if (workoutExercisesError) throw workoutExercisesError;
+
+  const exerciseIds = [...new Set((workoutExercises || []).map((exercise) => exercise.exercise_id).filter(Boolean))];
+  const { data: exercises, error: exercisesError } = exerciseIds.length
+    ? await supabase.from("pb_exercises").select("id, name").in("id", exerciseIds)
+    : { data: [], error: null };
+
+  if (exercisesError) throw exercisesError;
+
+  const exerciseMap = new Map((exercises || []).map((exercise) => [exercise.id, exercise]));
+  return (workoutExercises || []).map((exercise) => ({
+    ...exercise,
+    exercise_name: exerciseMap.get(exercise.exercise_id)?.name || "",
+  }));
+}
+
 function isMissingManagementSchema(error) {
   if (!error) return false;
   const message = `${error.message || ""} ${error.details || ""} ${error.hint || ""}`.toLowerCase();
@@ -31,7 +56,7 @@ function setupPayload() {
     results: [],
     students: [],
     workouts: [],
-    exercises: [],
+    workoutExercises: [],
     setupRequired: true,
     message: "Para activar resultados debes ejecutar primero supabase_management_schema.sql en Supabase.",
   };
@@ -59,17 +84,17 @@ async function listStudents(supabase) {
 }
 
 async function listSimpleOptions(supabase) {
-  const [{ data: workouts, error: workoutsError }, { data: exercises, error: exercisesError }] = await Promise.all([
-    supabase.from("pb_workouts").select("id, title").order("created_at", { ascending: false }).limit(OPTION_LIMIT),
-    supabase.from("pb_exercises").select("id, name").order("created_at", { ascending: false }).limit(OPTION_LIMIT),
-  ]);
-
+  const { data: workouts, error: workoutsError } = await supabase
+    .from("pb_workouts")
+    .select("id, title")
+    .order("created_at", { ascending: false })
+    .limit(OPTION_LIMIT);
   if (workoutsError) throw workoutsError;
-  if (exercisesError) throw exercisesError;
+  const workoutExercises = await loadWorkoutExercises(supabase, (workouts || []).map((workout) => workout.id));
 
   return {
     workouts: workouts || [],
-    exercises: exercises || [],
+    workoutExercises,
   };
 }
 
@@ -137,6 +162,45 @@ async function createResult(supabase, body) {
     const error = new Error("Debes seleccionar un alumno.");
     error.statusCode = 400;
     throw error;
+  }
+
+  if (exerciseId && !workoutId) {
+    const error = new Error("Si seleccionas un ejercicio, primero debes elegir la rutina.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (workoutId) {
+    const { data: assignment, error: assignmentError } = await supabase
+      .from("pb_workout_assignments")
+      .select("id")
+      .eq("student_id", studentId)
+      .eq("workout_id", workoutId)
+      .maybeSingle();
+
+    if (assignmentError) throw assignmentError;
+    if (!assignment?.id) {
+      const error = new Error("La rutina seleccionada no esta asignada al alumno.");
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
+  if (workoutId && exerciseId) {
+    const { data: workoutExercise, error: workoutExerciseError } = await supabase
+      .from("pb_workout_exercises")
+      .select("id")
+      .eq("workout_id", workoutId)
+      .eq("exercise_id", exerciseId)
+      .limit(1)
+      .maybeSingle();
+
+    if (workoutExerciseError) throw workoutExerciseError;
+    if (!workoutExercise?.id) {
+      const error = new Error("El ejercicio no pertenece a la rutina seleccionada.");
+      error.statusCode = 400;
+      throw error;
+    }
   }
 
   const { data, error } = await supabase

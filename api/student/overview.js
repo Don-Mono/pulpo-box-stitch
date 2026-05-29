@@ -135,6 +135,47 @@ async function createStudentResult(supabase, studentId, body) {
   const scoreText = clean(body.score_text, 160);
   const studentNotes = clean(body.student_notes, 500);
 
+  if (!workoutId) {
+    const error = new Error("Debes seleccionar una rutina.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!exerciseId) {
+    const error = new Error("Debes seleccionar un ejercicio.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { data: assignment, error: assignmentError } = await supabase
+    .from("pb_workout_assignments")
+    .select("id")
+    .eq("student_id", studentId)
+    .eq("workout_id", workoutId)
+    .maybeSingle();
+
+  if (assignmentError) throw assignmentError;
+  if (!assignment?.id) {
+    const error = new Error("La rutina seleccionada no esta asignada a tu perfil.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const { data: workoutExercise, error: workoutExerciseError } = await supabase
+    .from("pb_workout_exercises")
+    .select("id")
+    .eq("workout_id", workoutId)
+    .eq("exercise_id", exerciseId)
+    .limit(1)
+    .maybeSingle();
+
+  if (workoutExerciseError) throw workoutExerciseError;
+  if (!workoutExercise?.id) {
+    const error = new Error("El ejercicio seleccionado no pertenece a la rutina.");
+    error.statusCode = 400;
+    throw error;
+  }
+
   const { data, error } = await supabase
     .from("pb_performance_logs")
     .insert({

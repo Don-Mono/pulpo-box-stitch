@@ -9,8 +9,10 @@
   const studentSelect = document.querySelector("#student_id");
   const workoutSelect = document.querySelector("#workout_id");
   const exerciseSelect = document.querySelector("#exercise_id");
+  const exerciseHint = document.querySelector("#exerciseHint");
 
   let setupRequired = false;
+  let workoutExerciseMap = new Map();
 
   function setStatus(element, message, type = "") {
     element.textContent = message;
@@ -48,6 +50,37 @@
       html.push(`<option value="${escapeHtml(option.id)}">${escapeHtml(option[labelKey])}</option>`);
     });
     select.innerHTML = html.join("");
+  }
+
+  function syncExerciseOptions() {
+    const workoutId = workoutSelect.value;
+    const exercises = workoutExerciseMap.get(workoutId) || [];
+
+    if (!workoutId) {
+      exerciseSelect.innerHTML = '<option value="">Sin ejercicio</option>';
+      exerciseHint.textContent = "Si eliges una rutina, aqui apareceran sus ejercicios.";
+      return;
+    }
+
+    if (!exercises.length) {
+      exerciseSelect.innerHTML = '<option value="">Rutina sin ejercicios</option>';
+      exerciseHint.textContent = "La rutina seleccionada no tiene ejercicios detallados.";
+      return;
+    }
+
+    exerciseSelect.innerHTML = [
+      '<option value="">Selecciona el ejercicio</option>',
+      ...exercises.map((exercise) => {
+        const details = [
+          exercise.sets ? `${exercise.sets} series` : "",
+          exercise.reps || "",
+          exercise.prescription || "",
+        ].filter(Boolean).join(" / ");
+        return `<option value="${escapeHtml(exercise.exercise_id || "")}">${escapeHtml(exercise.exercise_name || "Ejercicio")}${details ? ` - ${escapeHtml(details)}` : ""}</option>`;
+      }),
+    ].join("");
+
+    exerciseHint.textContent = `${exercises.length} ejercicio(s) disponibles para esta rutina.`;
   }
 
   function renderEmpty(message) {
@@ -101,13 +134,21 @@
         : "Modulo conectado. Ya puedes registrar resultados cuando lo necesites.";
       fillSelect(studentSelect, "Seleccionar alumno", payload.students || [], "full_name");
       fillSelect(workoutSelect, "Sin rutina", payload.workouts || [], "title");
-      fillSelect(exerciseSelect, "Sin ejercicio", payload.exercises || [], "name");
+      workoutExerciseMap = new Map();
+      (payload.workoutExercises || []).forEach((exercise) => {
+        const list = workoutExerciseMap.get(exercise.workout_id) || [];
+        list.push(exercise);
+        workoutExerciseMap.set(exercise.workout_id, list);
+      });
+      syncExerciseOptions();
       renderResults(payload.results || []);
     } catch (error) {
       setupMessage.textContent = error.message;
       fillSelect(studentSelect, "Seleccionar alumno", [], "full_name");
       fillSelect(workoutSelect, "Sin rutina", [], "title");
       fillSelect(exerciseSelect, "Sin ejercicio", [], "name");
+      workoutExerciseMap = new Map();
+      exerciseHint.textContent = error.message;
       renderEmpty(error.message);
     }
   }
@@ -132,6 +173,7 @@
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar el resultado.");
       resultForm.reset();
+      syncExerciseOptions();
       setStatus(resultStatus, payload.message, "ok");
       await loadResults();
     } catch (error) {
@@ -140,6 +182,7 @@
   }
 
   resultForm.addEventListener("submit", createResult);
+  workoutSelect.addEventListener("change", syncExerciseOptions);
   refreshButton.addEventListener("click", loadResults);
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });

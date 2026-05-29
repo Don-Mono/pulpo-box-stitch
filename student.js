@@ -4,6 +4,8 @@
   const userEmail = document.querySelector("#userEmail");
   const assignmentsList = document.querySelector("#assignmentsList");
   const workoutSelect = document.querySelector("#workout_id");
+  const exerciseSelect = document.querySelector("#exercise_id");
+  const exerciseHint = document.querySelector("#exerciseHint");
   const studentResultForm = document.querySelector("#studentResultForm");
   const resultStatus = document.querySelector("#resultStatus");
   const resultsBody = document.querySelector("#resultsBody");
@@ -11,6 +13,7 @@
   const logoutButton = document.querySelector("#logoutButton");
 
   let setupRequired = false;
+  let assignmentsMap = new Map();
 
   function setStatus(element, message, type = "") {
     element.textContent = message;
@@ -44,14 +47,18 @@
   }
 
   function renderAssignments(assignments) {
+    assignmentsMap = new Map(assignments.map((assignment) => [assignment.workout_id, assignment]));
+
     if (!assignments.length) {
       assignmentsList.innerHTML = '<p class="muted">Aun no tienes rutinas asignadas.</p>';
       workoutSelect.innerHTML = '<option value="">Sin rutina</option>';
+      exerciseSelect.innerHTML = '<option value="">Sin ejercicios</option>';
+      exerciseHint.textContent = "Cuando tengas una rutina asignada, aqui podras elegir sus ejercicios.";
       return;
     }
 
     workoutSelect.innerHTML = [
-      '<option value="">Sin rutina</option>',
+      '<option value="">Selecciona tu rutina</option>',
       ...assignments.map((assignment) => `<option value="${escapeHtml(assignment.workout_id)}">${escapeHtml(assignment.workout?.title || "Rutina asignada")}</option>`),
     ].join("");
 
@@ -80,6 +87,43 @@
         </article>
       `;
     }).join("");
+
+    if (assignments.length === 1) {
+      workoutSelect.value = assignments[0].workout_id || "";
+    }
+    syncExerciseOptions();
+  }
+
+  function syncExerciseOptions() {
+    const workoutId = workoutSelect.value;
+    const assignment = assignmentsMap.get(workoutId);
+    const exercises = assignment?.exercises || [];
+
+    if (!workoutId) {
+      exerciseSelect.innerHTML = '<option value="">Selecciona una rutina primero</option>';
+      exerciseHint.textContent = "Elige la rutina para ver los ejercicios asignados.";
+      return;
+    }
+
+    if (!exercises.length) {
+      exerciseSelect.innerHTML = '<option value="">Rutina sin ejercicios</option>';
+      exerciseHint.textContent = "Esta rutina aun no tiene ejercicios detallados.";
+      return;
+    }
+
+    exerciseSelect.innerHTML = [
+      '<option value="">Selecciona el ejercicio realizado</option>',
+      ...exercises.map((exercise) => {
+        const details = [
+          exercise.sets ? `${exercise.sets} series` : "",
+          exercise.reps || "",
+          exercise.prescription || "",
+        ].filter(Boolean).join(" / ");
+        return `<option value="${escapeHtml(exercise.exercise_id || "")}">${escapeHtml(exercise.exercise_name || "Ejercicio")}${details ? ` - ${escapeHtml(details)}` : ""}</option>`;
+      }),
+    ].join("");
+
+    exerciseHint.textContent = `${exercises.length} ejercicio(s) disponibles para esta rutina.`;
   }
 
   function renderResults(results) {
@@ -177,6 +221,7 @@
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar.");
       studentResultForm.reset();
+      syncExerciseOptions();
       setStatus(resultStatus, payload.message, "ok");
       await loadOverview();
     } catch (error) {
@@ -185,6 +230,7 @@
   }
 
   studentResultForm.addEventListener("submit", saveResult);
+  workoutSelect.addEventListener("change", syncExerciseOptions);
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login.html";

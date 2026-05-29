@@ -148,6 +148,7 @@ Primera implementacion:
 - `/student.html`: permite al alumno registrar sus propios resultados.
 - `/api/student/overview`: API protegida por rol alumno.
 - Conecta alumno, rutina y ejercicio cuando esos datos existen.
+- El alumno registra resultados sobre ejercicios reales de sus rutinas asignadas.
 
 ### Etapa 5 - Progreso
 
