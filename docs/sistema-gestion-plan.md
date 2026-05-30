@@ -113,6 +113,7 @@ Primera implementacion de alumnos:
 - `/api/coach/student-detail`: API protegida por rol coach para ver rutinas, mediciones, marcas y notas visibles de sus alumnos asignados.
 - La ficha del coach ya filtra el historial por rutina y ejercicio, y entrega lectura rapida de tendencia sobre el filtro activo.
 - Admin ya puede entrar a una ficha unificada por alumno desde el listado y mantener el mismo `student_id` al abrir progreso, resultados o datos medicos.
+- La ficha admin del alumno ya incluye acceso rapido al modulo de rutinas manteniendo el mismo contexto de alumno.
 - La pantalla avisa si falta ejecutar el esquema de Supabase.
 
 ### Etapa 3 - Rutinas
@@ -135,8 +136,10 @@ Primera implementacion:
 - Permite asignacion inicial a un alumno si ya existe en la base.
 - El creador de rutinas puede seleccionar ejercicios desde el glosario o escribir uno manualmente.
 - El creador de rutinas ya permite agregar varios ejercicios ordenados en una misma rutina.
+- Admin ya puede reasignar rutinas existentes a multiples alumnos activos y quitar asignaciones desde el mismo modulo.
 - `/coach-workouts.html`: pantalla privada para que el coach cree rutinas y las asigne solo a sus alumnos activos.
 - `/api/coach/workouts`: API protegida por rol coach para listar rutinas relacionadas, cargar biblioteca y crear nuevas rutinas.
+- El coach ya puede reasignar o quitar alumnos dentro de rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
 
 ### Etapa 4 - Registro de resultados
 

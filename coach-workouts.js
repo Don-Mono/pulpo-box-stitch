@@ -26,6 +26,8 @@
   let exerciseLibrary = [];
   let exerciseByKey = new Map();
   let selectedExercises = [];
+  let currentStudents = [];
+  let preferredStudentId = "";
 
   function setStatus(element, message, type = "") {
     element.textContent = message;
@@ -38,6 +40,25 @@
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;");
+  }
+
+  function getInitialStudentId() {
+    try {
+      return new URLSearchParams(window.location.search).get("student_id") || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function syncUrl(studentId) {
+    try {
+      const url = new URL(window.location.href);
+      if (studentId) url.searchParams.set("student_id", studentId);
+      else url.searchParams.delete("student_id");
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      // Ignore URL sync errors in constrained environments.
+    }
   }
 
   function exerciseKey(exercise) {
@@ -62,11 +83,15 @@
   }
 
   function renderStudents(students) {
+    currentStudents = students;
     const options = ['<option value="">Sin asignar por ahora</option>'];
     students.forEach((student) => {
       options.push(`<option value="${escapeHtml(student.id)}">${escapeHtml(student.full_name)}${student.email ? ` - ${escapeHtml(student.email)}` : ""}</option>`);
     });
     studentSelect.innerHTML = options.join("");
+    if (preferredStudentId && students.some((student) => student.id === preferredStudentId)) {
+      studentSelect.value = preferredStudentId;
+    }
   }
 
   function renderEmpty(message) {
@@ -212,6 +237,7 @@
     workoutsList.innerHTML = workouts.map((workout) => {
       const exercises = workout.exercises || [];
       const assignments = workout.assignments || [];
+      const unassignedStudents = currentStudents.filter((student) => !assignments.some((assignment) => assignment.student_id === student.id));
       const exerciseSummary = exercises.length
         ? exercises.map((exercise) => {
           const details = [
@@ -226,6 +252,43 @@
         ? assignments.map((assignment) => escapeHtml(assignment.student_name)).join(", ")
         : "Sin alumnos asignados";
       const badge = workout.created_by_me ? "Creada por ti" : "Asignada a tus alumnos";
+      const canManageAssignments = Boolean(workout.created_by_me);
+      const assignmentOptions = unassignedStudents.length
+        ? unassignedStudents.map((student) => {
+          const selected = preferredStudentId && preferredStudentId === student.id ? " selected" : "";
+          return `<option value="${escapeHtml(student.id)}"${selected}>${escapeHtml(student.full_name)}</option>`;
+        }).join("")
+        : '<option value="">Todos tus alumnos activos ya estan asignados</option>';
+      const assignmentRows = assignments.length
+        ? assignments.map((assignment) => `
+          <article class="mini-list-item action-list-item">
+            <div>
+              <strong>${escapeHtml(assignment.student_name)}</strong>
+              <small>${escapeHtml(assignment.status || "assigned")}</small>
+            </div>
+            ${canManageAssignments ? `<button class="button ghost compact-button" data-workout-unassign="${escapeHtml(assignment.id)}" type="button">Quitar</button>` : ""}
+          </article>
+        `).join("")
+        : '<p class="muted">Sin alumnos asignados todavia.</p>';
+      const assignmentManager = canManageAssignments
+        ? `
+          <div class="assignment-manager">
+            <div class="field">
+              <label for="assign-${escapeHtml(workout.id)}">Asignar a tus alumnos</label>
+              <select id="assign-${escapeHtml(workout.id)}" class="assignment-select" data-assignment-select="${escapeHtml(workout.id)}" multiple size="4">
+                ${assignmentOptions}
+              </select>
+            </div>
+            <button class="button ghost full-button" data-workout-assign="${escapeHtml(workout.id)}" type="button">Asignar seleccionados</button>
+            <div class="mini-list assignment-list">${assignmentRows}</div>
+          </div>
+        `
+        : `
+          <div class="assignment-manager">
+            <p class="muted">Esta rutina queda en solo lectura porque no fue creada desde tu perfil.</p>
+            <div class="mini-list assignment-list">${assignmentRows}</div>
+          </div>
+        `;
 
       return `
         <article class="workout-card">
@@ -240,6 +303,7 @@
           </div>
           <ul class="check-list">${exerciseSummary}</ul>
           <p class="muted"><strong>Asignado a:</strong> ${assignedSummary}</p>
+          ${assignmentManager}
         </article>
       `;
     }).join("");
@@ -304,8 +368,72 @@
     }
   }
 
+  function getSelectedAssignmentStudentIds(workoutId) {
+    const select = workoutsList.querySelector(`[data-assignment-select="${workoutId}"]`);
+    if (!select) return [];
+    return [...select.selectedOptions].map((option) => option.value).filter(Boolean);
+  }
+
+  async function assignStudentsToWorkout(workoutId) {
+    if (setupRequired) {
+      setStatus(workoutStatus, "Primero debemos ejecutar el SQL de gestion en Supabase.", "error");
+      return;
+    }
+
+    const studentIds = getSelectedAssignmentStudentIds(workoutId);
+    if (!studentIds.length) {
+      setStatus(workoutStatus, "Selecciona al menos un alumno para asignar la rutina.", "error");
+      return;
+    }
+
+    setStatus(workoutStatus, "Actualizando asignaciones...");
+    try {
+      const response = await fetch("/api/coach/workouts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workout_id: workoutId, student_ids: studentIds }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo actualizar la asignacion.");
+      setStatus(workoutStatus, payload.message, "ok");
+      await loadWorkouts();
+    } catch (error) {
+      setStatus(workoutStatus, error.message, "error");
+    }
+  }
+
+  async function removeWorkoutAssignment(assignmentId) {
+    if (!assignmentId) return;
+    setStatus(workoutStatus, "Quitando asignacion...");
+    try {
+      const response = await fetch("/api/coach/workouts", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignment_id: assignmentId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo quitar la asignacion.");
+      setStatus(workoutStatus, payload.message, "ok");
+      await loadWorkouts();
+    } catch (error) {
+      setStatus(workoutStatus, error.message, "error");
+    }
+  }
+
   workoutForm.addEventListener("submit", createWorkout);
   addExerciseButton.addEventListener("click", addExerciseToRoutine);
+  workoutsList.addEventListener("click", (event) => {
+    const assignButton = event.target.closest("[data-workout-assign]");
+    if (assignButton) {
+      assignStudentsToWorkout(assignButton.dataset.workoutAssign);
+      return;
+    }
+
+    const unassignButton = event.target.closest("[data-workout-unassign]");
+    if (unassignButton) {
+      removeWorkoutAssignment(unassignButton.dataset.workoutUnassign);
+    }
+  });
   selectedExercisesList.addEventListener("click", (event) => {
     const removeButton = event.target.closest("[data-remove-exercise]");
     if (!removeButton) return;
@@ -314,6 +442,10 @@
   librarySectionSelect.addEventListener("change", () => renderExerciseOptions(librarySectionSelect.value));
   libraryExerciseSelect.addEventListener("change", applyExerciseSelection);
   exerciseNameInput.addEventListener("input", clearSelectedExerciseId);
+  studentSelect.addEventListener("change", () => {
+    preferredStudentId = studentSelect.value;
+    syncUrl(preferredStudentId);
+  });
   refreshButton.addEventListener("click", loadWorkouts);
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -323,6 +455,7 @@
   async function boot() {
     const user = await requireCoachSession();
     if (!user) return;
+    preferredStudentId = getInitialStudentId();
     await loadWorkouts();
   }
 

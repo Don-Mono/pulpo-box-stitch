@@ -11,6 +11,7 @@
   const coachSelect = document.querySelector("#primary_coach_id");
   const locationSelect = document.querySelector("#location_id");
   const studentProfileCard = document.querySelector("#studentProfileCard");
+  const workoutsLink = document.querySelector("#workoutsLink");
   const progressLink = document.querySelector("#progressLink");
   const resultsLink = document.querySelector("#resultsLink");
   const medicalLink = document.querySelector("#medicalLink");
@@ -103,6 +104,7 @@
 
   function updateQuickLinks(studentId) {
     const links = [
+      [workoutsLink, "/workouts.html"],
       [progressLink, "/progress.html"],
       [resultsLink, "/results.html"],
       [medicalLink, "/medical.html"],

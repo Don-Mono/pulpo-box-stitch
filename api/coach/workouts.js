@@ -50,6 +50,21 @@ function parseJsonArray(value) {
   }
 }
 
+function parseIdArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "string") return [];
+
+  const trimmed = value.trim();
+  if (!trimmed) return [];
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return trimmed.split(",").map((item) => item.trim()).filter(Boolean);
+  }
+}
+
 function normalizeDbExercise(exercise) {
   return {
     id: exercise.id,
@@ -401,6 +416,118 @@ async function createCoachWorkout(supabase, body, coachId) {
   };
 }
 
+async function assignCoachWorkoutStudents(supabase, body, coachId) {
+  const workoutId = clean(body.workout_id, 90);
+  const studentIds = [...new Set(parseIdArray(body.student_ids).map((studentId) => clean(studentId, 90)).filter(Boolean))].slice(0, 50);
+
+  if (!workoutId) {
+    const error = new Error("Debes indicar la rutina a asignar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!studentIds.length) {
+    const error = new Error("Selecciona al menos un alumno para asignar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const [{ data: workout, error: workoutError }, coachStudents] = await Promise.all([
+    supabase.from("pb_workouts").select("id, title, created_by").eq("id", workoutId).maybeSingle(),
+    listCoachStudents(supabase, coachId),
+  ]);
+
+  if (workoutError) throw workoutError;
+  if (!workout?.id) {
+    const error = new Error("La rutina indicada no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (workout.created_by !== coachId) {
+    const error = new Error("Solo puedes gestionar asignaciones de rutinas creadas por tu perfil.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const validStudentIds = new Set(coachStudents.map((student) => student.id));
+  const invalidStudentId = studentIds.find((studentId) => !validStudentIds.has(studentId));
+  if (invalidStudentId) {
+    const error = new Error("Uno de los alumnos seleccionados no pertenece a tu cartera activa.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const rows = studentIds.map((studentId) => ({
+    workout_id: workoutId,
+    student_id: studentId,
+    status: "assigned",
+    assigned_by: isUuid(coachId || "") ? coachId : null,
+  }));
+
+  const { error: assignmentError } = await supabase
+    .from("pb_workout_assignments")
+    .upsert(rows, { onConflict: "workout_id,student_id" });
+
+  if (assignmentError) throw assignmentError;
+
+  return {
+    workout_id: workoutId,
+    title: workout.title,
+    assigned_count: studentIds.length,
+  };
+}
+
+async function removeCoachWorkoutAssignment(supabase, body, coachId) {
+  const assignmentId = clean(body.assignment_id, 90);
+  const workoutId = clean(body.workout_id, 90);
+  const studentId = clean(body.student_id, 90);
+
+  if (!assignmentId && !(workoutId && studentId)) {
+    const error = new Error("Debes indicar la asignacion a eliminar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  let assignmentQuery = supabase
+    .from("pb_workout_assignments")
+    .select("id, workout_id, student_id");
+
+  if (assignmentId) assignmentQuery = assignmentQuery.eq("id", assignmentId);
+  else assignmentQuery = assignmentQuery.eq("workout_id", workoutId).eq("student_id", studentId);
+
+  const { data: assignment, error: assignmentError } = await assignmentQuery.maybeSingle();
+  if (assignmentError) throw assignmentError;
+  if (!assignment?.id) {
+    const error = new Error("La asignacion indicada no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const [{ data: workout, error: workoutError }, coachStudents] = await Promise.all([
+    supabase.from("pb_workouts").select("id, created_by").eq("id", assignment.workout_id).maybeSingle(),
+    listCoachStudents(supabase, coachId),
+  ]);
+
+  if (workoutError) throw workoutError;
+  if (!workout?.id || workout.created_by !== coachId) {
+    const error = new Error("Solo puedes quitar asignaciones de rutinas creadas por tu perfil.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  if (!coachStudents.some((student) => student.id === assignment.student_id)) {
+    const error = new Error("La asignacion no corresponde a uno de tus alumnos activos.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  const { error } = await supabase.from("pb_workout_assignments").delete().eq("id", assignment.id);
+  if (error) throw error;
+
+  return { ok: true };
+}
+
 module.exports = async function handler(req, res) {
   const session = requireRole(req, res, "coach");
   if (!session) return;
@@ -437,7 +564,36 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    res.setHeader("Allow", "GET, POST");
+    if (req.method === "PATCH") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        const updated = await assignCoachWorkoutStudents(supabase, body, session.userId);
+        return json(res, 200, {
+          ok: true,
+          message: `${updated.assigned_count} asignacion(es) actualizadas para ${updated.title}.`,
+          assignment: updated,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    if (req.method === "DELETE") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        await removeCoachWorkoutAssignment(supabase, body, session.userId);
+        return json(res, 200, {
+          ok: true,
+          message: "Asignacion eliminada correctamente.",
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    res.setHeader("Allow", "GET, POST, PATCH, DELETE");
     return json(res, 405, { error: "Method not allowed" });
   } catch (error) {
     console.error("Coach workouts endpoint failed", error);

@@ -48,6 +48,21 @@ function parseJsonArray(value) {
   }
 }
 
+function parseIdArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "string") return [];
+
+  const trimmed = value.trim();
+  if (!trimmed) return [];
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return trimmed.split(",").map((item) => item.trim()).filter(Boolean);
+  }
+}
+
 function setupPayload() {
   return {
     workouts: [],
@@ -324,6 +339,83 @@ async function createWorkout(supabase, body, session) {
   };
 }
 
+async function assignWorkoutStudents(supabase, body, session) {
+  const workoutId = clean(body.workout_id, 90);
+  const studentIds = [...new Set(parseIdArray(body.student_ids).map((studentId) => clean(studentId, 90)).filter(Boolean))].slice(0, 50);
+
+  if (!workoutId) {
+    const error = new Error("Debes indicar la rutina a asignar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!studentIds.length) {
+    const error = new Error("Selecciona al menos un alumno para asignar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const [{ data: workout, error: workoutError }, students] = await Promise.all([
+    supabase.from("pb_workouts").select("id, title").eq("id", workoutId).maybeSingle(),
+    listAssignableStudents(supabase),
+  ]);
+
+  if (workoutError) throw workoutError;
+  if (!workout?.id) {
+    const error = new Error("La rutina indicada no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const validStudentIds = new Set(students.map((student) => student.id));
+  const invalidStudentId = studentIds.find((studentId) => !validStudentIds.has(studentId));
+  if (invalidStudentId) {
+    const error = new Error("Uno de los alumnos seleccionados ya no esta disponible para asignacion.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const rows = studentIds.map((studentId) => ({
+    workout_id: workoutId,
+    student_id: studentId,
+    status: "assigned",
+    assigned_by: isUuid(session.userId || "") ? session.userId : null,
+  }));
+
+  const { error: assignmentError } = await supabase
+    .from("pb_workout_assignments")
+    .upsert(rows, { onConflict: "workout_id,student_id" });
+
+  if (assignmentError) throw assignmentError;
+
+  return {
+    workout_id: workoutId,
+    title: workout.title,
+    assigned_count: studentIds.length,
+  };
+}
+
+async function removeWorkoutAssignment(supabase, body) {
+  const assignmentId = clean(body.assignment_id, 90);
+  const workoutId = clean(body.workout_id, 90);
+  const studentId = clean(body.student_id, 90);
+
+  if (!assignmentId && !(workoutId && studentId)) {
+    const error = new Error("Debes indicar la asignacion a eliminar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  let query = supabase.from("pb_workout_assignments").delete();
+  if (assignmentId) query = query.eq("id", assignmentId);
+  else query = query.eq("workout_id", workoutId).eq("student_id", studentId);
+
+  const { error } = await query;
+  if (error) throw error;
+
+  return { ok: true };
+}
+
 module.exports = async function handler(req, res) {
   const session = requireAdmin(req, res);
   if (!session) return;
@@ -356,7 +448,36 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    res.setHeader("Allow", "GET, POST");
+    if (req.method === "PATCH") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        const updated = await assignWorkoutStudents(supabase, body, session);
+        return json(res, 200, {
+          ok: true,
+          message: `${updated.assigned_count} asignacion(es) actualizadas para ${updated.title}.`,
+          assignment: updated,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    if (req.method === "DELETE") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        await removeWorkoutAssignment(supabase, body);
+        return json(res, 200, {
+          ok: true,
+          message: "Asignacion eliminada correctamente.",
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    res.setHeader("Allow", "GET, POST, PATCH, DELETE");
     return json(res, 405, { error: "Method not allowed" });
   } catch (error) {
     console.error("Admin workouts endpoint failed", error);

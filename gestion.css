@@ -352,6 +352,24 @@ body {
   padding: 1rem;
 }
 
+.assignment-manager {
+  background: rgba(15, 23, 42, 0.035);
+  border: 1px solid var(--pb-line);
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+  padding: 0.9rem;
+}
+
+.assignment-select {
+  min-height: 8.5rem;
+}
+
+.assignment-list {
+  margin-top: 0;
+}
+
 .exercise-library-box h3 {
   color: var(--pb-dark);
   font-family: Teko, Impact, sans-serif;
