@@ -13,6 +13,12 @@ function cleanNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function getQuery(req) {
+  if (req.query) return req.query;
+  const url = new URL(req.url || "/", "http://localhost");
+  return Object.fromEntries(url.searchParams.entries());
+}
+
 async function loadWorkoutExercises(supabase, workoutIds) {
   if (!workoutIds.length) return [];
 
@@ -70,17 +76,18 @@ async function listStudents(supabase) {
   const profileIds = students.map((student) => student.profile_id);
   const { data: profiles, error: profilesError } = await supabase
     .from("pb_profiles")
-    .select("id, full_name, email")
+    .select("id, full_name, email, is_active")
     .in("id", profileIds)
-    .eq("role", "student")
-    .eq("is_active", true);
+    .eq("role", "student");
 
   if (profilesError) throw profilesError;
-  return (profiles || []).map((profile) => ({
-    id: profile.id,
-    full_name: profile.full_name,
-    email: profile.email || "",
-  }));
+  return (profiles || [])
+    .map((profile) => ({
+      id: profile.id,
+      full_name: `${profile.full_name}${profile.is_active === false ? " (Inactivo)" : ""}`,
+      email: profile.email || "",
+    }))
+    .sort((left, right) => left.full_name.localeCompare(right.full_name, "es"));
 }
 
 async function listSimpleOptions(supabase) {
@@ -98,19 +105,24 @@ async function listSimpleOptions(supabase) {
   };
 }
 
-async function listResults(supabase) {
-  const [students, options, { data: results, error: resultsError }] = await Promise.all([
-    listStudents(supabase),
+async function listResults(supabase, studentId) {
+  const students = await listStudents(supabase);
+  const selectedStudentId = studentId || students[0]?.id || "";
+  const resultQuery = supabase
+    .from("pb_performance_logs")
+    .select("id, student_id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes")
+    .order("logged_at", { ascending: false })
+    .limit(RESULT_LIMIT);
+
+  if (selectedStudentId) resultQuery.eq("student_id", selectedStudentId);
+
+  const [options, { data: results, error: resultsError }] = await Promise.all([
     listSimpleOptions(supabase),
-    supabase
-      .from("pb_performance_logs")
-      .select("id, student_id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes")
-      .order("logged_at", { ascending: false })
-      .limit(RESULT_LIMIT),
+    resultQuery,
   ]);
 
   if (resultsError) throw resultsError;
-  if (!results?.length) return { students, ...options, results: [] };
+  if (!results?.length) return { students, selectedStudentId, ...options, results: [] };
 
   const studentIds = [...new Set(results.map((result) => result.student_id).filter(Boolean))];
   const workoutIds = [...new Set(results.map((result) => result.workout_id).filter(Boolean))];
@@ -136,6 +148,7 @@ async function listResults(supabase) {
 
   return {
     students,
+    selectedStudentId,
     ...options,
     results: results.map((result) => ({
       ...result,
@@ -233,7 +246,8 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "GET") {
       try {
-        const payload = await listResults(supabase);
+        const query = getQuery(req);
+        const payload = await listResults(supabase, clean(query.student_id, 90));
         return json(res, 200, { ...payload, setupRequired: false });
       } catch (error) {
         if (isMissingManagementSchema(error)) return json(res, 200, setupPayload());

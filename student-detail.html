@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ficha Alumno Admin Pulpo Box</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&family=Teko:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/gestion.css" />
+  </head>
+  <body>
+    <main class="management-shell">
+      <div class="management-container">
+        <header class="management-topbar">
+          <a class="brand-lockup" href="/students.html">
+            <img alt="Logo Pulpo Box" src="/assets/brand/pulpo-box-logo.png" />
+            <span>
+              <strong>Pulpo Box</strong>
+              <span>Ficha admin de alumno</span>
+            </span>
+          </a>
+          <div class="topbar-actions">
+            <a class="button ghost" href="/students.html">Volver a alumnos</a>
+            <a class="button ghost" href="/dashboard.html">Dashboard</a>
+            <button class="button primary" id="logoutButton" type="button">Salir</button>
+          </div>
+        </header>
+
+        <section class="dashboard-header">
+          <div>
+            <span class="status-pill">Etapa 4</span>
+            <h1 class="dashboard-title" id="studentTitle">Ficha del alumno</h1>
+            <p class="muted" id="setupMessage">Cargando informacion del alumno...</p>
+          </div>
+          <div>
+            <span class="muted" id="userEmail"></span>
+          </div>
+        </section>
+
+        <section class="panel-card">
+          <div class="table-header">
+            <div>
+              <h2>Alumno seleccionado</h2>
+              <p class="muted" id="studentMeta">Elige un alumno para editar su ficha y entrar directo a sus modulos.</p>
+            </div>
+            <div class="field inline-field">
+              <label for="studentFilter">Alumno</label>
+              <select id="studentFilter">
+                <option value="">Seleccionar alumno</option>
+              </select>
+            </div>
+          </div>
+          <div class="metric-grid" id="summaryGrid">
+            <article class="metric-card">
+              <span>Peso actual</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Estatura</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Marcas</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Mediciones</span>
+              <strong>--</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="dashboard-row student-layout">
+          <article class="panel-card">
+            <h2>Editar ficha</h2>
+            <p>Actualiza datos base del alumno sin salir del panel de administracion.</p>
+            <form class="student-form" id="studentDetailForm">
+              <div class="field">
+                <label for="full_name">Nombre completo</label>
+                <input id="full_name" name="full_name" placeholder="Nombre del alumno" required />
+              </div>
+              <div class="form-grid-two">
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input id="email" name="email" readonly />
+                </div>
+                <div class="field">
+                  <label for="phone">Telefono</label>
+                  <input id="phone" name="phone" placeholder="+569 1234 5678" />
+                </div>
+              </div>
+              <div class="form-grid-two">
+                <div class="field">
+                  <label for="primary_coach_id">Coach principal</label>
+                  <select id="primary_coach_id" name="primary_coach_id">
+                    <option value="">Sin coach asignado</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="location_id">Sede</label>
+                  <select id="location_id" name="location_id">
+                    <option value="">Sin sede asignada</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-grid-two">
+                <div class="field">
+                  <label for="height_cm">Estatura cm</label>
+                  <input id="height_cm" name="height_cm" inputmode="decimal" placeholder="170" />
+                </div>
+                <div class="field">
+                  <label for="current_weight_kg">Peso kg</label>
+                  <input id="current_weight_kg" name="current_weight_kg" inputmode="decimal" placeholder="75" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="goal">Objetivo principal</label>
+                <textarea id="goal" name="goal" placeholder="Ej: bajar grasa, ganar masa muscular, reintegro deportivo"></textarea>
+              </div>
+              <div class="form-grid-two">
+                <div class="field">
+                  <label for="emergency_contact_name">Contacto de emergencia</label>
+                  <input id="emergency_contact_name" name="emergency_contact_name" placeholder="Nombre del contacto" />
+                </div>
+                <div class="field">
+                  <label for="emergency_contact_phone">Telefono emergencia</label>
+                  <input id="emergency_contact_phone" name="emergency_contact_phone" placeholder="+569 9999 9999" />
+                </div>
+              </div>
+              <label class="check-field">
+                <input id="is_active" name="is_active" type="checkbox" />
+                <span>Alumno activo en el sistema</span>
+              </label>
+              <span class="status" id="studentDetailStatus"></span>
+              <button class="button accent" id="saveButton" type="submit">Guardar cambios</button>
+            </form>
+          </article>
+
+          <article class="panel-card">
+            <h2>Acceso rapido</h2>
+            <p>Abre el mismo alumno ya filtrado dentro de sus modulos operativos.</p>
+            <div class="mini-list" id="studentProfileCard">
+              <p class="muted">Cargando ficha...</p>
+            </div>
+            <div class="topbar-actions detail-action-group">
+              <a class="button ghost" id="progressLink" href="/progress.html">Progreso</a>
+              <a class="button ghost" id="resultsLink" href="/results.html">Resultados</a>
+              <a class="button ghost" id="medicalLink" href="/medical.html">Datos medicos</a>
+            </div>
+            <div class="warning-card" id="consentCard">
+              <strong>Consentimiento pendiente</strong>
+              <p>Cuando administracion registre datos sensibles con consentimiento, aqui quedara visible el estado.</p>
+              <span>Pendiente</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="dashboard-row student-layout">
+          <article class="panel-card">
+            <h2>Mediciones recientes</h2>
+            <div class="mini-list" id="measurementsList">
+              <p class="muted">Cargando mediciones...</p>
+            </div>
+          </article>
+
+          <article class="panel-card">
+            <h2>Notas medicas recientes</h2>
+            <div class="mini-list" id="medicalNotesList">
+              <p class="muted">Cargando notas medicas...</p>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel-card students-table-card">
+          <div class="table-header">
+            <div>
+              <h2>Ultimos resultados</h2>
+              <p class="muted">Lectura rapida de las marcas recientes del alumno seleccionado.</p>
+            </div>
+            <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+          </div>
+          <div class="table-shell">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Rutina / Ejercicio</th>
+                  <th>Marca</th>
+                  <th>Notas</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody id="resultsBody">
+                <tr>
+                  <td colspan="4">Cargando resultados...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/student-detail.js"></script>
+  </body>
+</html>

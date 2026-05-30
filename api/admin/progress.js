@@ -51,17 +51,18 @@ async function listStudents(supabase) {
   const profileIds = students.map((student) => student.profile_id);
   const { data: profiles, error: profilesError } = await supabase
     .from("pb_profiles")
-    .select("id, full_name, email")
+    .select("id, full_name, email, is_active")
     .in("id", profileIds)
-    .eq("role", "student")
-    .eq("is_active", true);
+    .eq("role", "student");
 
   if (profilesError) throw profilesError;
-  return (profiles || []).map((profile) => ({
-    id: profile.id,
-    full_name: profile.full_name,
-    email: profile.email || "",
-  }));
+  return (profiles || [])
+    .map((profile) => ({
+      id: profile.id,
+      full_name: `${profile.full_name}${profile.is_active === false ? " (Inactivo)" : ""}`,
+      email: profile.email || "",
+    }))
+    .sort((left, right) => left.full_name.localeCompare(right.full_name, "es"));
 }
 
 async function loadProgress(supabase, studentId) {

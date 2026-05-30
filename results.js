@@ -14,6 +14,25 @@
   let setupRequired = false;
   let workoutExerciseMap = new Map();
 
+  function getInitialStudentId() {
+    try {
+      return new URLSearchParams(window.location.search).get("student_id") || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function syncUrl(studentId) {
+    try {
+      const url = new URL(window.location.href);
+      if (studentId) url.searchParams.set("student_id", studentId);
+      else url.searchParams.delete("student_id");
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      // Ignore URL sync errors in constrained environments.
+    }
+  }
+
   function setStatus(element, message, type = "") {
     element.textContent = message;
     element.className = `status ${type}`.trim();
@@ -119,12 +138,15 @@
     }).join("");
   }
 
-  async function loadResults() {
+  async function loadResults(preferredStudentId = studentSelect.value || getInitialStudentId()) {
     renderEmpty("Cargando resultados...");
     setupMessage.textContent = "Revisando tablas de gestion...";
 
     try {
-      const response = await fetch("/api/admin/results");
+      const url = preferredStudentId
+        ? `/api/admin/results?student_id=${encodeURIComponent(preferredStudentId)}`
+        : "/api/admin/results";
+      const response = await fetch(url);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo cargar resultados.");
 
@@ -133,6 +155,7 @@
         ? payload.message
         : "Modulo conectado. Ya puedes registrar resultados cuando lo necesites.";
       fillSelect(studentSelect, "Seleccionar alumno", payload.students || [], "full_name");
+      studentSelect.value = payload.selectedStudentId || preferredStudentId || "";
       fillSelect(workoutSelect, "Sin rutina", payload.workouts || [], "title");
       workoutExerciseMap = new Map();
       (payload.workoutExercises || []).forEach((exercise) => {
@@ -142,6 +165,7 @@
       });
       syncExerciseOptions();
       renderResults(payload.results || []);
+      syncUrl(studentSelect.value);
     } catch (error) {
       setupMessage.textContent = error.message;
       fillSelect(studentSelect, "Seleccionar alumno", [], "full_name");
@@ -183,7 +207,8 @@
 
   resultForm.addEventListener("submit", createResult);
   workoutSelect.addEventListener("change", syncExerciseOptions);
-  refreshButton.addEventListener("click", loadResults);
+  studentSelect.addEventListener("change", () => loadResults(studentSelect.value));
+  refreshButton.addEventListener("click", () => loadResults(studentSelect.value));
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login.html";
@@ -192,7 +217,7 @@
   async function boot() {
     const user = await requireAdminSession();
     if (!user) return;
-    await loadResults();
+    await loadResults(getInitialStudentId());
   }
 
   boot();

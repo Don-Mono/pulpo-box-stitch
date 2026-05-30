@@ -44,6 +44,7 @@ La rama de gestion incorpora una entrada privada inicial:
 - `/login.html`: login central para el futuro sistema por roles.
 - `/dashboard.html`: panel privado protegido por sesion.
 - `/students.html`: primera base del modulo alumnos.
+- `/student-detail.html`: ficha admin para editar un alumno y abrir sus modulos con contexto.
 - `/coaches-admin.html`: primera base del modulo coaches.
 - `/workouts.html`: primera base del modulo rutinas.
 - `/api/admin/exercises`: biblioteca base de ejercicios para el creador de rutinas.
@@ -67,3 +68,5 @@ El portal coach ya puede revisar resultados de sus alumnos asignados y guardar f
 El coach ya cuenta con un modulo propio de rutinas para crear trabajo y asignarlo solo a sus alumnos activos.
 El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, mediciones, marcas y notas medicas visibles para seguimiento.
 La ficha del coach ya permite filtrar historial por rutina y ejercicio, con indicadores rapidos para leer tendencias sin salir de la vista.
+Admin ya puede abrir una ficha unificada por alumno, editar datos base y saltar directo a progreso, resultados y datos medicos manteniendo el mismo `student_id` en la URL.
+Los modulos admin de progreso, resultados y datos medicos ya aceptan deep-link por `student_id`, incluyendo alumnos inactivos para seguimiento administrativo.

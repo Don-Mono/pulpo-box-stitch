@@ -103,6 +103,8 @@ Primera implementacion de alumnos:
 
 - `/students.html`: pantalla privada para admin.
 - `/api/admin/students`: API para listar, crear y activar/desactivar alumnos.
+- `/student-detail.html`: ficha privada de admin para editar datos base del alumno y abrir sus modulos operativos con contexto.
+- `/api/admin/student-detail`: API protegida por rol admin para cargar y actualizar la ficha del alumno.
 - `/coaches-admin.html`: pantalla privada para crear coaches.
 - `/api/admin/coaches`: API para listar, crear y activar/desactivar coaches.
 - `/coach.html`: primera vista privada de coach.
@@ -110,6 +112,7 @@ Primera implementacion de alumnos:
 - `/coach-student.html`: ficha detallada para seguimiento individual desde coach.
 - `/api/coach/student-detail`: API protegida por rol coach para ver rutinas, mediciones, marcas y notas visibles de sus alumnos asignados.
 - La ficha del coach ya filtra el historial por rutina y ejercicio, y entrega lectura rapida de tendencia sobre el filtro activo.
+- Admin ya puede entrar a una ficha unificada por alumno desde el listado y mantener el mismo `student_id` al abrir progreso, resultados o datos medicos.
 - La pantalla avisa si falta ejecutar el esquema de Supabase.
 
 ### Etapa 3 - Rutinas
@@ -153,6 +156,7 @@ Primera implementacion:
 - `/student.html`: permite al alumno registrar sus propios resultados.
 - `/api/student/overview`: API protegida por rol alumno.
 - Conecta alumno, rutina y ejercicio cuando esos datos existen.
+- El modulo admin ya acepta `student_id` en URL para entrar filtrado desde la ficha del alumno.
 - El alumno registra resultados sobre ejercicios reales de sus rutinas asignadas.
 - El portal alumno ya filtra historial por rutina y ejercicio, resume tendencia y muestra feedback del coach dentro de sus registros.
 - El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
@@ -173,6 +177,7 @@ Primera implementacion:
 - `/progress.html`: pantalla privada de seguimiento por alumno.
 - `/api/admin/progress`: API para consultar historial y registrar mediciones corporales.
 - Resume peso, estatura, cintura y cantidad de marcas recientes.
+- El modulo admin ya acepta `student_id` en URL para continuidad de flujo desde alumnos.
 
 ### Etapa 6 - Datos medicos
 
@@ -189,6 +194,7 @@ Primera implementacion:
 - `/medical.html`: pantalla privada solo para admin.
 - `/api/admin/medical`: API para listar y crear notas sensibles.
 - Requiere confirmacion explicita de consentimiento antes de guardar.
+- El modulo admin ya acepta `student_id` en URL y mantiene visibilidad de alumnos inactivos para revision administrativa.
 
 ### Etapa 7 - Mejoras futuras
 

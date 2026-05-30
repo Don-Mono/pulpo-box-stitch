@@ -470,6 +470,18 @@ body {
   width: 100%;
 }
 
+.table-actions,
+.detail-action-group {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.detail-action-group {
+  margin-top: 1rem;
+}
+
 .data-table {
   border-collapse: collapse;
   min-width: 820px;

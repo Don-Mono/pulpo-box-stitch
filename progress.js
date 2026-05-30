@@ -12,6 +12,25 @@
 
   let setupRequired = false;
 
+  function getInitialStudentId() {
+    try {
+      return new URLSearchParams(window.location.search).get("student_id") || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function syncUrl(studentId) {
+    try {
+      const url = new URL(window.location.href);
+      if (studentId) url.searchParams.set("student_id", studentId);
+      else url.searchParams.delete("student_id");
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      // Ignore URL sync errors in constrained environments.
+    }
+  }
+
   function setStatus(element, message, type = "") {
     element.textContent = message;
     element.className = `status ${type}`.trim();
@@ -136,10 +155,12 @@
       setupMessage.textContent = setupRequired
         ? payload.message
         : "Modulo conectado. Puedes registrar mediciones y revisar el historial.";
-      renderStudents(payload.students || [], payload.selectedStudentId || preferredStudentId);
+      const selectedStudentId = payload.selectedStudentId || preferredStudentId || "";
+      renderStudents(payload.students || [], selectedStudentId);
       renderSummary(payload.summary);
       renderMeasurements(payload.measurements || []);
       renderResults(payload.results || []);
+      syncUrl(selectedStudentId);
     } catch (error) {
       setupMessage.textContent = error.message;
       renderStudents([], "");
@@ -194,7 +215,7 @@
   async function boot() {
     const user = await requireAdminSession();
     if (!user) return;
-    await loadProgress("");
+    await loadProgress(getInitialStudentId());
   }
 
   boot();

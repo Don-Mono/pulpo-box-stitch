@@ -68,7 +68,12 @@
           <td>${escapeHtml(student.goal || "Pendiente")}</td>
           <td>${escapeHtml(measures)}</td>
           <td><span class="status-chip ${student.is_active ? "is-active" : "is-inactive"}">${student.is_active ? "Activo" : "Inactivo"}</span></td>
-          <td><button class="button ghost compact-button" data-student-status="${escapeHtml(student.id)}" data-next-state="${nextState}" type="button">${actionLabel}</button></td>
+          <td>
+            <div class="table-actions">
+              <a class="button ghost compact-button" href="/student-detail.html?student_id=${encodeURIComponent(student.id)}">Ver ficha</a>
+              <button class="button ghost compact-button" data-student-status="${escapeHtml(student.id)}" data-next-state="${nextState}" type="button">${actionLabel}</button>
+            </div>
+          </td>
         </tr>
       `;
     }).join("");
