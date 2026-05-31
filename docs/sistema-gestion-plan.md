@@ -183,6 +183,7 @@ Primera implementacion:
 - `/api/admin/progress`: API para consultar historial y registrar mediciones corporales.
 - Resume peso, estatura, cintura y cantidad de marcas recientes.
 - El modulo admin ya acepta `student_id` en URL para continuidad de flujo desde alumnos.
+- El modulo admin de progreso ya filtra historial por rutina y ejercicio, entrega lectura rapida de tendencia y muestra mejores marcas por ejercicio.
 
 ### Etapa 6 - Datos medicos
 

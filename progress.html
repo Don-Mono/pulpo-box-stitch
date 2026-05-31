@@ -57,11 +57,19 @@
               <strong>--</strong>
             </article>
             <article class="metric-card">
-              <span>Estatura</span>
+              <span>Cambio peso</span>
               <strong>--</strong>
             </article>
             <article class="metric-card">
               <span>Cintura</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Cambio cintura</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Mejor carga</span>
               <strong>--</strong>
             </article>
             <article class="metric-card">
@@ -121,9 +129,49 @@
           <div class="table-header">
             <div>
               <h2>Ultimas marcas</h2>
-              <p class="muted">Resultados recientes del alumno seleccionado.</p>
+              <p class="muted">Filtra por rutina o ejercicio para leer tendencia y mejores marcas reales.</p>
             </div>
             <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+          </div>
+          <div class="filter-grid">
+            <div class="field inline-field">
+              <label for="workoutFilter">Rutina</label>
+              <select id="workoutFilter">
+                <option value="">Todas las rutinas</option>
+              </select>
+            </div>
+            <div class="field inline-field">
+              <label for="exerciseFilter">Ejercicio</label>
+              <select id="exerciseFilter">
+                <option value="">Todos los ejercicios</option>
+              </select>
+            </div>
+            <article class="mini-list-item filter-helper">
+              <strong>Lectura rapida</strong>
+              <span id="resultsFilterHint">Filtra por rutina o ejercicio para revisar una tendencia puntual.</span>
+              <small>Los indicadores y mejores marcas cambian segun el filtro activo.</small>
+            </article>
+          </div>
+          <div class="metric-grid compact-metrics" id="resultsSummaryGrid">
+            <article class="metric-card">
+              <span>Registros</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Ultimo registro</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Mejor carga</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Mayor reps</span>
+              <strong>--</strong>
+            </article>
+          </div>
+          <div class="mini-list" id="personalBestsList">
+            <p class="muted">Cargando mejores marcas...</p>
           </div>
           <div class="table-shell">
             <table class="data-table">
@@ -131,12 +179,13 @@
                 <tr>
                   <th>Rutina / Ejercicio</th>
                   <th>Marca</th>
+                  <th>Notas</th>
                   <th>Fecha</th>
                 </tr>
               </thead>
               <tbody id="resultsBody">
                 <tr>
-                  <td colspan="3">Cargando marcas...</td>
+                  <td colspan="4">Cargando marcas...</td>
                 </tr>
               </tbody>
             </table>

@@ -1,7 +1,8 @@
 const { getSupabase, json, requireAdmin } = require("../_shared");
 
 const OPTION_LIMIT = 250;
-const HISTORY_LIMIT = 12;
+const MEASUREMENT_HISTORY_LIMIT = 30;
+const RESULT_HISTORY_LIMIT = 80;
 
 function clean(value, maxLength = 220) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -79,23 +80,30 @@ async function loadProgress(supabase, studentId) {
   }
 
   const [
+    { data: studentDetails, error: studentDetailsError },
     { data: measurements, error: measurementsError },
     { data: results, error: resultsError },
   ] = await Promise.all([
+    supabase
+      .from("pb_students")
+      .select("height_cm, current_weight_kg")
+      .eq("profile_id", selectedStudentId)
+      .maybeSingle(),
     supabase
       .from("pb_body_measurements")
       .select("id, measured_at, body_weight_kg, height_cm, waist_cm, chest_cm, hip_cm, notes")
       .eq("student_id", selectedStudentId)
       .order("measured_at", { ascending: false })
-      .limit(HISTORY_LIMIT),
+      .limit(MEASUREMENT_HISTORY_LIMIT),
     supabase
       .from("pb_performance_logs")
-      .select("id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text")
+      .select("id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes")
       .eq("student_id", selectedStudentId)
       .order("logged_at", { ascending: false })
-      .limit(HISTORY_LIMIT),
+      .limit(RESULT_HISTORY_LIMIT),
   ]);
 
+  if (studentDetailsError) throw studentDetailsError;
   if (measurementsError) throw measurementsError;
   if (resultsError) throw resultsError;
 
@@ -116,6 +124,14 @@ async function loadProgress(supabase, studentId) {
   const workoutMap = new Map((workouts || []).map((workout) => [workout.id, workout]));
   const exerciseMap = new Map((exercises || []).map((exercise) => [exercise.id, exercise]));
   const latestMeasurement = measurements?.[0] || null;
+  const bestWeightKg = (results || [])
+    .map((result) => result.weight_kg)
+    .filter((value) => value != null)
+    .reduce((max, value) => Math.max(max, value), Number.NEGATIVE_INFINITY);
+  const bestReps = (results || [])
+    .map((result) => result.reps)
+    .filter((value) => value != null)
+    .reduce((max, value) => Math.max(max, value), Number.NEGATIVE_INFINITY);
 
   return {
     students,
@@ -127,11 +143,13 @@ async function loadProgress(supabase, studentId) {
       exercise_name: exerciseMap.get(result.exercise_id)?.name || "",
     })),
     summary: {
-      latest_weight_kg: latestMeasurement?.body_weight_kg || null,
-      latest_height_cm: latestMeasurement?.height_cm || null,
+      latest_weight_kg: latestMeasurement?.body_weight_kg || studentDetails?.current_weight_kg || null,
+      latest_height_cm: latestMeasurement?.height_cm || studentDetails?.height_cm || null,
       latest_waist_cm: latestMeasurement?.waist_cm || null,
       result_count: results?.length || 0,
       measurement_count: measurements?.length || 0,
+      best_weight_kg: Number.isFinite(bestWeightKg) ? bestWeightKg : null,
+      best_reps: Number.isFinite(bestReps) ? bestReps : null,
     },
   };
 }
