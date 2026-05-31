@@ -56,6 +56,57 @@
             <p>Guarda solo datos necesarios para entrenar de forma segura. No registres diagnosticos extensos si no son indispensables.</p>
             <span id="consentStatus">Consentimiento pendiente.</span>
           </div>
+          <div class="metric-grid compact-metrics" id="medicalSummaryGrid" aria-label="Resumen medico del alumno">
+            <article class="metric-card">
+              <span>Notas</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Coach visible</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Solo admin</span>
+              <strong>--</strong>
+            </article>
+            <article class="metric-card">
+              <span>Ultima nota</span>
+              <strong>--</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="dashboard-row student-layout">
+          <article class="panel-card">
+            <h2>Contexto del alumno</h2>
+            <div id="studentProfileCard" class="mini-list">
+              <p class="muted">Selecciona un alumno para revisar su contexto medico.</p>
+            </div>
+            <div class="detail-action-group">
+              <a class="button ghost is-disabled" id="studentDetailLink" href="/student-detail.html">Abrir ficha admin</a>
+            </div>
+          </article>
+
+          <article class="panel-card">
+            <h2>Emergencia y consentimiento</h2>
+            <p>Manten al dia el contacto de emergencia. Si el alumno ya autorizo el manejo de datos sensibles, puedes registrarlo aqui aunque todavia no agregues una nota.</p>
+            <form class="student-form" id="safetyForm">
+              <div class="field">
+                <label for="emergency_contact_name">Contacto de emergencia</label>
+                <input id="emergency_contact_name" name="emergency_contact_name" placeholder="Nombre del contacto" />
+              </div>
+              <div class="field">
+                <label for="emergency_contact_phone">Telefono de emergencia</label>
+                <input id="emergency_contact_phone" name="emergency_contact_phone" placeholder="+56 9 ..." />
+              </div>
+              <label class="check-field">
+                <input id="register_consent" name="register_consent" type="checkbox" />
+                <span>Registrar consentimiento medico ahora si ya fue confirmado por el alumno.</span>
+              </label>
+              <span class="status" id="safetyStatus"></span>
+              <button class="button ghost" type="submit">Actualizar ficha segura</button>
+            </form>
+          </article>
         </section>
 
         <section class="dashboard-row student-layout">
@@ -85,11 +136,40 @@
           </article>
 
           <article class="panel-card">
-            <h2>Notas registradas</h2>
-            <div id="medicalNotesList" class="mini-list">
-              <p class="muted">Cargando notas...</p>
+            <h2>Vista para coach</h2>
+            <p>Este bloque replica solo las notas marcadas como visibles para el coach asignado.</p>
+            <div id="coachPreviewList" class="mini-list">
+              <p class="muted">Cargando vista compartida...</p>
             </div>
           </article>
+        </section>
+
+        <section class="panel-card">
+          <div class="table-header">
+            <div>
+              <h2>Notas registradas</h2>
+              <p class="muted" id="notesFilterHint">Filtra por tipo o visibilidad para revisar el historial con mas rapidez.</p>
+            </div>
+            <div class="filter-grid medical-filter-grid">
+              <div class="field inline-field">
+                <label for="noteTypeFilter">Tipo</label>
+                <select id="noteTypeFilter">
+                  <option value="">Todos</option>
+                </select>
+              </div>
+              <div class="field inline-field">
+                <label for="visibilityFilter">Visibilidad</label>
+                <select id="visibilityFilter">
+                  <option value="">Todas</option>
+                  <option value="coach">Visible para coach</option>
+                  <option value="admin">Solo admin</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="medicalNotesList" class="mini-list">
+            <p class="muted">Cargando notas...</p>
+          </div>
         </section>
       </div>
     </main>

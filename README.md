@@ -76,3 +76,4 @@ Admin ya puede abrir una ficha unificada por alumno, editar datos base y saltar 
 La ficha admin del alumno ya incluye acceso rapido al modulo de rutinas con el mismo contexto de alumno.
 Los modulos admin de progreso, resultados y datos medicos ya aceptan deep-link por `student_id`, incluyendo alumnos inactivos para seguimiento administrativo.
 El modulo admin de progreso ya filtra historial por rutina y ejercicio, resume tendencias rapidas y expone mejores marcas por ejercicio para cada alumno.
+El modulo admin de datos medicos ya resume consentimiento, contacto de emergencia, filtros por tipo/visibilidad y una vista previa exacta de las notas compartidas con coach.

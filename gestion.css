@@ -541,6 +541,10 @@ body {
   margin-bottom: 1rem;
 }
 
+.medical-filter-grid {
+  grid-template-columns: repeat(2, minmax(14rem, 1fr));
+}
+
 .filter-helper {
   align-self: end;
   margin: 0;
