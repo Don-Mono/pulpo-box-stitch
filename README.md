@@ -55,6 +55,7 @@ La rama de gestion incorpora una entrada privada inicial:
 - `/medical.html`: primera base del modulo de datos medicos sensibles.
 - `/coach.html`: primera vista privada para coach.
 - `/student.html`: primera vista privada para alumno.
+- `/change-password.html`: pantalla privada para que coach y alumno actualicen su clave cuando ya tienen sesion activa.
 - `/admin.html`: panel clasico de contenido, se mantiene compatible.
 
 El login acepta el admin actual por variables de entorno y tambien usuarios creados en Supabase Auth con perfil en `pb_profiles`.
@@ -69,6 +70,7 @@ El portal alumno ya puede filtrar su historial por rutina y ejercicio, ver tende
 El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios de sus rutinas asignadas, incluyendo una vista previa al registrar marcas.
 El portal alumno ya puede actualizar sus datos de contacto permitidos y su contacto de emergencia sin tocar coach, sede ni objetivo.
 El portal coach ya puede revisar resultados de sus alumnos asignados y guardar feedback tecnico sobre cada marca.
+Admin ya puede regenerar claves temporales para alumnos y coaches desde sus listados, y coach/alumno ya pueden cambiar su propia clave desde una vista privada.
 El coach ya cuenta con un modulo propio de rutinas para crear trabajo y asignarlo solo a sus alumnos activos.
 El coach ya puede reasignar o quitar alumnos dentro de rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
 El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, mediciones, marcas y notas medicas visibles para seguimiento.

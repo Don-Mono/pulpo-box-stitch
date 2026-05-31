@@ -81,9 +81,11 @@ function clearSessionCookie() {
 }
 
 function getSession(req) {
-  const { email: adminEmail, secret } = getAdminConfig();
   const token = parseCookies(req)[COOKIE_NAME];
   if (!token) return null;
+  const secret = String(process.env.SESSION_SECRET || "");
+  const adminEmail = String(process.env.ADMIN_EMAIL || "").toLowerCase();
+  if (secret.length < 32) return null;
 
   const [payload, signature] = token.split(".");
   if (!payload || !signature || sign(payload, secret) !== signature) return null;

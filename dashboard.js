@@ -4,6 +4,7 @@
   const intro = document.querySelector("#dashboardIntro");
   const userEmail = document.querySelector("#userEmail");
   const systemStatus = document.querySelector("#systemStatus");
+  const changePasswordLink = document.querySelector("#changePasswordLink");
   const logoutButton = document.querySelector("#logoutButton");
   const modules = Array.from(document.querySelectorAll("[data-module-role]"));
 
@@ -30,6 +31,7 @@
       : role === "coach"
         ? "Sesion validada. Ya tienes panel propio, feedback sobre resultados y un modulo dedicado para crear rutinas."
         : "Sesion validada. El panel alumno ya registra marcas sobre ejercicios de sus rutinas asignadas.";
+    changePasswordLink.hidden = !["coach", "student"].includes(role);
 
     modules.forEach((module) => {
       const allowedRoles = String(module.dataset.moduleRole || "").split(" ");

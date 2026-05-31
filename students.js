@@ -71,6 +71,7 @@
           <td>
             <div class="table-actions">
               <a class="button ghost compact-button" href="/student-detail.html?student_id=${encodeURIComponent(student.id)}">Ver ficha</a>
+              <button class="button ghost compact-button" data-student-reset="${escapeHtml(student.id)}" type="button">Resetear clave</button>
               <button class="button ghost compact-button" data-student-status="${escapeHtml(student.id)}" data-next-state="${nextState}" type="button">${actionLabel}</button>
             </div>
           </td>
@@ -151,7 +152,28 @@
     }
   }
 
+  async function resetStudentAccess(id) {
+    setStatus(studentStatus, "Regenerando clave temporal...");
+    try {
+      const response = await fetch("/api/admin/access-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, role: "student" }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo regenerar la clave.");
+      setStatus(studentStatus, `${payload.message} Nueva clave temporal: ${payload.temporaryPassword}`, "ok");
+    } catch (error) {
+      setStatus(studentStatus, error.message, "error");
+    }
+  }
+
   studentsBody.addEventListener("click", (event) => {
+    const resetButton = event.target.closest("[data-student-reset]");
+    if (resetButton) {
+      resetStudentAccess(resetButton.dataset.studentReset);
+      return;
+    }
     const button = event.target.closest("[data-student-status]");
     if (!button) return;
     updateStudentStatus(button.dataset.studentStatus, button.dataset.nextState === "true");

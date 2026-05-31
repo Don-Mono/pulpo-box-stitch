@@ -82,11 +82,13 @@ Primera implementacion:
 
 - `/login.html`: entrada central al sistema.
 - `/dashboard.html`: panel privado protegido.
+- `/change-password.html`: vista privada para que coach y alumno actualicen su propia clave cuando ya tienen sesion activa.
 - `/admin.html`: panel clasico de contenido, se mantiene disponible.
 - Rol activo inicial: `admin`.
 - Login extendido: usuarios creados en Supabase Auth pueden entrar si tienen perfil activo en `pb_profiles`.
 - Rol `student`: redirige a `/student.html` para ver rutinas asignadas y registrar resultados propios.
 - Rol `coach`: redirige a `/coach.html` para ver alumnos asignados y ultimas marcas.
+- Admin ya puede regenerar claves temporales para alumnos y coaches desde sus listados si olvidan el acceso.
 
 ### Etapa 2 - Alumnos y coaches
 
@@ -103,6 +105,7 @@ Primera implementacion de alumnos:
 
 - `/students.html`: pantalla privada para admin.
 - `/api/admin/students`: API para listar, crear y activar/desactivar alumnos.
+- `/api/admin/access-reset`: API protegida por rol admin para regenerar claves temporales de alumnos y coaches.
 - `/student-detail.html`: ficha privada de admin para editar datos base del alumno y abrir sus modulos operativos con contexto.
 - `/api/admin/student-detail`: API protegida por rol admin para cargar y actualizar la ficha del alumno.
 - `/coaches-admin.html`: pantalla privada para crear coaches.
@@ -162,6 +165,7 @@ Primera implementacion:
 - `/api/admin/results`: API para listar y guardar marcas de entrenamiento.
 - `/student.html`: permite al alumno registrar sus propios resultados.
 - `/api/student/overview`: API protegida por rol alumno.
+- `/api/auth/change-password`: API protegida para que coach y alumno cambien su propia clave mientras mantienen sesion activa.
 - Conecta alumno, rutina y ejercicio cuando esos datos existen.
 - El modulo admin ya acepta `student_id` en URL para entrar filtrado desde la ficha del alumno.
 - El alumno registra resultados sobre ejercicios reales de sus rutinas asignadas.
