@@ -27,7 +27,7 @@
         : "Tu panel de alumno ya existe para ver rutinas y registrar marcas personales.";
     userEmail.textContent = user.email || "";
     systemStatus.textContent = role === "admin"
-      ? "Base privada activa. Los modulos de alumnos, coaches, rutinas, resultados y progreso ya tienen esqueleto inicial."
+      ? "Base privada activa. Los modulos de alumnos, coaches, sedes, rutinas, resultados y progreso ya tienen base operativa."
       : role === "coach"
         ? "Sesion validada. Ya tienes panel propio, feedback sobre resultados y un modulo dedicado para crear rutinas."
         : "Sesion validada. El panel alumno ya registra marcas sobre ejercicios de sus rutinas asignadas.";

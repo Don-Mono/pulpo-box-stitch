@@ -24,6 +24,7 @@ function setupPayload() {
   return {
     students: [],
     coaches: [],
+    locations: [],
     setupRequired: true,
     message: "Para activar alumnos debes ejecutar primero supabase_management_schema.sql en Supabase.",
   };
@@ -95,12 +96,24 @@ async function listCoaches(supabase) {
   return profiles || [];
 }
 
+async function listLocations(supabase) {
+  const { data: locations, error } = await supabase
+    .from("pb_locations")
+    .select("id, name, is_active")
+    .order("name", { ascending: true })
+    .limit(100);
+
+  if (error) throw error;
+  return locations || [];
+}
+
 async function createStudent(supabase, body) {
   const fullName = clean(body.full_name, 120);
   const email = clean(body.email, 160).toLowerCase();
   const phone = clean(body.phone, 40);
   const goal = clean(body.goal, 280);
   const primaryCoachId = clean(body.primary_coach_id, 90) || null;
+  const locationId = clean(body.location_id, 90) || null;
   const heightCm = body.height_cm === "" || body.height_cm == null ? null : Number(body.height_cm);
   const currentWeightKg = body.current_weight_kg === "" || body.current_weight_kg == null ? null : Number(body.current_weight_kg);
 
@@ -156,6 +169,7 @@ async function createStudent(supabase, body) {
 
     const { error: studentError } = await supabase.from("pb_students").insert({
       profile_id: userId,
+      location_id: locationId,
       primary_coach_id: primaryCoachId,
       goal,
       height_cm: heightCm,
@@ -204,11 +218,12 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "GET") {
       try {
-        const [students, coaches] = await Promise.all([
+        const [students, coaches, locations] = await Promise.all([
           listStudents(supabase),
           listCoaches(supabase),
+          listLocations(supabase),
         ]);
-        return json(res, 200, { students, coaches, setupRequired: false });
+        return json(res, 200, { students, coaches, locations, setupRequired: false });
       } catch (error) {
         if (isMissingManagementSchema(error)) return json(res, 200, setupPayload());
         throw error;

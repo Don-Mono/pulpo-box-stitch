@@ -47,6 +47,7 @@ La rama de gestion incorpora una entrada privada inicial:
 - `/student-detail.html`: ficha admin para editar un alumno y abrir sus modulos con contexto.
 - `/coaches-admin.html`: primera base del modulo coaches.
 - `/coach-detail.html`: ficha admin para editar un coach y revisar alumnos, rutinas y actividad reciente.
+- `/locations-admin.html`: base privada para crear, editar y activar/desactivar sedes.
 - `/workouts.html`: primera base del modulo rutinas.
 - `/api/admin/exercises`: biblioteca base de ejercicios para el creador de rutinas.
 - `/exercises.html`: administracion basica de ejercicios personalizados.
@@ -71,6 +72,7 @@ El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejerc
 El portal alumno ya puede actualizar sus datos de contacto permitidos y su contacto de emergencia sin tocar coach, sede ni objetivo.
 El portal coach ya puede revisar resultados de sus alumnos asignados y guardar feedback tecnico sobre cada marca.
 Admin ya puede regenerar claves temporales para alumnos y coaches desde sus listados, y coach/alumno ya pueden cambiar su propia clave desde una vista privada.
+Admin ya puede crear, editar y desactivar sedes, y el alta inicial de alumnos ya permite asignarles una sede desde el mismo formulario.
 El coach ya cuenta con un modulo propio de rutinas para crear trabajo y asignarlo solo a sus alumnos activos.
 El coach ya puede reasignar o quitar alumnos dentro de rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
 El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, mediciones, marcas y notas medicas visibles para seguimiento.

@@ -7,6 +7,7 @@
   const refreshButton = document.querySelector("#refreshButton");
   const logoutButton = document.querySelector("#logoutButton");
   const coachSelect = document.querySelector("#primary_coach_id");
+  const locationSelect = document.querySelector("#location_id");
 
   let setupRequired = false;
 
@@ -88,6 +89,16 @@
     coachSelect.innerHTML = options.join("");
   }
 
+  function renderLocations(locations) {
+    const options = ['<option value="">Sin sede asignada</option>'];
+    locations
+      .filter((location) => location.is_active !== false)
+      .forEach((location) => {
+        options.push(`<option value="${escapeHtml(location.id)}">${escapeHtml(location.name)}</option>`);
+      });
+    locationSelect.innerHTML = options.join("");
+  }
+
   async function loadStudents() {
     renderEmpty("Cargando alumnos...");
     setupMessage.textContent = "Revisando tablas de gestion...";
@@ -100,10 +111,12 @@
         ? payload.message
         : "Modulo conectado. Ya puedes registrar alumnos cuando lo necesites.";
       renderCoaches(payload.coaches || []);
+      renderLocations(payload.locations || []);
       renderStudents(payload.students || []);
     } catch (error) {
       setupMessage.textContent = error.message;
       renderCoaches([]);
+      renderLocations([]);
       renderEmpty(error.message);
     }
   }
