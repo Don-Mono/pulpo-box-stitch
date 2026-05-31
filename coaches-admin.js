@@ -65,7 +65,12 @@
           <td>${escapeHtml(coach.specialty || "Pendiente")}</td>
           <td>${escapeHtml(coach.bio || "Pendiente")}</td>
           <td><span class="status-chip ${coach.is_active ? "is-active" : "is-inactive"}">${coach.is_active ? "Activo" : "Inactivo"}</span></td>
-          <td><button class="button ghost compact-button" data-coach-status="${escapeHtml(coach.id)}" data-next-state="${nextState}" type="button">${actionLabel}</button></td>
+          <td>
+            <div class="table-actions">
+              <a class="button ghost compact-button" href="/coach-detail.html?coach_id=${encodeURIComponent(coach.id)}">Ver ficha</a>
+              <button class="button ghost compact-button" data-coach-status="${escapeHtml(coach.id)}" data-next-state="${nextState}" type="button">${actionLabel}</button>
+            </div>
+          </td>
         </tr>
       `;
     }).join("");

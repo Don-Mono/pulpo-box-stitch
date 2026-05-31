@@ -107,12 +107,15 @@ Primera implementacion de alumnos:
 - `/api/admin/student-detail`: API protegida por rol admin para cargar y actualizar la ficha del alumno.
 - `/coaches-admin.html`: pantalla privada para crear coaches.
 - `/api/admin/coaches`: API para listar, crear y activar/desactivar coaches.
+- `/coach-detail.html`: ficha privada de admin para editar datos base del coach y revisar su contexto operativo.
+- `/api/admin/coach-detail`: API protegida por rol admin para cargar y actualizar la ficha del coach.
 - `/coach.html`: primera vista privada de coach.
 - `/api/coach/overview`: API protegida por rol coach.
 - `/coach-student.html`: ficha detallada para seguimiento individual desde coach.
 - `/api/coach/student-detail`: API protegida por rol coach para ver rutinas, mediciones, marcas y notas visibles de sus alumnos asignados.
 - La ficha del coach ya muestra descripcion, enfoque y enlaces de video dentro de los ejercicios asignados al alumno.
 - La ficha del coach ya filtra el historial por rutina y ejercicio, y entrega lectura rapida de tendencia sobre el filtro activo.
+- Admin ya puede entrar a una ficha unificada por coach desde el listado y revisar alumnos asignados, rutinas creadas y ultimas marcas relacionadas.
 - Admin ya puede entrar a una ficha unificada por alumno desde el listado y mantener el mismo `student_id` al abrir progreso, resultados o datos medicos.
 - La ficha admin del alumno ya incluye acceso rapido al modulo de rutinas manteniendo el mismo contexto de alumno.
 - La pantalla avisa si falta ejecutar el esquema de Supabase.
