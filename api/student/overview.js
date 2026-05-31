@@ -89,7 +89,7 @@ async function loadStudentOverview(supabase, studentId) {
   ] = await Promise.all([
     workoutIds.length ? supabase.from("pb_workouts").select("id, title, summary, workout_date, level").in("id", workoutIds) : Promise.resolve({ data: [], error: null }),
     workoutIds.length
-      ? supabase.from("pb_workout_exercises").select("workout_id, prescription, sets, reps, exercise_id").in("workout_id", workoutIds).order("position", { ascending: true })
+      ? supabase.from("pb_workout_exercises").select("workout_id, prescription, sets, reps, exercise_id, position, time_cap_seconds").in("workout_id", workoutIds).order("position", { ascending: true })
       : Promise.resolve({ data: [], error: null }),
   ]);
 
@@ -101,7 +101,7 @@ async function loadStudentOverview(supabase, studentId) {
     ...(workoutExercises || []).map((exercise) => exercise.exercise_id),
   ].filter(Boolean))];
   const { data: exercises, error: exercisesError } = exerciseIds.length
-    ? await supabase.from("pb_exercises").select("id, name").in("id", exerciseIds)
+    ? await supabase.from("pb_exercises").select("id, name, description, movement_type, video_url").in("id", exerciseIds)
     : { data: [], error: null };
 
   if (exercisesError) throw exercisesError;
@@ -113,9 +113,13 @@ async function loadStudentOverview(supabase, studentId) {
 
   (workoutExercises || []).forEach((item) => {
     const list = workoutExerciseMap.get(item.workout_id) || [];
+    const exercise = exerciseMap.get(item.exercise_id);
     list.push({
       ...item,
-      exercise_name: exerciseMap.get(item.exercise_id)?.name || "",
+      exercise_name: exercise?.name || "",
+      exercise_description: exercise?.description || "",
+      movement_type: exercise?.movement_type || "",
+      video_url: exercise?.video_url || "",
     });
     workoutExerciseMap.set(item.workout_id, list);
   });
@@ -132,6 +136,9 @@ async function loadStudentOverview(supabase, studentId) {
       ...result,
       workout_title: workoutMap.get(result.workout_id)?.title || "",
       exercise_name: exerciseMap.get(result.exercise_id)?.name || "",
+      exercise_description: exerciseMap.get(result.exercise_id)?.description || "",
+      movement_type: exerciseMap.get(result.exercise_id)?.movement_type || "",
+      video_url: exerciseMap.get(result.exercise_id)?.video_url || "",
     })),
     measurements: measurements || [],
     summary: {

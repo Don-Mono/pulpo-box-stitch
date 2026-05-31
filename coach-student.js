@@ -53,6 +53,17 @@
     return value == null ? "--" : `${formatNumber(value)} ${unit}`.trim();
   }
 
+  function safeExternalUrl(value) {
+    if (!value) return "";
+
+    try {
+      const url = new URL(String(value).trim());
+      return ["http:", "https:"].includes(url.protocol) ? url.toString() : "";
+    } catch {
+      return "";
+    }
+  }
+
   function formatDelta(current, baseline, unit) {
     if (current == null || baseline == null) return "--";
     const delta = Number(current) - Number(baseline);
@@ -69,6 +80,54 @@
       result.time_seconds ? `${result.time_seconds} seg` : "",
       result.score_text || "",
     ].filter(Boolean).join(" / ") || "Sin marca";
+  }
+
+  function buildExerciseMeta(exercise) {
+    return [
+      exercise.movement_type || "",
+      exercise.sets ? `${exercise.sets} series` : "",
+      exercise.reps || "",
+      exercise.time_cap_seconds ? `cap ${exercise.time_cap_seconds} seg` : "",
+    ].filter(Boolean);
+  }
+
+  function renderExerciseStack(exercises, emptyMessage = "Sin ejercicios cargados.") {
+    if (!exercises.length) {
+      return `<p class="muted">${escapeHtml(emptyMessage)}</p>`;
+    }
+
+    return `
+      <div class="exercise-stack">
+        ${exercises.map((exercise) => {
+          const meta = buildExerciseMeta(exercise);
+          const description = exercise.exercise_description || "";
+          const prescription = exercise.prescription || "";
+          const videoUrl = safeExternalUrl(exercise.video_url);
+
+          return `
+            <article class="exercise-item-card">
+              <div class="exercise-item-head">
+                <div>
+                  <h4 class="exercise-item-title">${escapeHtml(exercise.exercise_name || "Ejercicio")}</h4>
+                  ${meta.length ? `
+                    <div class="exercise-item-meta">
+                      ${meta.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
+                    </div>
+                  ` : ""}
+                </div>
+                ${videoUrl ? `
+                  <div class="exercise-item-actions">
+                    <a class="button ghost compact-button" href="${escapeHtml(videoUrl)}" rel="noreferrer noopener" target="_blank">Ver video</a>
+                  </div>
+                ` : ""}
+              </div>
+              ${description ? `<p class="exercise-item-copy">${escapeHtml(description)}</p>` : ""}
+              ${prescription ? `<p class="exercise-item-prescription"><strong>Indicacion:</strong> ${escapeHtml(prescription)}</p>` : ""}
+            </article>
+          `;
+        }).join("")}
+      </div>
+    `;
   }
 
   function getInitialStudentId() {
@@ -177,16 +236,6 @@
     assignmentsList.innerHTML = assignments.map((assignment) => {
       const workout = assignment.workout || {};
       const exercises = assignment.exercises || [];
-      const exerciseSummary = exercises.length
-        ? exercises.map((exercise) => {
-          const details = [
-            exercise.sets ? `${exercise.sets} series` : "",
-            exercise.reps || "",
-            exercise.prescription || "",
-          ].filter(Boolean).join(" / ");
-          return `<li><strong>${escapeHtml(exercise.exercise_name || "Ejercicio")}</strong>${details ? `: ${escapeHtml(details)}` : ""}</li>`;
-        }).join("")
-        : "<li>Sin ejercicios cargados.</li>";
       const assignedAt = assignment.assigned_at ? new Date(assignment.assigned_at).toLocaleDateString("es-CL") : "Sin fecha";
 
       return `
@@ -200,7 +249,7 @@
             <span>${escapeHtml(workout.workout_date || assignedAt)}</span>
             <span>${exercises.length} ejercicio(s)</span>
           </div>
-          <ul class="check-list">${exerciseSummary}</ul>
+          ${renderExerciseStack(exercises, "Sin ejercicios cargados.")}
         </article>
       `;
     }).join("");

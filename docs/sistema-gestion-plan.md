@@ -111,6 +111,7 @@ Primera implementacion de alumnos:
 - `/api/coach/overview`: API protegida por rol coach.
 - `/coach-student.html`: ficha detallada para seguimiento individual desde coach.
 - `/api/coach/student-detail`: API protegida por rol coach para ver rutinas, mediciones, marcas y notas visibles de sus alumnos asignados.
+- La ficha del coach ya muestra descripcion, enfoque y enlaces de video dentro de los ejercicios asignados al alumno.
 - La ficha del coach ya filtra el historial por rutina y ejercicio, y entrega lectura rapida de tendencia sobre el filtro activo.
 - Admin ya puede entrar a una ficha unificada por alumno desde el listado y mantener el mismo `student_id` al abrir progreso, resultados o datos medicos.
 - La ficha admin del alumno ya incluye acceso rapido al modulo de rutinas manteniendo el mismo contexto de alumno.
@@ -162,6 +163,7 @@ Primera implementacion:
 - El modulo admin ya acepta `student_id` en URL para entrar filtrado desde la ficha del alumno.
 - El alumno registra resultados sobre ejercicios reales de sus rutinas asignadas.
 - El portal alumno ya filtra historial por rutina y ejercicio, resume tendencia y muestra feedback del coach dentro de sus registros.
+- El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios asignados, incluyendo una vista previa contextual al registrar una marca.
 - El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
 
 ### Etapa 5 - Progreso

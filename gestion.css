@@ -370,6 +370,90 @@ body {
   margin-top: 0;
 }
 
+.exercise-preview-card {
+  background: rgba(15, 23, 42, 0.035);
+  border: 1px solid var(--pb-line);
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.9rem;
+}
+
+.exercise-preview-card > .muted,
+.exercise-preview-card > p {
+  margin: 0;
+}
+
+.exercise-stack {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.exercise-item-card {
+  background: #f8fbfd;
+  border: 1px solid var(--pb-line);
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.9rem;
+}
+
+.exercise-item-head {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.exercise-item-title {
+  color: var(--pb-dark);
+  font-family: Teko, Impact, sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.exercise-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+}
+
+.exercise-item-meta span {
+  background: #edf4f7;
+  border-radius: 999px;
+  color: var(--pb-ink);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 0.32rem 0.68rem;
+  text-transform: uppercase;
+}
+
+.exercise-item-copy,
+.exercise-item-prescription {
+  line-height: 1.55;
+  margin: 0;
+}
+
+.exercise-item-copy {
+  color: var(--pb-muted) !important;
+}
+
+.exercise-item-prescription {
+  color: var(--pb-ink) !important;
+  font-weight: 700;
+}
+
+.exercise-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
 .exercise-library-box h3 {
   color: var(--pb-dark);
   font-family: Teko, Impact, sans-serif;

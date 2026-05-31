@@ -166,10 +166,10 @@ async function loadStudentDetail(supabase, coachId, studentId) {
       ? supabase.from("pb_workouts").select("id, title, summary, workout_date, level").in("id", workoutIds)
       : Promise.resolve({ data: [], error: null }),
     exerciseIds.length
-      ? supabase.from("pb_exercises").select("id, name").in("id", exerciseIds)
+      ? supabase.from("pb_exercises").select("id, name, description, movement_type, video_url").in("id", exerciseIds)
       : Promise.resolve({ data: [], error: null }),
     workoutIds.length
-      ? supabase.from("pb_workout_exercises").select("workout_id, exercise_id, prescription, sets, reps, position").in("workout_id", workoutIds).order("position", { ascending: true })
+      ? supabase.from("pb_workout_exercises").select("workout_id, exercise_id, prescription, sets, reps, position, time_cap_seconds").in("workout_id", workoutIds).order("position", { ascending: true })
       : Promise.resolve({ data: [], error: null }),
     locationId
       ? supabase.from("pb_locations").select("id, name").eq("id", locationId).maybeSingle()
@@ -184,7 +184,7 @@ async function loadStudentDetail(supabase, coachId, studentId) {
   const workoutExerciseIds = [...new Set((workoutExercises || []).map((exercise) => exercise.exercise_id).filter(Boolean))];
   const extraExerciseIds = workoutExerciseIds.filter((id) => !exerciseIds.includes(id));
   const { data: extraExercises, error: extraExercisesError } = extraExerciseIds.length
-    ? await supabase.from("pb_exercises").select("id, name").in("id", extraExerciseIds)
+    ? await supabase.from("pb_exercises").select("id, name, description, movement_type, video_url").in("id", extraExerciseIds)
     : { data: [], error: null };
 
   if (extraExercisesError) throw extraExercisesError;
@@ -195,9 +195,13 @@ async function loadStudentDetail(supabase, coachId, studentId) {
 
   (workoutExercises || []).forEach((item) => {
     const list = workoutExerciseMap.get(item.workout_id) || [];
+    const exercise = exerciseMap.get(item.exercise_id);
     list.push({
       ...item,
-      exercise_name: exerciseMap.get(item.exercise_id)?.name || "",
+      exercise_name: exercise?.name || "",
+      exercise_description: exercise?.description || "",
+      movement_type: exercise?.movement_type || "",
+      video_url: exercise?.video_url || "",
     });
     workoutExerciseMap.set(item.workout_id, list);
   });
@@ -226,6 +230,9 @@ async function loadStudentDetail(supabase, coachId, studentId) {
       ...result,
       workout_title: workoutMap.get(result.workout_id)?.title || "",
       exercise_name: exerciseMap.get(result.exercise_id)?.name || "",
+      exercise_description: exerciseMap.get(result.exercise_id)?.description || "",
+      movement_type: exerciseMap.get(result.exercise_id)?.movement_type || "",
+      video_url: exerciseMap.get(result.exercise_id)?.video_url || "",
     })),
     summary: {
       latest_weight_kg: latestMeasurement?.body_weight_kg || studentDetails?.current_weight_kg || null,

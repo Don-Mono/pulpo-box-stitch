@@ -7,6 +7,7 @@
   const workoutSelect = document.querySelector("#workout_id");
   const exerciseSelect = document.querySelector("#exercise_id");
   const exerciseHint = document.querySelector("#exerciseHint");
+  const exercisePreviewCard = document.querySelector("#exercisePreviewCard");
   const studentResultForm = document.querySelector("#studentResultForm");
   const resultStatus = document.querySelector("#resultStatus");
   const workoutHistoryFilter = document.querySelector("#workoutHistoryFilter");
@@ -49,6 +50,17 @@
     return value == null ? "--" : `${formatNumber(value)} ${unit}`.trim();
   }
 
+  function safeExternalUrl(value) {
+    if (!value) return "";
+
+    try {
+      const url = new URL(String(value).trim());
+      return ["http:", "https:"].includes(url.protocol) ? url.toString() : "";
+    } catch {
+      return "";
+    }
+  }
+
   function formatDelta(current, baseline, unit) {
     if (current == null || baseline == null) return "--";
     const delta = Number(current) - Number(baseline);
@@ -65,6 +77,81 @@
       result.time_seconds ? `${result.time_seconds} seg` : "",
       result.score_text || "",
     ].filter(Boolean).join(" / ") || "Sin marca";
+  }
+
+  function buildExerciseMeta(exercise) {
+    return [
+      exercise.movement_type || "",
+      exercise.sets ? `${exercise.sets} series` : "",
+      exercise.reps || "",
+      exercise.time_cap_seconds ? `cap ${exercise.time_cap_seconds} seg` : "",
+    ].filter(Boolean);
+  }
+
+  function renderExerciseStack(exercises, emptyMessage = "Sin ejercicios cargados.") {
+    if (!exercises.length) {
+      return `<p class="muted">${escapeHtml(emptyMessage)}</p>`;
+    }
+
+    return `
+      <div class="exercise-stack">
+        ${exercises.map((exercise) => {
+          const meta = buildExerciseMeta(exercise);
+          const description = exercise.exercise_description || "";
+          const prescription = exercise.prescription || "";
+          const videoUrl = safeExternalUrl(exercise.video_url);
+
+          return `
+            <article class="exercise-item-card">
+              <div class="exercise-item-head">
+                <div>
+                  <h4 class="exercise-item-title">${escapeHtml(exercise.exercise_name || "Ejercicio")}</h4>
+                  ${meta.length ? `
+                    <div class="exercise-item-meta">
+                      ${meta.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
+                    </div>
+                  ` : ""}
+                </div>
+                ${videoUrl ? `
+                  <div class="exercise-item-actions">
+                    <a class="button ghost compact-button" href="${escapeHtml(videoUrl)}" rel="noreferrer noopener" target="_blank">Ver video</a>
+                  </div>
+                ` : ""}
+              </div>
+              ${description ? `<p class="exercise-item-copy">${escapeHtml(description)}</p>` : ""}
+              ${prescription ? `<p class="exercise-item-prescription"><strong>Indicacion:</strong> ${escapeHtml(prescription)}</p>` : ""}
+            </article>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  function renderSelectedExercisePreview() {
+    const workoutId = workoutSelect.value;
+    const selectedExerciseId = exerciseSelect.value;
+    const assignment = assignmentsMap.get(workoutId);
+    const exercises = assignment?.exercises || [];
+
+    if (!workoutId) {
+      exercisePreviewCard.innerHTML = '<p class="muted">Selecciona una rutina para revisar la descripcion y el video del ejercicio.</p>';
+      return;
+    }
+
+    if (!selectedExerciseId) {
+      exercisePreviewCard.innerHTML = exercises.length
+        ? '<p class="muted">Selecciona un ejercicio para revisar descripcion, enfoque y video disponible antes de guardar tu marca.</p>'
+        : '<p class="muted">Esta rutina aun no tiene ejercicios detallados.</p>';
+      return;
+    }
+
+    const selectedExercise = exercises.find((exercise) => exercise.exercise_id === selectedExerciseId);
+    if (!selectedExercise) {
+      exercisePreviewCard.innerHTML = '<p class="muted">No se encontro informacion detallada para este ejercicio.</p>';
+      return;
+    }
+
+    exercisePreviewCard.innerHTML = renderExerciseStack([selectedExercise]);
   }
 
   async function requireStudentSession() {
@@ -118,6 +205,7 @@
       workoutHistoryFilter.innerHTML = '<option value="">Todas las rutinas</option>';
       exerciseHistoryFilter.innerHTML = '<option value="">Todos los ejercicios</option>';
       exerciseHint.textContent = "Cuando tengas una rutina asignada, aqui podras elegir sus ejercicios.";
+      renderSelectedExercisePreview();
       return;
     }
 
@@ -129,16 +217,6 @@
     assignmentsList.innerHTML = assignments.map((assignment) => {
       const workout = assignment.workout || {};
       const exercises = assignment.exercises || [];
-      const exerciseSummary = exercises.length
-        ? exercises.map((exercise) => {
-          const details = [
-            exercise.sets ? `${exercise.sets} series` : "",
-            exercise.reps || "",
-            exercise.prescription || "",
-          ].filter(Boolean).join(" / ");
-          return `<li><strong>${escapeHtml(exercise.exercise_name || "Ejercicio")}</strong>${details ? `: ${escapeHtml(details)}` : ""}</li>`;
-        }).join("")
-        : "<li>Revisa las indicaciones con tu coach.</li>";
 
       return `
         <article class="workout-card">
@@ -147,7 +225,7 @@
             <h3>${escapeHtml(workout.title || "Rutina asignada")}</h3>
             <p>${escapeHtml(workout.summary || "Sin resumen.")}</p>
           </div>
-          <ul class="check-list">${exerciseSummary}</ul>
+          ${renderExerciseStack(exercises, "Revisa las indicaciones con tu coach.")}
         </article>
       `;
     }).join("");
@@ -164,16 +242,19 @@
     const workoutId = workoutSelect.value;
     const assignment = assignmentsMap.get(workoutId);
     const exercises = assignment?.exercises || [];
+    const previousExerciseId = exerciseSelect.value;
 
     if (!workoutId) {
       exerciseSelect.innerHTML = '<option value="">Selecciona una rutina primero</option>';
       exerciseHint.textContent = "Elige la rutina para ver los ejercicios asignados.";
+      renderSelectedExercisePreview();
       return;
     }
 
     if (!exercises.length) {
       exerciseSelect.innerHTML = '<option value="">Rutina sin ejercicios</option>';
       exerciseHint.textContent = "Esta rutina aun no tiene ejercicios detallados.";
+      renderSelectedExercisePreview();
       return;
     }
 
@@ -189,7 +270,14 @@
       }),
     ].join("");
 
+    if (exercises.some((exercise) => exercise.exercise_id === previousExerciseId)) {
+      exerciseSelect.value = previousExerciseId;
+    } else if (exercises.length === 1 && exercises[0].exercise_id) {
+      exerciseSelect.value = exercises[0].exercise_id;
+    }
+
     exerciseHint.textContent = `${exercises.length} ejercicio(s) disponibles para esta rutina.`;
+    renderSelectedExercisePreview();
   }
 
   function renderMeasurements(measurements) {
@@ -418,6 +506,9 @@
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar.");
       studentResultForm.reset();
+      if (currentAssignments.length === 1 && currentAssignments[0]?.workout_id) {
+        workoutSelect.value = currentAssignments[0].workout_id;
+      }
       syncExerciseOptions();
       setStatus(resultStatus, payload.message, "ok");
       await loadOverview();
@@ -428,6 +519,7 @@
 
   studentResultForm.addEventListener("submit", saveResult);
   workoutSelect.addEventListener("change", syncExerciseOptions);
+  exerciseSelect.addEventListener("change", renderSelectedExercisePreview);
   workoutHistoryFilter.addEventListener("change", () => {
     const previousExerciseId = exerciseHistoryFilter.value;
     const exerciseOptions = collectExerciseHistoryOptions(workoutHistoryFilter.value);
