@@ -27,8 +27,16 @@ function isMissingManagementSchema(error) {
   );
 }
 
+function parseBody(req) {
+  if (typeof req.body === "string") return JSON.parse(req.body);
+  return req.body || {};
+}
+
 function setupPayload() {
   return {
+    studentProfile: null,
+    profile: null,
+    studentDetails: null,
     assignments: [],
     results: [],
     measurements: [],
@@ -46,10 +54,10 @@ async function loadStudentOverview(supabase, studentId) {
     { data: results, error: resultsError },
     { data: measurements, error: measurementsError },
   ] = await Promise.all([
-    supabase.from("pb_profiles").select("id, full_name, email").eq("id", studentId).maybeSingle(),
+    supabase.from("pb_profiles").select("id, full_name, email, phone").eq("id", studentId).maybeSingle(),
     supabase
       .from("pb_students")
-      .select("goal, height_cm, current_weight_kg")
+      .select("goal, height_cm, current_weight_kg, emergency_contact_name, emergency_contact_phone, location_id, primary_coach_id")
       .eq("profile_id", studentId)
       .maybeSingle(),
     supabase
@@ -82,17 +90,35 @@ async function loadStudentOverview(supabase, studentId) {
     ...(assignments || []).map((assignment) => assignment.workout_id),
     ...(results || []).map((result) => result.workout_id),
   ].filter(Boolean))];
+  const coachId = studentDetails?.primary_coach_id || "";
+  const locationId = studentDetails?.location_id || "";
 
   const [
+    { data: coachProfile, error: coachError },
+    { data: location, error: locationError },
     { data: workouts, error: workoutsError },
     { data: workoutExercises, error: workoutExercisesError },
   ] = await Promise.all([
-    workoutIds.length ? supabase.from("pb_workouts").select("id, title, summary, workout_date, level").in("id", workoutIds) : Promise.resolve({ data: [], error: null }),
+    coachId
+      ? supabase.from("pb_profiles").select("id, full_name").eq("id", coachId).eq("role", "coach").maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    locationId
+      ? supabase.from("pb_locations").select("id, name").eq("id", locationId).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
     workoutIds.length
-      ? supabase.from("pb_workout_exercises").select("workout_id, prescription, sets, reps, exercise_id, position, time_cap_seconds").in("workout_id", workoutIds).order("position", { ascending: true })
+      ? supabase.from("pb_workouts").select("id, title, summary, workout_date, level").in("id", workoutIds)
+      : Promise.resolve({ data: [], error: null }),
+    workoutIds.length
+      ? supabase
+        .from("pb_workout_exercises")
+        .select("workout_id, prescription, sets, reps, exercise_id, position, time_cap_seconds")
+        .in("workout_id", workoutIds)
+        .order("position", { ascending: true })
       : Promise.resolve({ data: [], error: null }),
   ]);
 
+  if (coachError) throw coachError;
+  if (locationError) throw locationError;
   if (workoutsError) throw workoutsError;
   if (workoutExercisesError) throw workoutExercisesError;
 
@@ -124,7 +150,22 @@ async function loadStudentOverview(supabase, studentId) {
     workoutExerciseMap.set(item.workout_id, list);
   });
 
+  const studentProfile = profile
+    ? {
+      id: profile.id,
+      full_name: profile.full_name || "",
+      email: profile.email || "",
+      phone: profile.phone || "",
+      goal: studentDetails?.goal || "",
+      emergency_contact_name: studentDetails?.emergency_contact_name || "",
+      emergency_contact_phone: studentDetails?.emergency_contact_phone || "",
+      primary_coach_name: coachProfile?.full_name || "",
+      location_name: location?.name || "",
+    }
+    : null;
+
   return {
+    studentProfile,
     profile,
     studentDetails: studentDetails || null,
     assignments: (assignments || []).map((assignment) => ({
@@ -149,6 +190,50 @@ async function loadStudentOverview(supabase, studentId) {
       measurement_count: measurements?.length || 0,
     },
   };
+}
+
+async function updateStudentProfile(supabase, studentId, body) {
+  const phone = clean(body.phone, 40);
+  const emergencyContactName = clean(body.emergency_contact_name, 120);
+  const emergencyContactPhone = clean(body.emergency_contact_phone, 40);
+  const timestamp = new Date().toISOString();
+
+  const { data: currentStudent, error: currentStudentError } = await supabase
+    .from("pb_students")
+    .select("profile_id")
+    .eq("profile_id", studentId)
+    .maybeSingle();
+
+  if (currentStudentError) throw currentStudentError;
+  if (!currentStudent) {
+    const error = new Error("No encontramos tu ficha de alumno para actualizar.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const { error: profileError } = await supabase
+    .from("pb_profiles")
+    .update({
+      phone,
+      updated_at: timestamp,
+    })
+    .eq("id", studentId)
+    .eq("role", "student");
+
+  if (profileError) throw profileError;
+
+  const { error: studentError } = await supabase
+    .from("pb_students")
+    .update({
+      emergency_contact_name: emergencyContactName,
+      emergency_contact_phone: emergencyContactPhone,
+      updated_at: timestamp,
+    })
+    .eq("profile_id", studentId);
+
+  if (studentError) throw studentError;
+
+  return { id: studentId };
 }
 
 async function createStudentResult(supabase, studentId, body) {
@@ -245,8 +330,23 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    if (req.method === "PATCH") {
+      const body = parseBody(req);
+      try {
+        const updated = await updateStudentProfile(supabase, studentId, body);
+        return json(res, 200, {
+          ok: true,
+          message: "Tus datos de contacto fueron actualizados correctamente.",
+          profile: updated,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
     if (req.method === "POST") {
-      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      const body = parseBody(req);
       try {
         const created = await createStudentResult(supabase, studentId, body);
         return json(res, 201, {
@@ -260,7 +360,7 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    res.setHeader("Allow", "GET, POST");
+    res.setHeader("Allow", "GET, PATCH, POST");
     return json(res, 405, { error: "Method not allowed" });
   } catch (error) {
     console.error("Student overview endpoint failed", error);

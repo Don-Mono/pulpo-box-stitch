@@ -37,6 +37,44 @@
           </div>
         </section>
 
+        <section class="dashboard-row student-layout">
+          <article class="panel-card">
+            <h2>Mis datos</h2>
+            <p>Actualiza tu contacto y emergencia sin afectar tus rutinas ni tu historial.</p>
+            <form class="student-form" id="studentProfileForm">
+              <div class="field">
+                <label for="profile_full_name">Nombre</label>
+                <input id="profile_full_name" name="full_name" readonly />
+              </div>
+              <div class="field">
+                <label for="profile_email">Email</label>
+                <input id="profile_email" name="email" readonly />
+              </div>
+              <div class="field">
+                <label for="profile_phone">Telefono</label>
+                <input id="profile_phone" name="phone" placeholder="+56 9 ..." />
+              </div>
+              <div class="field">
+                <label for="profile_emergency_contact_name">Contacto de emergencia</label>
+                <input id="profile_emergency_contact_name" name="emergency_contact_name" placeholder="Nombre de emergencia" />
+              </div>
+              <div class="field">
+                <label for="profile_emergency_contact_phone">Telefono de emergencia</label>
+                <input id="profile_emergency_contact_phone" name="emergency_contact_phone" placeholder="+56 9 ..." />
+              </div>
+              <span class="status" id="profileStatus"></span>
+              <button class="button ghost" id="saveProfileButton" type="submit">Guardar mis datos</button>
+            </form>
+          </article>
+
+          <article class="panel-card">
+            <h2>Mi contexto</h2>
+            <div id="profileContextCard" class="mini-list">
+              <p class="muted">Cargando contexto...</p>
+            </div>
+          </article>
+        </section>
+
         <section class="panel-card">
           <div class="table-header">
             <div>

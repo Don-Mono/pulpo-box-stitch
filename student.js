@@ -2,6 +2,10 @@
   const studentTitle = document.querySelector("#studentTitle");
   const setupMessage = document.querySelector("#setupMessage");
   const userEmail = document.querySelector("#userEmail");
+  const studentProfileForm = document.querySelector("#studentProfileForm");
+  const profileStatus = document.querySelector("#profileStatus");
+  const saveProfileButton = document.querySelector("#saveProfileButton");
+  const profileContextCard = document.querySelector("#profileContextCard");
   const summaryGrid = document.querySelector("#summaryGrid");
   const assignmentsList = document.querySelector("#assignmentsList");
   const workoutSelect = document.querySelector("#workout_id");
@@ -19,6 +23,7 @@
   const logoutButton = document.querySelector("#logoutButton");
 
   let setupRequired = false;
+  let currentProfile = null;
   let assignmentsMap = new Map();
   let currentAssignments = [];
   let currentResults = [];
@@ -170,6 +175,42 @@
     userEmail.textContent = payload.user.email || "";
     studentTitle.textContent = payload.user.name ? `Hola, ${payload.user.name}` : "Mi entrenamiento";
     return payload.user;
+  }
+
+  function renderProfile(profile) {
+    currentProfile = profile || null;
+    studentProfileForm.full_name.value = profile?.full_name || "";
+    studentProfileForm.email.value = profile?.email || "";
+    studentProfileForm.phone.value = profile?.phone || "";
+    studentProfileForm.emergency_contact_name.value = profile?.emergency_contact_name || "";
+    studentProfileForm.emergency_contact_phone.value = profile?.emergency_contact_phone || "";
+    saveProfileButton.disabled = !profile;
+
+    if (!profile) {
+      profileContextCard.innerHTML = '<p class="muted">No encontramos tu contexto aun. Cuando la base este completa aqui veras sede, coach y objetivo.</p>';
+      return;
+    }
+
+    profileContextCard.innerHTML = `
+      <article class="mini-list-item">
+        <strong>${escapeHtml(profile.full_name || "Alumno")}</strong>
+        <span>${escapeHtml(profile.goal || "Objetivo pendiente")}</span>
+        <small>${escapeHtml([profile.email, profile.phone].filter(Boolean).join(" / ") || "Sin contacto principal")}</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Coach y sede</strong>
+        <span>${escapeHtml(profile.primary_coach_name || "Sin coach asignado")}</span>
+        <small>${escapeHtml(profile.location_name || "Sin sede asignada")}</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Emergencia</strong>
+        <span>${escapeHtml(
+          [profile.emergency_contact_name, profile.emergency_contact_phone].filter(Boolean).join(" / ")
+          || "Sin contacto de emergencia"
+        )}</span>
+        <small>Si necesitas cambiar coach, sede u objetivo, solicita apoyo al equipo admin.</small>
+      </article>
+    `;
   }
 
   function renderSummary(summary, measurements) {
@@ -459,22 +500,28 @@
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo cargar tu panel.");
 
       setupRequired = Boolean(payload.setupRequired);
+      currentProfile = payload.studentProfile || null;
       currentResults = payload.results || [];
+      currentMeasurements = payload.measurements || [];
       currentSummary = payload.summary || null;
 
       setupMessage.textContent = setupRequired
         ? payload.message
-        : "Panel listo. Revisa tu progreso, tus rutinas y registra tus marcas.";
-      renderSummary(currentSummary, payload.measurements || []);
+        : "Panel listo. Revisa tu progreso, tus rutinas, actualiza tus datos y registra tus marcas.";
+      renderProfile(currentProfile);
+      renderSummary(currentSummary, currentMeasurements);
       renderAssignments(payload.assignments || []);
-      renderMeasurements(payload.measurements || []);
+      renderMeasurements(currentMeasurements);
       syncHistoryFilters();
+      setStatus(profileStatus, "");
     } catch (error) {
       setupMessage.textContent = error.message;
+      currentProfile = null;
       currentAssignments = [];
       currentResults = [];
       currentMeasurements = [];
       currentSummary = null;
+      renderProfile(null);
       renderSummary(null, []);
       renderAssignments([]);
       renderResults([]);
@@ -483,6 +530,38 @@
       exerciseHistoryFilter.innerHTML = '<option value="">Todos los ejercicios</option>';
       resultsFilterHint.textContent = "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
       renderResultsSummary([]);
+      setStatus(profileStatus, error.message, "error");
+    }
+  }
+
+  async function saveProfile(event) {
+    event.preventDefault();
+    if (setupRequired) {
+      setStatus(profileStatus, "Tu panel aun no esta activo en Supabase.", "error");
+      return;
+    }
+
+    if (!currentProfile) {
+      setStatus(profileStatus, "Todavia no hay perfil disponible para actualizar.", "error");
+      return;
+    }
+
+    setStatus(profileStatus, "Guardando tus datos...");
+    const formData = new FormData(studentProfileForm);
+    const body = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await fetch("/api/student/overview", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudieron guardar tus datos.");
+      setStatus(profileStatus, payload.message || "Tus datos fueron actualizados.", "ok");
+      await loadOverview();
+    } catch (error) {
+      setStatus(profileStatus, error.message, "error");
     }
   }
 
@@ -517,6 +596,7 @@
     }
   }
 
+  studentProfileForm.addEventListener("submit", saveProfile);
   studentResultForm.addEventListener("submit", saveResult);
   workoutSelect.addEventListener("change", syncExerciseOptions);
   exerciseSelect.addEventListener("change", renderSelectedExercisePreview);

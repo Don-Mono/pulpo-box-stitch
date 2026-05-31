@@ -165,6 +165,7 @@ Primera implementacion:
 - Conecta alumno, rutina y ejercicio cuando esos datos existen.
 - El modulo admin ya acepta `student_id` en URL para entrar filtrado desde la ficha del alumno.
 - El alumno registra resultados sobre ejercicios reales de sus rutinas asignadas.
+- El alumno ya puede actualizar su telefono y contacto de emergencia desde su propio portal, manteniendo coach, sede y objetivo como datos administrados por el equipo.
 - El portal alumno ya filtra historial por rutina y ejercicio, resume tendencia y muestra feedback del coach dentro de sus registros.
 - El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios asignados, incluyendo una vista previa contextual al registrar una marca.
 - El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
