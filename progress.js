@@ -19,6 +19,8 @@
   const exerciseFilter = document.querySelector("#exerciseFilter");
   const resultsFilterHint = document.querySelector("#resultsFilterHint");
   const resultsSummaryGrid = document.querySelector("#resultsSummaryGrid");
+  const performanceTrendHint = document.querySelector("#performanceTrendHint");
+  const performanceTrendGrid = document.querySelector("#performanceTrendGrid");
   const personalBestsList = document.querySelector("#personalBestsList");
   const resultsBody = document.querySelector("#resultsBody");
   const refreshButton = document.querySelector("#refreshButton");
@@ -86,6 +88,12 @@
 
   function formatDate(value) {
     return value ? new Date(value).toLocaleDateString("es-CL") : "Sin fecha";
+  }
+
+  function getTrendDeltaLabel(delta, unit) {
+    if (!Number.isFinite(delta)) return "--";
+    const prefix = delta > 0 ? "+" : "";
+    return `${prefix}${formatNumber(delta)} ${unit}`.trim();
   }
 
   function formatDelta(current, baseline, unit) {
@@ -234,7 +242,7 @@
     const delta = endLabel.value - startLabel.value;
     const deltaPrefix = delta > 0 ? "+" : "";
 
-    metaElement.textContent = `${entries.length} mediciones · ${deltaPrefix}${formatNumber(delta)} ${config.unit}`;
+    metaElement.textContent = `${entries.length} mediciones | ${deltaPrefix}${formatNumber(delta)} ${config.unit}`;
     container.innerHTML = `
       <svg class="trend-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(config.label)}">
         <line class="trend-axis" x1="${paddingX}" y1="${baselineY}" x2="${width - paddingX}" y2="${baselineY}"></line>
@@ -381,9 +389,145 @@
       <article class="mini-list-item">
         <strong>${escapeHtml(result.exercise_name || "Ejercicio")}</strong>
         <span>${escapeHtml(formatMark(result))}</span>
-        <small>${escapeHtml(`${result.workout_title || "Sin rutina"} · ${formatDate(result.logged_at)}`)}</small>
+        <small>${escapeHtml(`${result.workout_title || "Sin rutina"} | ${formatDate(result.logged_at)}`)}</small>
       </article>
     `).join("");
+  }
+
+  function buildResultTrendCard(filteredResults, config) {
+    const entries = [...filteredResults]
+      .filter((result) => result[config.key] != null)
+      .reverse()
+      .map((result) => ({
+        value: Number(result[config.key]),
+        date: formatDate(result.logged_at),
+      }))
+      .filter((entry) => Number.isFinite(entry.value));
+
+    if (entries.length < 2) return "";
+
+    const width = 640;
+    const height = 220;
+    const paddingX = 24;
+    const paddingTop = 22;
+    const paddingBottom = 34;
+    const usableWidth = width - paddingX * 2;
+    const usableHeight = height - paddingTop - paddingBottom;
+    const values = entries.map((entry) => entry.value);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const spread = maxValue - minValue || 1;
+    const minRange = minValue - spread * 0.15;
+    const maxRange = maxValue + spread * 0.15;
+
+    const points = entries.map((entry, index) => {
+      const x = paddingX + (usableWidth * index) / Math.max(entries.length - 1, 1);
+      const normalized = (entry.value - minRange) / Math.max(maxRange - minRange, 1);
+      const y = height - paddingBottom - normalized * usableHeight;
+      return {
+        ...entry,
+        x: Number(x.toFixed(2)),
+        y: Number(y.toFixed(2)),
+      };
+    });
+
+    const polylinePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
+    const areaPoints = [
+      `${points[0].x},${height - paddingBottom}`,
+      ...points.map((point) => `${point.x},${point.y}`),
+      `${points[points.length - 1].x},${height - paddingBottom}`,
+    ].join(" ");
+    const baselineY = height - paddingBottom;
+    const startLabel = points[0];
+    const endLabel = points[points.length - 1];
+    const delta = endLabel.value - startLabel.value;
+
+    return `
+      <article class="trend-card">
+        <div class="trend-header">
+          <strong>${escapeHtml(config.title)}</strong>
+          <small>${escapeHtml(`${entries.length} registros | ${getTrendDeltaLabel(delta, config.unit)}`)}</small>
+        </div>
+        <div class="trend-chart">
+          <svg class="trend-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(config.label)}">
+            <line class="trend-axis" x1="${paddingX}" y1="${baselineY}" x2="${width - paddingX}" y2="${baselineY}"></line>
+            <polygon class="trend-area" points="${areaPoints}" fill="${config.areaColor}"></polygon>
+            <polyline class="trend-line" points="${polylinePoints}" stroke="${config.color}"></polyline>
+            ${points.map((point) => `<circle cx="${point.x}" cy="${point.y}" r="4.5" fill="${config.color}"></circle>`).join("")}
+            <text class="trend-label trend-label-start" x="${paddingX}" y="${height - 8}">${escapeHtml(startLabel.date)}</text>
+            <text class="trend-label trend-label-end" x="${width - paddingX}" y="${height - 8}" text-anchor="end">${escapeHtml(endLabel.date)}</text>
+            <text class="trend-value" x="${points[0].x}" y="${Math.max(points[0].y - 12, 14)}">${escapeHtml(`${formatNumber(startLabel.value)} ${config.unit}`)}</text>
+            <text class="trend-value" x="${points[points.length - 1].x}" y="${Math.max(points[points.length - 1].y - 12, 14)}" text-anchor="end">${escapeHtml(`${formatNumber(endLabel.value)} ${config.unit}`)}</text>
+          </svg>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderPerformanceTrendCharts(filteredResults) {
+    if (!filteredResults.length) {
+      performanceTrendHint.textContent = "Filtra por rutina o ejercicio para leer la evolucion de las marcas.";
+      performanceTrendGrid.innerHTML = `
+        <article class="trend-card trend-card-empty">
+          <div class="trend-chart">
+            <p class="muted">Todavia no hay registros suficientes para mostrar una curva de rendimiento.</p>
+          </div>
+        </article>
+      `;
+      return;
+    }
+
+    const distinctExercises = [...new Set(filteredResults.map((result) => result.exercise_name || "Ejercicio"))];
+    const chartConfigs = [
+      {
+        key: "weight_kg",
+        title: "Carga utilizada",
+        label: "Grafico de evolucion de carga",
+        unit: "kg",
+        color: "#19d0d8",
+        areaColor: "rgba(25, 208, 216, 0.18)",
+      },
+      {
+        key: "reps",
+        title: "Repeticiones",
+        label: "Grafico de evolucion de repeticiones",
+        unit: "reps",
+        color: "#d7ff18",
+        areaColor: "rgba(215, 255, 24, 0.18)",
+      },
+      {
+        key: "time_seconds",
+        title: "Tiempo",
+        label: "Grafico de evolucion de tiempo",
+        unit: "seg",
+        color: "#7cddff",
+        areaColor: "rgba(124, 221, 255, 0.2)",
+      },
+    ];
+
+    const cards = chartConfigs
+      .map((config) => buildResultTrendCard(filteredResults, config))
+      .filter(Boolean);
+
+    if (!cards.length) {
+      performanceTrendHint.textContent = "Se necesitan al menos 2 marcas comparables del mismo tipo para dibujar una curva.";
+      performanceTrendGrid.innerHTML = `
+        <article class="trend-card trend-card-empty">
+          <div class="trend-chart">
+            <p class="muted">Las marcas visibles aun no tienen suficientes datos comparables para graficar carga, repeticiones o tiempo.</p>
+          </div>
+        </article>
+      `;
+      return;
+    }
+
+    if (exerciseFilter.value || distinctExercises.length === 1) {
+      performanceTrendHint.textContent = `Lectura enfocada en ${distinctExercises[0] || "el ejercicio seleccionado"}.`;
+    } else {
+      performanceTrendHint.textContent = `${filteredResults.length} registros visibles | mezcla ${distinctExercises.length} ejercicios. Si quieres una curva mas precisa, filtra por un ejercicio.`;
+    }
+
+    performanceTrendGrid.innerHTML = cards.join("");
   }
 
   function renderResults(results) {
@@ -419,6 +563,7 @@
       : "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
 
     renderResultsSummary(filteredResults);
+    renderPerformanceTrendCharts(filteredResults);
     renderPersonalBests(filteredResults);
     renderResults(filteredResults);
   }
@@ -494,6 +639,7 @@
       exerciseFilter.innerHTML = '<option value="">Todos los ejercicios</option>';
       resultsFilterHint.textContent = "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
       renderResultsSummary([]);
+      renderPerformanceTrendCharts([]);
       renderPersonalBests([]);
       resultsBody.innerHTML = `<tr><td colspan="4">${escapeHtml(error.message)}</td></tr>`;
     }
