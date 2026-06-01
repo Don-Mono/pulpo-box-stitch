@@ -827,6 +827,80 @@ body {
   padding-left: 1.1rem;
 }
 
+.trend-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.trend-card {
+  background: #f8fbfd;
+  border: 1px solid var(--pb-line);
+  border-radius: 1.1rem;
+  padding: 1rem;
+}
+
+.trend-header {
+  align-items: baseline;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.trend-header strong {
+  color: var(--pb-ink);
+  font-size: 1rem;
+}
+
+.trend-header small {
+  color: var(--pb-muted);
+  font-weight: 800;
+}
+
+.trend-chart {
+  min-height: 13.5rem;
+}
+
+.trend-chart .muted {
+  margin: 0;
+}
+
+.trend-svg {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.trend-axis {
+  opacity: 0.5;
+  stroke: var(--pb-line);
+  stroke-width: 2;
+}
+
+.trend-area {
+  opacity: 1;
+}
+
+.trend-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.trend-label,
+.trend-value {
+  fill: var(--pb-muted);
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.trend-value {
+  fill: var(--pb-ink);
+}
+
 .hidden {
   display: none !important;
 }
@@ -858,6 +932,10 @@ body {
 
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trend-grid {
+    grid-template-columns: 1fr;
   }
 
   .form-grid-two,

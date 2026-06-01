@@ -11,6 +11,10 @@
   const saveMeasurementButton = document.querySelector("#saveMeasurementButton");
   const cancelMeasurementEditButton = document.querySelector("#cancelMeasurementEditButton");
   const measurementsList = document.querySelector("#measurementsList");
+  const weightTrendChart = document.querySelector("#weightTrendChart");
+  const waistTrendChart = document.querySelector("#waistTrendChart");
+  const weightTrendMeta = document.querySelector("#weightTrendMeta");
+  const waistTrendMeta = document.querySelector("#waistTrendMeta");
   const workoutFilter = document.querySelector("#workoutFilter");
   const exerciseFilter = document.querySelector("#exerciseFilter");
   const resultsFilterHint = document.querySelector("#resultsFilterHint");
@@ -179,6 +183,87 @@
         </article>
       `;
     }).join("");
+  }
+
+  function renderMeasurementTrend(container, metaElement, measurements, config) {
+    const entries = [...measurements]
+      .filter((measurement) => measurement[config.key] != null)
+      .reverse();
+
+    if (entries.length < 2) {
+      metaElement.textContent = "Se necesitan al menos 2 mediciones.";
+      container.innerHTML = '<p class="muted">Todavia no hay suficientes datos para graficar esta tendencia.</p>';
+      return;
+    }
+
+    const width = 640;
+    const height = 220;
+    const paddingX = 24;
+    const paddingTop = 22;
+    const paddingBottom = 34;
+    const usableWidth = width - paddingX * 2;
+    const usableHeight = height - paddingTop - paddingBottom;
+    const values = entries.map((entry) => Number(entry[config.key]));
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const spread = maxValue - minValue || 1;
+    const minRange = minValue - spread * 0.15;
+    const maxRange = maxValue + spread * 0.15;
+
+    const points = entries.map((entry, index) => {
+      const x = paddingX + (usableWidth * index) / Math.max(entries.length - 1, 1);
+      const normalized = (Number(entry[config.key]) - minRange) / Math.max(maxRange - minRange, 1);
+      const y = height - paddingBottom - normalized * usableHeight;
+      return {
+        x: Number(x.toFixed(2)),
+        y: Number(y.toFixed(2)),
+        value: Number(entry[config.key]),
+        date: formatDate(entry.measured_at),
+      };
+    });
+
+    const polylinePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
+    const areaPoints = [
+      `${points[0].x},${height - paddingBottom}`,
+      ...points.map((point) => `${point.x},${point.y}`),
+      `${points[points.length - 1].x},${height - paddingBottom}`,
+    ].join(" ");
+    const baselineY = height - paddingBottom;
+    const startLabel = points[0];
+    const endLabel = points[points.length - 1];
+    const delta = endLabel.value - startLabel.value;
+    const deltaPrefix = delta > 0 ? "+" : "";
+
+    metaElement.textContent = `${entries.length} mediciones · ${deltaPrefix}${formatNumber(delta)} ${config.unit}`;
+    container.innerHTML = `
+      <svg class="trend-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(config.label)}">
+        <line class="trend-axis" x1="${paddingX}" y1="${baselineY}" x2="${width - paddingX}" y2="${baselineY}"></line>
+        <polygon class="trend-area" points="${areaPoints}" fill="${config.areaColor}"></polygon>
+        <polyline class="trend-line" points="${polylinePoints}" stroke="${config.color}"></polyline>
+        ${points.map((point) => `<circle cx="${point.x}" cy="${point.y}" r="4.5" fill="${config.color}"></circle>`).join("")}
+        <text class="trend-label trend-label-start" x="${paddingX}" y="${height - 8}">${escapeHtml(startLabel.date)}</text>
+        <text class="trend-label trend-label-end" x="${width - paddingX}" y="${height - 8}" text-anchor="end">${escapeHtml(endLabel.date)}</text>
+        <text class="trend-value" x="${points[0].x}" y="${Math.max(points[0].y - 12, 14)}">${escapeHtml(`${formatNumber(startLabel.value)} ${config.unit}`)}</text>
+        <text class="trend-value" x="${points[points.length - 1].x}" y="${Math.max(points[points.length - 1].y - 12, 14)}" text-anchor="end">${escapeHtml(`${formatNumber(endLabel.value)} ${config.unit}`)}</text>
+      </svg>
+    `;
+  }
+
+  function renderMeasurementCharts(measurements) {
+    renderMeasurementTrend(weightTrendChart, weightTrendMeta, measurements, {
+      key: "body_weight_kg",
+      label: "Grafico de peso corporal",
+      unit: "kg",
+      color: "#19d0d8",
+      areaColor: "rgba(25, 208, 216, 0.18)",
+    });
+    renderMeasurementTrend(waistTrendChart, waistTrendMeta, measurements, {
+      key: "waist_cm",
+      label: "Grafico de cintura",
+      unit: "cm",
+      color: "#d7ff18",
+      areaColor: "rgba(215, 255, 24, 0.18)",
+    });
   }
 
   function resetMeasurementForm() {
@@ -389,6 +474,7 @@
       renderStudents(payload.students || [], selectedStudentId);
       renderSummary(currentSummary, currentMeasurements);
       renderMeasurements(currentMeasurements);
+      renderMeasurementCharts(currentMeasurements);
       if (editingMeasurementId && !measurementById.has(editingMeasurementId)) {
         resetMeasurementForm();
       }
@@ -403,6 +489,7 @@
       renderStudents([], "");
       renderSummary(null, []);
       renderMeasurements([]);
+      renderMeasurementCharts([]);
       workoutFilter.innerHTML = '<option value="">Todas las rutinas</option>';
       exerciseFilter.innerHTML = '<option value="">Todos los ejercicios</option>';
       resultsFilterHint.textContent = "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
