@@ -159,7 +159,7 @@ async function listResults(supabase, studentId) {
   };
 }
 
-async function createResult(supabase, body) {
+function normalizeResultInput(body) {
   const studentId = clean(body.student_id, 90);
   const workoutId = clean(body.workout_id, 90) || null;
   const exerciseId = clean(body.exercise_id, 90) || null;
@@ -183,12 +183,33 @@ async function createResult(supabase, body) {
     throw error;
   }
 
-  if (workoutId) {
+  return {
+    studentId,
+    workoutId,
+    exerciseId,
+    weightKg,
+    reps,
+    rounds,
+    timeSeconds,
+    scoreText,
+    studentNotes,
+    coachNotes,
+  };
+}
+
+async function validateResultLinks(supabase, resultInput) {
+  if (!resultInput.studentId) {
+    const error = new Error("Debes seleccionar un alumno.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (resultInput.workoutId) {
     const { data: assignment, error: assignmentError } = await supabase
       .from("pb_workout_assignments")
       .select("id")
-      .eq("student_id", studentId)
-      .eq("workout_id", workoutId)
+      .eq("student_id", resultInput.studentId)
+      .eq("workout_id", resultInput.workoutId)
       .maybeSingle();
 
     if (assignmentError) throw assignmentError;
@@ -199,12 +220,12 @@ async function createResult(supabase, body) {
     }
   }
 
-  if (workoutId && exerciseId) {
+  if (resultInput.workoutId && resultInput.exerciseId) {
     const { data: workoutExercise, error: workoutExerciseError } = await supabase
       .from("pb_workout_exercises")
       .select("id")
-      .eq("workout_id", workoutId)
-      .eq("exercise_id", exerciseId)
+      .eq("workout_id", resultInput.workoutId)
+      .eq("exercise_id", resultInput.exerciseId)
       .limit(1)
       .maybeSingle();
 
@@ -215,26 +236,105 @@ async function createResult(supabase, body) {
       throw error;
     }
   }
+}
+
+async function createResult(supabase, body) {
+  const resultInput = normalizeResultInput(body);
+  await validateResultLinks(supabase, resultInput);
 
   const { data, error } = await supabase
     .from("pb_performance_logs")
     .insert({
-      student_id: studentId,
-      workout_id: workoutId,
-      exercise_id: exerciseId,
-      weight_kg: weightKg,
-      reps,
-      rounds,
-      time_seconds: timeSeconds,
-      score_text: scoreText,
-      student_notes: studentNotes,
-      coach_notes: coachNotes,
+      student_id: resultInput.studentId,
+      workout_id: resultInput.workoutId,
+      exercise_id: resultInput.exerciseId,
+      weight_kg: resultInput.weightKg,
+      reps: resultInput.reps,
+      rounds: resultInput.rounds,
+      time_seconds: resultInput.timeSeconds,
+      score_text: resultInput.scoreText,
+      student_notes: resultInput.studentNotes,
+      coach_notes: resultInput.coachNotes,
     })
     .select("id")
     .single();
 
   if (error) throw error;
   return data;
+}
+
+async function updateResult(supabase, body) {
+  const resultId = clean(body.result_id, 90);
+  if (!resultId) {
+    const error = new Error("Debes indicar el resultado a editar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { data: existingResult, error: existingError } = await supabase
+    .from("pb_performance_logs")
+    .select("id")
+    .eq("id", resultId)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (!existingResult?.id) {
+    const error = new Error("El resultado indicado no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const resultInput = normalizeResultInput(body);
+  await validateResultLinks(supabase, resultInput);
+
+  const { error: updateError } = await supabase
+    .from("pb_performance_logs")
+    .update({
+      student_id: resultInput.studentId,
+      workout_id: resultInput.workoutId,
+      exercise_id: resultInput.exerciseId,
+      weight_kg: resultInput.weightKg,
+      reps: resultInput.reps,
+      rounds: resultInput.rounds,
+      time_seconds: resultInput.timeSeconds,
+      score_text: resultInput.scoreText,
+      student_notes: resultInput.studentNotes,
+      coach_notes: resultInput.coachNotes,
+    })
+    .eq("id", resultId);
+
+  if (updateError) throw updateError;
+  return { id: resultId };
+}
+
+async function deleteResult(supabase, body) {
+  const resultId = clean(body.result_id, 90);
+  if (!resultId) {
+    const error = new Error("Debes indicar el resultado a eliminar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { data: existingResult, error: existingError } = await supabase
+    .from("pb_performance_logs")
+    .select("id")
+    .eq("id", resultId)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (!existingResult?.id) {
+    const error = new Error("El resultado indicado no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const { error: deleteError } = await supabase
+    .from("pb_performance_logs")
+    .delete()
+    .eq("id", resultId);
+
+  if (deleteError) throw deleteError;
+  return { id: resultId };
 }
 
 module.exports = async function handler(req, res) {
@@ -270,7 +370,37 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    res.setHeader("Allow", "GET, POST");
+    if (req.method === "PUT") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        const updated = await updateResult(supabase, body);
+        return json(res, 200, {
+          ok: true,
+          message: "Resultado actualizado correctamente.",
+          result: updated,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    if (req.method === "DELETE") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        const deleted = await deleteResult(supabase, body);
+        return json(res, 200, {
+          ok: true,
+          message: "Resultado eliminado correctamente.",
+          result: deleted,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    res.setHeader("Allow", "GET, POST, PUT, DELETE");
     return json(res, 405, { error: "Method not allowed" });
   } catch (error) {
     console.error("Admin results endpoint failed", error);

@@ -10,9 +10,17 @@
   const workoutSelect = document.querySelector("#workout_id");
   const exerciseSelect = document.querySelector("#exercise_id");
   const exerciseHint = document.querySelector("#exerciseHint");
+  const resultFormTitle = document.querySelector("#resultFormTitle");
+  const resultFormCopy = document.querySelector("#resultFormCopy");
+  const resultEditorMode = document.querySelector("#resultEditorMode");
+  const saveResultButton = document.querySelector("#saveResultButton");
+  const cancelResultEditButton = document.querySelector("#cancelResultEditButton");
 
   let setupRequired = false;
   let workoutExerciseMap = new Map();
+  let currentResults = [];
+  let resultById = new Map();
+  let editingResultId = "";
 
   function getInitialStudentId() {
     try {
@@ -36,6 +44,19 @@
   function setStatus(element, message, type = "") {
     element.textContent = message;
     element.className = `status ${type}`.trim();
+  }
+
+  function setResultEditorMode(mode, result = null) {
+    const isEditing = mode === "edit";
+    editingResultId = isEditing ? result?.id || "" : "";
+    resultEditorMode.classList.toggle("hidden", !isEditing);
+    resultEditorMode.textContent = isEditing ? "Edicion" : "Creacion";
+    resultFormTitle.textContent = isEditing ? "Editar resultado" : "Nuevo resultado";
+    resultFormCopy.textContent = isEditing
+      ? "Ajusta alumno, rutina, ejercicio y marca sin perder el historial operativo."
+      : "Este registro luego lo usaremos para graficos, marcas personales y seguimiento por ejercicio.";
+    saveResultButton.textContent = isEditing ? "Guardar cambios" : "Guardar resultado";
+    cancelResultEditButton.classList.toggle("hidden", !isEditing);
   }
 
   function escapeHtml(value) {
@@ -74,6 +95,7 @@
   function syncExerciseOptions() {
     const workoutId = workoutSelect.value;
     const exercises = workoutExerciseMap.get(workoutId) || [];
+    const previousExerciseId = exerciseSelect.value;
 
     if (!workoutId) {
       exerciseSelect.innerHTML = '<option value="">Sin ejercicio</option>';
@@ -99,14 +121,55 @@
       }),
     ].join("");
 
+    if (exercises.some((exercise) => exercise.exercise_id === previousExerciseId)) {
+      exerciseSelect.value = previousExerciseId;
+    }
+
     exerciseHint.textContent = `${exercises.length} ejercicio(s) disponibles para esta rutina.`;
   }
 
   function renderEmpty(message) {
-    resultsBody.innerHTML = `<tr><td colspan="5">${escapeHtml(message)}</td></tr>`;
+    currentResults = [];
+    resultById = new Map();
+    resultsBody.innerHTML = `<tr><td colspan="6">${escapeHtml(message)}</td></tr>`;
+  }
+
+  function resetResultForm() {
+    const preservedStudentId = studentSelect.value || getInitialStudentId();
+    resultForm.reset();
+    studentSelect.value = preservedStudentId;
+    workoutSelect.value = "";
+    syncExerciseOptions();
+    setResultEditorMode("create");
+  }
+
+  function populateResultForm(resultId) {
+    const result = resultById.get(resultId);
+    if (!result) {
+      setStatus(resultStatus, "No encontramos el resultado a editar.", "error");
+      return;
+    }
+
+    setResultEditorMode("edit", result);
+    studentSelect.value = result.student_id || "";
+    workoutSelect.value = result.workout_id || "";
+    syncExerciseOptions();
+    exerciseSelect.value = result.exercise_id || "";
+    resultForm.weight_kg.value = result.weight_kg ?? "";
+    resultForm.reps.value = result.reps ?? "";
+    resultForm.rounds.value = result.rounds ?? "";
+    resultForm.time_seconds.value = result.time_seconds ?? "";
+    resultForm.score_text.value = result.score_text || "";
+    resultForm.student_notes.value = result.student_notes || "";
+    resultForm.coach_notes.value = result.coach_notes || "";
+    setStatus(resultStatus, `Editando resultado de ${result.student_name}.`, "ok");
+    resultForm.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function renderResults(results) {
+    currentResults = results;
+    resultById = new Map(results.map((result) => [result.id, result]));
+
     if (!results.length) {
       renderEmpty("Todavia no hay resultados registrados.");
       return;
@@ -133,6 +196,12 @@
           <td>${escapeHtml(mark)}</td>
           <td>${escapeHtml(notes)}</td>
           <td>${escapeHtml(date)}</td>
+          <td>
+            <div class="detail-action-group">
+              <button class="button ghost compact-button" data-result-edit="${escapeHtml(result.id)}" type="button">Editar</button>
+              <button class="button ghost compact-button" data-result-delete="${escapeHtml(result.id)}" type="button">Eliminar</button>
+            </div>
+          </td>
         </tr>
       `;
     }).join("");
@@ -165,6 +234,9 @@
       });
       syncExerciseOptions();
       renderResults(payload.results || []);
+      if (editingResultId && !resultById.has(editingResultId)) {
+        resetResultForm();
+      }
       syncUrl(studentSelect.value);
     } catch (error) {
       setupMessage.textContent = error.message;
@@ -172,6 +244,8 @@
       fillSelect(workoutSelect, "Sin rutina", [], "title");
       fillSelect(exerciseSelect, "Sin ejercicio", [], "name");
       workoutExerciseMap = new Map();
+      currentResults = [];
+      resultById = new Map();
       exerciseHint.textContent = error.message;
       renderEmpty(error.message);
     }
@@ -184,22 +258,51 @@
       return;
     }
 
-    setStatus(resultStatus, "Guardando resultado...");
+    setStatus(resultStatus, editingResultId ? "Guardando cambios..." : "Guardando resultado...");
     const formData = new FormData(resultForm);
     const body = Object.fromEntries(formData.entries());
+    if (editingResultId) {
+      body.result_id = editingResultId;
+    }
 
     try {
       const response = await fetch("/api/admin/results", {
-        method: "POST",
+        method: editingResultId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar el resultado.");
-      resultForm.reset();
-      syncExerciseOptions();
+      const selectedStudentId = studentSelect.value;
+      resetResultForm();
+      studentSelect.value = selectedStudentId;
       setStatus(resultStatus, payload.message, "ok");
-      await loadResults();
+      await loadResults(selectedStudentId);
+    } catch (error) {
+      setStatus(resultStatus, error.message, "error");
+    }
+  }
+
+  async function deleteResult(resultId) {
+    if (!resultId) return;
+    const result = resultById.get(resultId);
+    if (!window.confirm(`Se eliminara el resultado de ${result?.student_name || "este alumno"} del ${result?.logged_at ? new Date(result.logged_at).toLocaleDateString("es-CL") : "registro seleccionado"}. Esta accion no se puede deshacer.`)) {
+      return;
+    }
+
+    setStatus(resultStatus, "Eliminando resultado...");
+    try {
+      const response = await fetch("/api/admin/results", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ result_id: resultId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo eliminar el resultado.");
+      const selectedStudentId = studentSelect.value;
+      if (editingResultId === resultId) resetResultForm();
+      setStatus(resultStatus, payload.message, "ok");
+      await loadResults(selectedStudentId);
     } catch (error) {
       setStatus(resultStatus, error.message, "error");
     }
@@ -208,6 +311,22 @@
   resultForm.addEventListener("submit", createResult);
   workoutSelect.addEventListener("change", syncExerciseOptions);
   studentSelect.addEventListener("change", () => loadResults(studentSelect.value));
+  resultsBody.addEventListener("click", (event) => {
+    const editButton = event.target.closest("[data-result-edit]");
+    if (editButton) {
+      populateResultForm(editButton.dataset.resultEdit);
+      return;
+    }
+
+    const deleteButton = event.target.closest("[data-result-delete]");
+    if (deleteButton) {
+      deleteResult(deleteButton.dataset.resultDelete);
+    }
+  });
+  cancelResultEditButton.addEventListener("click", () => {
+    resetResultForm();
+    setStatus(resultStatus, "Edicion cancelada.", "ok");
+  });
   refreshButton.addEventListener("click", () => loadResults(studentSelect.value));
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -217,6 +336,7 @@
   async function boot() {
     const user = await requireAdminSession();
     if (!user) return;
+    setResultEditorMode("create");
     await loadResults(getInitialStudentId());
   }
 

@@ -40,8 +40,9 @@
 
         <section class="dashboard-row student-layout">
           <article class="panel-card">
-            <h2>Nuevo resultado</h2>
-            <p>Este registro luego lo usaremos para graficos, marcas personales y seguimiento por ejercicio.</p>
+            <span class="status-pill hidden" id="resultEditorMode">Creacion</span>
+            <h2 id="resultFormTitle">Nuevo resultado</h2>
+            <p id="resultFormCopy">Este registro luego lo usaremos para graficos, marcas personales y seguimiento por ejercicio.</p>
             <form class="student-form" id="resultForm">
               <div class="field">
                 <label for="student_id">Alumno</label>
@@ -97,7 +98,10 @@
                 <input id="coach_notes" name="coach_notes" placeholder="Correcciones tecnicas o indicaciones" />
               </div>
               <span class="status" id="resultStatus"></span>
-              <button class="button accent" type="submit">Guardar resultado</button>
+              <div class="detail-action-group">
+                <button class="button accent" id="saveResultButton" type="submit">Guardar resultado</button>
+                <button class="button ghost hidden" id="cancelResultEditButton" type="button">Cancelar edicion</button>
+              </div>
             </form>
           </article>
 
@@ -129,11 +133,12 @@
                   <th>Marca</th>
                   <th>Notas</th>
                   <th>Fecha</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="resultsBody">
                 <tr>
-                  <td colspan="5">Cargando resultados...</td>
+                  <td colspan="6">Cargando resultados...</td>
                 </tr>
               </tbody>
             </table>
