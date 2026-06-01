@@ -29,9 +29,9 @@
 
         <section class="dashboard-header">
           <div>
-            <span class="status-pill">Coach · Etapa 3</span>
+            <span class="status-pill">Coach / Etapa 3</span>
             <h1 class="dashboard-title">Mis rutinas</h1>
-            <p class="muted">Crea rutinas, agrega ejercicios y asignalas solo a tus alumnos activos.</p>
+            <p class="muted">Crea, edita y asigna rutinas solo a tus alumnos activos.</p>
           </div>
           <div>
             <span class="muted" id="userEmail"></span>
@@ -40,8 +40,9 @@
 
         <section class="dashboard-row student-layout">
           <article class="panel-card">
-            <h2>Nueva rutina</h2>
-            <p>Este flujo queda restringido a tu sesion y a los alumnos que tienes asignados como coach principal.</p>
+            <span class="status-pill hidden" id="workoutEditorMode">Creacion</span>
+            <h2 id="workoutFormTitle">Nueva rutina</h2>
+            <p id="workoutFormCopy">Este flujo queda restringido a tu sesion y a los alumnos que tienes asignados como coach principal.</p>
             <form class="student-form" id="workoutForm">
               <div class="form-grid-two">
                 <div class="field">
@@ -125,7 +126,10 @@
                 <input id="notes" name="notes" placeholder="Indicaciones privadas para seguimiento del coach" />
               </div>
               <span class="status" id="workoutStatus"></span>
-              <button class="button accent" type="submit">Crear rutina</button>
+              <div class="detail-action-group">
+                <button class="button accent" id="saveWorkoutButton" type="submit">Crear rutina</button>
+                <button class="button ghost hidden" id="cancelWorkoutEditButton" type="button">Cancelar edicion</button>
+              </div>
             </form>
           </article>
 
@@ -134,7 +138,7 @@
             <p id="setupMessage">Cargando estado...</p>
             <ul class="check-list">
               <li>Solo muestra alumnos asignados a este coach.</li>
-              <li>Permite crear rutinas sin tocar permisos de admin.</li>
+              <li>Permite crear, editar y eliminar rutinas sin tocar permisos de admin.</li>
               <li>Las asignaciones iniciales y multiples quedan limitadas a tus alumnos.</li>
               <li>La biblioteca combina glosario y ejercicios ya guardados.</li>
             </ul>

@@ -65,6 +65,7 @@ Las vistas especificas de coach y alumno quedan preparadas, pero los modulos ope
 La biblioteca inicial de ejercicios se genero desde `Glosario.xlsx` y queda versionada en `data/exercise-library.js`. Incluye las secciones Ejercicios, Progresiones, Movilidad y Core; los videos quedan como dato opcional para completar despues.
 El creador de rutinas puede guardar varios ejercicios por rutina, manteniendo compatibilidad con rutinas simples de un solo ejercicio.
 Admin ya puede reasignar rutinas existentes a multiples alumnos activos y quitar asignaciones desde el mismo modulo de rutinas.
+Admin ya puede editar y eliminar rutinas completas desde el mismo modulo, manteniendo las asignaciones como gestion separada.
 Los ejercicios personalizados se pueden agregar y desactivar desde `/exercises.html` sin borrar el historial de rutinas.
 El portal alumno ya puede registrar marcas vinculadas a ejercicios concretos de sus rutinas asignadas.
 El portal alumno ya puede filtrar su historial por rutina y ejercicio, ver tendencias rapidas y leer feedback del coach dentro de sus propias marcas.
@@ -76,6 +77,7 @@ Admin ya puede regenerar claves temporales para alumnos y coaches desde sus list
 Admin ya puede crear, editar y desactivar sedes, y el alta inicial de alumnos ya permite asignarles una sede desde el mismo formulario.
 El coach ya cuenta con un modulo propio de rutinas para crear trabajo y asignarlo solo a sus alumnos activos.
 El coach ya puede reasignar o quitar alumnos dentro de rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
+El coach ya puede editar y eliminar sus propias rutinas, manteniendo solo lectura sobre rutinas externas asignadas a sus alumnos.
 El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, mediciones, marcas y notas medicas visibles para seguimiento.
 La ficha del coach ya expone descripcion, enfoque y enlaces de video dentro de los ejercicios asignados al alumno para revisar tecnica sin salir de la vista.
 La ficha del coach ya permite filtrar historial por rutina y ejercicio, con indicadores rapidos para leer tendencias sin salir de la vista.

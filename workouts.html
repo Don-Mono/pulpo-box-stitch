@@ -40,8 +40,9 @@
 
         <section class="dashboard-row student-layout">
           <article class="panel-card">
-            <h2>Nueva rutina</h2>
-            <p>Arma una rutina completa agregando uno o varios ejercicios desde el glosario.</p>
+            <span class="status-pill hidden" id="workoutEditorMode">Creacion</span>
+            <h2 id="workoutFormTitle">Nueva rutina</h2>
+            <p id="workoutFormCopy">Arma una rutina completa agregando uno o varios ejercicios desde el glosario.</p>
             <form class="student-form" id="workoutForm">
               <div class="form-grid-two">
                 <div class="field">
@@ -125,7 +126,10 @@
                 <input id="notes" name="notes" placeholder="Notas para coach/admin" />
               </div>
               <span class="status" id="workoutStatus"></span>
-              <button class="button accent" type="submit">Crear rutina</button>
+              <div class="detail-action-group">
+                <button class="button accent" id="saveWorkoutButton" type="submit">Crear rutina</button>
+                <button class="button ghost hidden" id="cancelWorkoutEditButton" type="button">Cancelar edicion</button>
+              </div>
             </form>
           </article>
 

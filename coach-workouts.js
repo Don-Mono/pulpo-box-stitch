@@ -21,6 +21,11 @@
   const setsInput = document.querySelector("#sets");
   const repsInput = document.querySelector("#reps");
   const prescriptionInput = document.querySelector("#prescription");
+  const workoutFormTitle = document.querySelector("#workoutFormTitle");
+  const workoutFormCopy = document.querySelector("#workoutFormCopy");
+  const workoutEditorMode = document.querySelector("#workoutEditorMode");
+  const saveWorkoutButton = document.querySelector("#saveWorkoutButton");
+  const cancelWorkoutEditButton = document.querySelector("#cancelWorkoutEditButton");
 
   let setupRequired = false;
   let exerciseLibrary = [];
@@ -28,6 +33,9 @@
   let selectedExercises = [];
   let currentStudents = [];
   let preferredStudentId = "";
+  let currentWorkouts = [];
+  let workoutById = new Map();
+  let editingWorkoutId = "";
 
   function setStatus(element, message, type = "") {
     element.textContent = message;
@@ -97,6 +105,19 @@
     return payload.user;
   }
 
+  function setWorkoutEditorMode(mode, workout = null) {
+    const isEditing = mode === "edit";
+    editingWorkoutId = isEditing ? workout?.id || "" : "";
+    workoutEditorMode.classList.toggle("hidden", !isEditing);
+    workoutEditorMode.textContent = isEditing ? "Edicion" : "Creacion";
+    workoutFormTitle.textContent = isEditing ? "Editar rutina" : "Nueva rutina";
+    workoutFormCopy.textContent = isEditing
+      ? "Actualiza el bloque completo de ejercicios, fecha, foco y notas. Las asignaciones siguen restringidas a tus alumnos."
+      : "Este flujo queda restringido a tu sesion y a los alumnos que tienes asignados como coach principal.";
+    saveWorkoutButton.textContent = isEditing ? "Guardar cambios" : "Crear rutina";
+    cancelWorkoutEditButton.classList.toggle("hidden", !isEditing);
+  }
+
   function renderStudents(students) {
     currentStudents = students;
     const options = ['<option value="">Sin asignar por ahora</option>'];
@@ -137,6 +158,13 @@
     libraryHint.textContent = exercises.length
       ? `${exercises.length} ejercicios disponibles en esta vista.`
       : "No hay ejercicios para esta seccion.";
+  }
+
+  function loadExerciseLibrary(payload) {
+    exerciseLibrary = payload.exerciseLibrary || [];
+    exerciseByKey = new Map(exerciseLibrary.map((exercise) => [exerciseKey(exercise), exercise]));
+    renderExerciseSections(payload.sections || []);
+    renderExerciseOptions(librarySectionSelect.value);
   }
 
   function applyExerciseSelection() {
@@ -236,14 +264,61 @@
     renderSelectedExercises();
   }
 
-  function loadExerciseLibrary(payload) {
-    exerciseLibrary = payload.exerciseLibrary || [];
-    exerciseByKey = new Map(exerciseLibrary.map((exercise) => [exerciseKey(exercise), exercise]));
-    renderExerciseSections(payload.sections || []);
+  function resetWorkoutForm() {
+    workoutForm.reset();
+    selectedExercises = [];
+    clearSelectedExerciseId();
+    renderSelectedExercises();
     renderExerciseOptions(librarySectionSelect.value);
+    if (preferredStudentId && currentStudents.some((student) => student.id === preferredStudentId)) {
+      studentSelect.value = preferredStudentId;
+    }
+    setWorkoutEditorMode("create");
+  }
+
+  function buildSelectedExercisesFromWorkout(workout) {
+    return (workout.exercises || []).map((exercise) => ({
+      exercise_id: exercise.exercise_id || "",
+      exercise_name: exercise.name || "",
+      exercise_description: exercise.description || "",
+      movement_type: exercise.movement_type || "",
+      video_url: exercise.video_url || "",
+      prescription: exercise.prescription || "",
+      sets: exercise.sets ?? "",
+      reps: exercise.reps || "",
+      time_cap_seconds: exercise.time_cap_seconds ?? "",
+    }));
+  }
+
+  function startWorkoutEdit(workoutId) {
+    const workout = workoutById.get(workoutId);
+    if (!workout) {
+      setStatus(workoutStatus, "No encontramos la rutina a editar.", "error");
+      return;
+    }
+
+    if (!workout.created_by_me) {
+      setStatus(workoutStatus, "Solo puedes editar rutinas creadas desde tu perfil.", "error");
+      return;
+    }
+
+    setWorkoutEditorMode("edit", workout);
+    workoutForm.title.value = workout.title || "";
+    workoutForm.workout_date.value = workout.workout_date || "";
+    workoutForm.level.value = workout.level || "";
+    workoutForm.summary.value = workout.summary || "";
+    workoutForm.notes.value = workout.notes || "";
+    studentSelect.value = "";
+    selectedExercises = buildSelectedExercisesFromWorkout(workout);
+    renderSelectedExercises();
+    setStatus(workoutStatus, `Editando ${workout.title}.`, "ok");
+    workoutForm.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function renderWorkouts(workouts) {
+    currentWorkouts = workouts;
+    workoutById = new Map(workouts.map((workout) => [workout.id, workout]));
+
     if (!workouts.length) {
       renderEmpty("Todavia no hay rutinas relacionadas con tus alumnos.");
       return;
@@ -278,7 +353,7 @@
         ? assignments.map((assignment) => {
           const assignmentMeta = getAssignmentStatusMeta(assignment.status);
           const assignmentDate = assignment.completed_at && assignmentMeta.label === "Completada"
-            ? ` · ${formatDate(assignment.completed_at)}`
+            ? ` / ${formatDate(assignment.completed_at)}`
             : "";
           return `
           <article class="mini-list-item action-list-item">
@@ -293,6 +368,10 @@
         : '<p class="muted">Sin alumnos asignados todavia.</p>';
       const assignmentManager = canManageAssignments
         ? `
+          <div class="detail-action-group">
+            <button class="button ghost compact-button" data-workout-edit="${escapeHtml(workout.id)}" type="button">Editar rutina</button>
+            <button class="button ghost compact-button" data-workout-delete="${escapeHtml(workout.id)}" type="button">Eliminar rutina</button>
+          </div>
           <div class="assignment-manager">
             <div class="field">
               <label for="assign-${escapeHtml(workout.id)}">Asignar a tus alumnos</label>
@@ -323,6 +402,7 @@
             <span>${assignments.length} asignacion(es)</span>
           </div>
           <ul class="check-list">${exerciseSummary}</ul>
+          ${workout.notes ? `<p class="muted"><strong>Notas:</strong> ${escapeHtml(workout.notes)}</p>` : ""}
           <p class="muted"><strong>Asignado a:</strong> ${assignedSummary}</p>
           ${assignmentManager}
         </article>
@@ -346,6 +426,9 @@
       renderStudents(payload.students || []);
       loadExerciseLibrary(payload);
       renderWorkouts(payload.workouts || []);
+      if (editingWorkoutId && !workoutById.has(editingWorkoutId)) {
+        resetWorkoutForm();
+      }
     } catch (error) {
       setupMessage.textContent = error.message;
       renderStudents([]);
@@ -358,30 +441,30 @@
     }
   }
 
-  async function createWorkout(event) {
+  async function submitWorkout(event) {
     event.preventDefault();
     if (setupRequired) {
       setStatus(workoutStatus, "Primero debemos ejecutar el SQL de gestion en Supabase.", "error");
       return;
     }
 
-    setStatus(workoutStatus, "Creando rutina...");
+    setStatus(workoutStatus, editingWorkoutId ? "Guardando cambios..." : "Creando rutina...");
     const formData = new FormData(workoutForm);
     const body = Object.fromEntries(formData.entries());
+    if (editingWorkoutId) {
+      body.workout_id = editingWorkoutId;
+      body.student_id = "";
+    }
 
     try {
       const response = await fetch("/api/coach/workouts", {
-        method: "POST",
+        method: editingWorkoutId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo crear la rutina.");
-      workoutForm.reset();
-      selectedExercises = [];
-      clearSelectedExerciseId();
-      renderExerciseOptions(librarySectionSelect.value);
-      renderSelectedExercises();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar la rutina.");
+      resetWorkoutForm();
       setStatus(workoutStatus, payload.message, "ok");
       await loadWorkouts();
     } catch (error) {
@@ -441,9 +524,50 @@
     }
   }
 
-  workoutForm.addEventListener("submit", createWorkout);
+  async function deleteWorkout(workoutId) {
+    if (!workoutId) return;
+    const workout = workoutById.get(workoutId);
+    if (!workout?.created_by_me) {
+      setStatus(workoutStatus, "Solo puedes eliminar rutinas creadas desde tu perfil.", "error");
+      return;
+    }
+
+    if (!window.confirm(`Se eliminara la rutina ${workout?.title || "seleccionada"} junto con sus ejercicios y asignaciones. Esta accion no se puede deshacer.`)) {
+      return;
+    }
+
+    setStatus(workoutStatus, "Eliminando rutina...");
+    try {
+      const response = await fetch("/api/coach/workouts", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete-workout", workout_id: workoutId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo eliminar la rutina.");
+      if (editingWorkoutId === workoutId) resetWorkoutForm();
+      setStatus(workoutStatus, payload.message, "ok");
+      await loadWorkouts();
+    } catch (error) {
+      setStatus(workoutStatus, error.message, "error");
+    }
+  }
+
+  workoutForm.addEventListener("submit", submitWorkout);
   addExerciseButton.addEventListener("click", addExerciseToRoutine);
   workoutsList.addEventListener("click", (event) => {
+    const editButton = event.target.closest("[data-workout-edit]");
+    if (editButton) {
+      startWorkoutEdit(editButton.dataset.workoutEdit);
+      return;
+    }
+
+    const deleteButton = event.target.closest("[data-workout-delete]");
+    if (deleteButton) {
+      deleteWorkout(deleteButton.dataset.workoutDelete);
+      return;
+    }
+
     const assignButton = event.target.closest("[data-workout-assign]");
     if (assignButton) {
       assignStudentsToWorkout(assignButton.dataset.workoutAssign);
@@ -463,6 +587,10 @@
   librarySectionSelect.addEventListener("change", () => renderExerciseOptions(librarySectionSelect.value));
   libraryExerciseSelect.addEventListener("change", applyExerciseSelection);
   exerciseNameInput.addEventListener("input", clearSelectedExerciseId);
+  cancelWorkoutEditButton.addEventListener("click", () => {
+    resetWorkoutForm();
+    setStatus(workoutStatus, "Edicion cancelada.", "ok");
+  });
   studentSelect.addEventListener("change", () => {
     preferredStudentId = studentSelect.value;
     syncUrl(preferredStudentId);
@@ -477,6 +605,7 @@
     const user = await requireCoachSession();
     if (!user) return;
     preferredStudentId = getInitialStudentId();
+    setWorkoutEditorMode("create");
     await loadWorkouts();
   }
 

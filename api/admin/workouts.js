@@ -154,6 +154,7 @@ async function listWorkouts(supabase) {
     const exercise = exerciseMap.get(item.exercise_id);
     list.push({
       id: item.id,
+      exercise_id: item.exercise_id,
       name: exercise?.name || "Ejercicio sin nombre",
       description: exercise?.description || "",
       video_url: exercise?.video_url || "",
@@ -340,6 +341,90 @@ async function createWorkout(supabase, body, session) {
   };
 }
 
+async function replaceWorkoutExercises(supabase, workoutId, workoutExercises, userId) {
+  const { error: deleteExercisesError } = await supabase
+    .from("pb_workout_exercises")
+    .delete()
+    .eq("workout_id", workoutId);
+
+  if (deleteExercisesError) throw deleteExercisesError;
+
+  if (!workoutExercises.length) return;
+
+  const rows = [];
+
+  for (const [index, exercise] of workoutExercises.entries()) {
+    const resolvedExerciseId = await findOrCreateExercise(supabase, exercise, userId);
+    rows.push({
+      workout_id: workoutId,
+      exercise_id: resolvedExerciseId,
+      position: index + 1,
+      prescription: exercise.prescription,
+      sets: exercise.sets,
+      reps: exercise.reps,
+      time_cap_seconds: exercise.timeCapSeconds,
+    });
+  }
+
+  const { error: insertExercisesError } = await supabase.from("pb_workout_exercises").insert(rows);
+  if (insertExercisesError) throw insertExercisesError;
+}
+
+async function updateWorkout(supabase, body, session) {
+  const workoutId = clean(body.workout_id, 90);
+  const title = clean(body.title, 140);
+  const summary = clean(body.summary, 500);
+  const workoutDate = cleanDate(body.workout_date);
+  const level = clean(body.level, 80);
+  const notes = clean(body.notes, 800);
+  const workoutExercises = buildWorkoutExercises(body);
+
+  if (!workoutId) {
+    const error = new Error("Debes indicar la rutina a editar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!title) {
+    const error = new Error("El titulo de la rutina es obligatorio.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { data: workout, error: workoutError } = await supabase
+    .from("pb_workouts")
+    .select("id, title")
+    .eq("id", workoutId)
+    .maybeSingle();
+
+  if (workoutError) throw workoutError;
+  if (!workout?.id) {
+    const error = new Error("La rutina indicada no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const { error: updateError } = await supabase
+    .from("pb_workouts")
+    .update({
+      title,
+      summary,
+      workout_date: workoutDate,
+      level,
+      notes,
+    })
+    .eq("id", workoutId);
+
+  if (updateError) throw updateError;
+
+  await replaceWorkoutExercises(supabase, workoutId, workoutExercises, session.userId);
+
+  return {
+    id: workoutId,
+    title,
+  };
+}
+
 async function assignWorkoutStudents(supabase, body, session) {
   const workoutId = clean(body.workout_id, 90);
   const studentIds = [...new Set(parseIdArray(body.student_ids).map((studentId) => clean(studentId, 90)).filter(Boolean))].slice(0, 50);
@@ -417,6 +502,41 @@ async function removeWorkoutAssignment(supabase, body) {
   return { ok: true };
 }
 
+async function deleteWorkout(supabase, body) {
+  const workoutId = clean(body.workout_id, 90);
+
+  if (!workoutId) {
+    const error = new Error("Debes indicar la rutina a eliminar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { data: workout, error: workoutError } = await supabase
+    .from("pb_workouts")
+    .select("id, title")
+    .eq("id", workoutId)
+    .maybeSingle();
+
+  if (workoutError) throw workoutError;
+  if (!workout?.id) {
+    const error = new Error("La rutina indicada no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const { error: deleteError } = await supabase
+    .from("pb_workouts")
+    .delete()
+    .eq("id", workoutId);
+
+  if (deleteError) throw deleteError;
+
+  return {
+    id: workoutId,
+    title: workout.title,
+  };
+}
+
 module.exports = async function handler(req, res) {
   const session = requireAdmin(req, res);
   if (!session) return;
@@ -464,9 +584,32 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    if (req.method === "PUT") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        const updated = await updateWorkout(supabase, body, session);
+        return json(res, 200, {
+          ok: true,
+          message: `Rutina ${updated.title} actualizada correctamente.`,
+          workout: updated,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
     if (req.method === "DELETE") {
       const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
       try {
+        if (body.action === "delete-workout") {
+          const deleted = await deleteWorkout(supabase, body);
+          return json(res, 200, {
+            ok: true,
+            message: `Rutina ${deleted.title} eliminada correctamente.`,
+          });
+        }
+
         await removeWorkoutAssignment(supabase, body);
         return json(res, 200, {
           ok: true,
@@ -478,7 +621,7 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    res.setHeader("Allow", "GET, POST, PATCH, DELETE");
+    res.setHeader("Allow", "GET, POST, PATCH, PUT, DELETE");
     return json(res, 405, { error: "Method not allowed" });
   } catch (error) {
     console.error("Admin workouts endpoint failed", error);

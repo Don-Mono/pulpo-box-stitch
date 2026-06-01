@@ -33,14 +33,14 @@ flowchart TD
 - Gestiona alumnos.
 - Gestiona coaches.
 - Gestiona sedes.
-- Crea y edita rutinas.
+- Crea, edita y elimina rutinas.
 - Revisa progreso general.
 - Mantiene contenido visible de la landing.
 
 ### Coach
 
 - Ve alumnos asignados.
-- Crea rutinas y ejercicios.
+- Crea, edita y elimina sus propias rutinas y ejercicios.
 - Agrega videos o enlaces.
 - Revisa pesos, tiempos, repeticiones y notas.
 - Hace seguimiento individual.
@@ -148,9 +148,11 @@ Primera implementacion:
 - El creador de rutinas puede seleccionar ejercicios desde el glosario o escribir uno manualmente.
 - El creador de rutinas ya permite agregar varios ejercicios ordenados en una misma rutina.
 - Admin ya puede reasignar rutinas existentes a multiples alumnos activos y quitar asignaciones desde el mismo modulo.
+- Admin ya puede editar y eliminar rutinas completas desde el mismo modulo.
 - `/coach-workouts.html`: pantalla privada para que el coach cree rutinas y las asigne solo a sus alumnos activos.
 - `/api/coach/workouts`: API protegida por rol coach para listar rutinas relacionadas, cargar biblioteca y crear nuevas rutinas.
 - El coach ya puede reasignar o quitar alumnos dentro de rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
+- El coach ya puede editar y eliminar rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
 
 ### Etapa 4 - Registro de resultados
 
