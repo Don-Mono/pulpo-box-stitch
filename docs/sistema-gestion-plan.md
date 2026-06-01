@@ -170,6 +170,7 @@ Primera implementacion:
 - `/results.html`: pantalla privada para registrar resultados.
 - `/api/admin/results`: API para listar y guardar marcas de entrenamiento.
 - Admin ya puede editar y eliminar resultados desde el mismo modulo.
+- Admin ya puede editar y eliminar mediciones corporales desde `/progress.html`.
 - `/student.html`: permite al alumno registrar sus propios resultados.
 - `/api/student/overview`: API protegida por rol alumno.
 - `/api/auth/change-password`: API protegida para que coach y alumno cambien su propia clave mientras mantienen sesion activa.

@@ -154,7 +154,7 @@ async function loadProgress(supabase, studentId) {
   };
 }
 
-async function createMeasurement(supabase, body) {
+function normalizeMeasurementInput(body) {
   const studentId = clean(body.student_id, 90);
   const bodyWeightKg = cleanNumber(body.body_weight_kg);
   const heightCm = cleanNumber(body.height_cm);
@@ -169,22 +169,120 @@ async function createMeasurement(supabase, body) {
     throw error;
   }
 
+  const hasAnyValue = [
+    bodyWeightKg,
+    heightCm,
+    waistCm,
+    chestCm,
+    hipCm,
+  ].some((value) => value != null) || Boolean(notes);
+
+  if (!hasAnyValue) {
+    const error = new Error("Debes registrar al menos una medida o una nota.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return {
+    studentId,
+    bodyWeightKg,
+    heightCm,
+    waistCm,
+    chestCm,
+    hipCm,
+    notes,
+  };
+}
+
+async function createMeasurement(supabase, body) {
+  const measurementInput = normalizeMeasurementInput(body);
+
   const { data, error } = await supabase
     .from("pb_body_measurements")
     .insert({
-      student_id: studentId,
-      body_weight_kg: bodyWeightKg,
-      height_cm: heightCm,
-      waist_cm: waistCm,
-      chest_cm: chestCm,
-      hip_cm: hipCm,
-      notes,
+      student_id: measurementInput.studentId,
+      body_weight_kg: measurementInput.bodyWeightKg,
+      height_cm: measurementInput.heightCm,
+      waist_cm: measurementInput.waistCm,
+      chest_cm: measurementInput.chestCm,
+      hip_cm: measurementInput.hipCm,
+      notes: measurementInput.notes,
     })
     .select("id")
     .single();
 
   if (error) throw error;
   return data;
+}
+
+async function updateMeasurement(supabase, body) {
+  const measurementId = clean(body.measurement_id, 90);
+  if (!measurementId) {
+    const error = new Error("Debes indicar la medicion a editar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { data: existingMeasurement, error: existingError } = await supabase
+    .from("pb_body_measurements")
+    .select("id")
+    .eq("id", measurementId)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (!existingMeasurement?.id) {
+    const error = new Error("La medicion indicada no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const measurementInput = normalizeMeasurementInput(body);
+
+  const { error: updateError } = await supabase
+    .from("pb_body_measurements")
+    .update({
+      student_id: measurementInput.studentId,
+      body_weight_kg: measurementInput.bodyWeightKg,
+      height_cm: measurementInput.heightCm,
+      waist_cm: measurementInput.waistCm,
+      chest_cm: measurementInput.chestCm,
+      hip_cm: measurementInput.hipCm,
+      notes: measurementInput.notes,
+    })
+    .eq("id", measurementId);
+
+  if (updateError) throw updateError;
+  return { id: measurementId };
+}
+
+async function deleteMeasurement(supabase, body) {
+  const measurementId = clean(body.measurement_id, 90);
+  if (!measurementId) {
+    const error = new Error("Debes indicar la medicion a eliminar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { data: existingMeasurement, error: existingError } = await supabase
+    .from("pb_body_measurements")
+    .select("id")
+    .eq("id", measurementId)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (!existingMeasurement?.id) {
+    const error = new Error("La medicion indicada no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const { error: deleteError } = await supabase
+    .from("pb_body_measurements")
+    .delete()
+    .eq("id", measurementId);
+
+  if (deleteError) throw deleteError;
+  return { id: measurementId };
 }
 
 module.exports = async function handler(req, res) {
@@ -220,7 +318,37 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    res.setHeader("Allow", "GET, POST");
+    if (req.method === "PUT") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        const updated = await updateMeasurement(supabase, body);
+        return json(res, 200, {
+          ok: true,
+          message: "Medicion actualizada correctamente.",
+          measurement: updated,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    if (req.method === "DELETE") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        const deleted = await deleteMeasurement(supabase, body);
+        return json(res, 200, {
+          ok: true,
+          message: "Medicion eliminada correctamente.",
+          measurement: deleted,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    res.setHeader("Allow", "GET, POST, PUT, DELETE");
     return json(res, 405, { error: "Method not allowed" });
   } catch (error) {
     console.error("Admin progress endpoint failed", error);

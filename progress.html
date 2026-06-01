@@ -81,8 +81,9 @@
 
         <section class="dashboard-row student-layout">
           <article class="panel-card">
-            <h2>Nueva medicion</h2>
-            <p>Registra medidas simples para empezar a construir el historial fisico.</p>
+            <span class="status-pill hidden" id="measurementEditorMode">Creacion</span>
+            <h2 id="measurementFormTitle">Nueva medicion</h2>
+            <p id="measurementFormCopy">Registra medidas simples para empezar a construir el historial fisico.</p>
             <form class="student-form" id="measurementForm">
               <div class="form-grid-two">
                 <div class="field">
@@ -113,7 +114,10 @@
                 <input id="notes" name="notes" placeholder="Contexto de la medicion" />
               </div>
               <span class="status" id="measurementStatus"></span>
-              <button class="button accent" type="submit">Guardar medicion</button>
+              <div class="detail-action-group">
+                <button class="button accent" id="saveMeasurementButton" type="submit">Guardar medicion</button>
+                <button class="button ghost hidden" id="cancelMeasurementEditButton" type="button">Cancelar edicion</button>
+              </div>
             </form>
           </article>
 

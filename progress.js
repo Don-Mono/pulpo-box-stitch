@@ -5,6 +5,11 @@
   const summaryGrid = document.querySelector("#summaryGrid");
   const measurementForm = document.querySelector("#measurementForm");
   const measurementStatus = document.querySelector("#measurementStatus");
+  const measurementEditorMode = document.querySelector("#measurementEditorMode");
+  const measurementFormTitle = document.querySelector("#measurementFormTitle");
+  const measurementFormCopy = document.querySelector("#measurementFormCopy");
+  const saveMeasurementButton = document.querySelector("#saveMeasurementButton");
+  const cancelMeasurementEditButton = document.querySelector("#cancelMeasurementEditButton");
   const measurementsList = document.querySelector("#measurementsList");
   const workoutFilter = document.querySelector("#workoutFilter");
   const exerciseFilter = document.querySelector("#exerciseFilter");
@@ -19,6 +24,8 @@
   let currentMeasurements = [];
   let currentResults = [];
   let currentSummary = null;
+  let measurementById = new Map();
+  let editingMeasurementId = "";
 
   function getInitialStudentId() {
     try {
@@ -42,6 +49,19 @@
   function setStatus(element, message, type = "") {
     element.textContent = message;
     element.className = `status ${type}`.trim();
+  }
+
+  function setMeasurementEditorMode(mode, measurement = null) {
+    const isEditing = mode === "edit";
+    editingMeasurementId = isEditing ? measurement?.id || "" : "";
+    measurementEditorMode.classList.toggle("hidden", !isEditing);
+    measurementEditorMode.textContent = isEditing ? "Edicion" : "Creacion";
+    measurementFormTitle.textContent = isEditing ? "Editar medicion" : "Nueva medicion";
+    measurementFormCopy.textContent = isEditing
+      ? "Corrige medidas o contexto de una medicion ya registrada sin perder el historial."
+      : "Registra medidas simples para empezar a construir el historial fisico.";
+    saveMeasurementButton.textContent = isEditing ? "Guardar cambios" : "Guardar medicion";
+    cancelMeasurementEditButton.classList.toggle("hidden", !isEditing);
   }
 
   function escapeHtml(value) {
@@ -130,6 +150,8 @@
   }
 
   function renderMeasurements(measurements) {
+    measurementById = new Map(measurements.map((measurement) => [measurement.id, measurement]));
+
     if (!measurements.length) {
       measurementsList.innerHTML = '<p class="muted">Todavia no hay mediciones.</p>';
       return;
@@ -144,13 +166,42 @@
       ].filter(Boolean).join(" / ") || "Sin medidas";
 
       return `
-        <article class="mini-list-item">
-          <strong>${escapeHtml(date)}</strong>
-          <span>${escapeHtml(values)}</span>
-          <small>${escapeHtml(measurement.notes || "")}</small>
+        <article class="mini-list-item action-list-item">
+          <div>
+            <strong>${escapeHtml(date)}</strong>
+            <span>${escapeHtml(values)}</span>
+            <small>${escapeHtml(measurement.notes || "")}</small>
+          </div>
+          <div class="detail-action-group">
+            <button class="button ghost compact-button" data-measurement-edit="${escapeHtml(measurement.id)}" type="button">Editar</button>
+            <button class="button ghost compact-button" data-measurement-delete="${escapeHtml(measurement.id)}" type="button">Eliminar</button>
+          </div>
         </article>
       `;
     }).join("");
+  }
+
+  function resetMeasurementForm() {
+    measurementForm.reset();
+    setMeasurementEditorMode("create");
+  }
+
+  function populateMeasurementForm(measurementId) {
+    const measurement = measurementById.get(measurementId);
+    if (!measurement) {
+      setStatus(measurementStatus, "No encontramos la medicion a editar.", "error");
+      return;
+    }
+
+    setMeasurementEditorMode("edit", measurement);
+    measurementForm.body_weight_kg.value = measurement.body_weight_kg ?? "";
+    measurementForm.height_cm.value = measurement.height_cm ?? "";
+    measurementForm.waist_cm.value = measurement.waist_cm ?? "";
+    measurementForm.chest_cm.value = measurement.chest_cm ?? "";
+    measurementForm.hip_cm.value = measurement.hip_cm ?? "";
+    measurementForm.notes.value = measurement.notes || "";
+    setStatus(measurementStatus, `Editando medicion del ${formatDate(measurement.measured_at)}.`, "ok");
+    measurementForm.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function collectWorkoutOptions() {
@@ -338,6 +389,9 @@
       renderStudents(payload.students || [], selectedStudentId);
       renderSummary(currentSummary, currentMeasurements);
       renderMeasurements(currentMeasurements);
+      if (editingMeasurementId && !measurementById.has(editingMeasurementId)) {
+        resetMeasurementForm();
+      }
       syncResultFilters();
       syncUrl(selectedStudentId);
     } catch (error) {
@@ -345,6 +399,7 @@
       currentMeasurements = [];
       currentResults = [];
       currentSummary = null;
+      measurementById = new Map();
       renderStudents([], "");
       renderSummary(null, []);
       renderMeasurements([]);
@@ -357,7 +412,7 @@
     }
   }
 
-  async function createMeasurement(event) {
+  async function saveMeasurement(event) {
     event.preventDefault();
     if (setupRequired) {
       setStatus(measurementStatus, "Primero debemos ejecutar el SQL de gestion en Supabase.", "error");
@@ -374,18 +429,49 @@
     const formData = new FormData(measurementForm);
     const body = Object.fromEntries(formData.entries());
     body.student_id = studentId;
+    if (editingMeasurementId) {
+      body.measurement_id = editingMeasurementId;
+    }
 
     try {
       const response = await fetch("/api/admin/progress", {
-        method: "POST",
+        method: editingMeasurementId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar la medicion.");
-      measurementForm.reset();
+      resetMeasurementForm();
       setStatus(measurementStatus, payload.message, "ok");
       await loadProgress(studentId);
+    } catch (error) {
+      setStatus(measurementStatus, error.message, "error");
+    }
+  }
+
+  async function deleteMeasurement(measurementId) {
+    if (!measurementId) return;
+    const measurement = measurementById.get(measurementId);
+    const confirmationLabel = measurement?.measured_at
+      ? `la medicion del ${formatDate(measurement.measured_at)}`
+      : "esta medicion";
+    if (!window.confirm(`Se eliminara ${confirmationLabel}. Esta accion no se puede deshacer.`)) {
+      return;
+    }
+
+    setStatus(measurementStatus, "Eliminando medicion...");
+    try {
+      const response = await fetch("/api/admin/progress", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ measurement_id: measurementId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo eliminar la medicion.");
+      const selectedStudentId = studentFilter.value;
+      if (editingMeasurementId === measurementId) resetMeasurementForm();
+      setStatus(measurementStatus, payload.message, "ok");
+      await loadProgress(selectedStudentId);
     } catch (error) {
       setStatus(measurementStatus, error.message, "error");
     }
@@ -409,7 +495,23 @@
     refreshResultsView();
   });
   exerciseFilter.addEventListener("change", refreshResultsView);
-  measurementForm.addEventListener("submit", createMeasurement);
+  measurementForm.addEventListener("submit", saveMeasurement);
+  measurementsList.addEventListener("click", (event) => {
+    const editButton = event.target.closest("[data-measurement-edit]");
+    if (editButton) {
+      populateMeasurementForm(editButton.dataset.measurementEdit);
+      return;
+    }
+
+    const deleteButton = event.target.closest("[data-measurement-delete]");
+    if (deleteButton) {
+      deleteMeasurement(deleteButton.dataset.measurementDelete);
+    }
+  });
+  cancelMeasurementEditButton.addEventListener("click", () => {
+    resetMeasurementForm();
+    setStatus(measurementStatus, "Edicion cancelada.", "ok");
+  });
   refreshButton.addEventListener("click", () => loadProgress(studentFilter.value));
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -419,6 +521,7 @@
   async function boot() {
     const user = await requireAdminSession();
     if (!user) return;
+    setMeasurementEditorMode("create");
     await loadProgress(getInitialStudentId());
   }
 
