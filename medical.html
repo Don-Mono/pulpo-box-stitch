@@ -111,8 +111,9 @@
 
         <section class="dashboard-row student-layout">
           <article class="panel-card">
-            <h2>Nueva nota medica</h2>
-            <p>Ejemplos: lesion previa, restriccion de movimiento, contacto de emergencia o permiso especial.</p>
+            <span class="status-pill hidden" id="medicalEditorMode">Creacion</span>
+            <h2 id="medicalFormTitle">Nueva nota medica</h2>
+            <p id="medicalFormCopy">Ejemplos: lesion previa, restriccion de movimiento, contacto de emergencia o permiso especial.</p>
             <form class="student-form" id="medicalForm">
               <div class="field">
                 <label for="note_type">Tipo de nota</label>
@@ -128,10 +129,13 @@
               </label>
               <label class="check-field">
                 <input id="consent_confirmed" name="consent_confirmed" type="checkbox" required />
-                <span>Confirmo que el alumno autorizo registrar esta informacion sensible.</span>
+                <span id="medicalConsentCopy">Confirmo que el alumno autorizo registrar esta informacion sensible.</span>
               </label>
               <span class="status" id="medicalStatus"></span>
-              <button class="button accent" type="submit">Guardar nota</button>
+              <div class="detail-action-group">
+                <button class="button accent" id="saveMedicalButton" type="submit">Guardar nota</button>
+                <button class="button ghost hidden" id="cancelMedicalEditButton" type="button">Cancelar edicion</button>
+              </div>
             </form>
           </article>
 

@@ -217,6 +217,7 @@ Primera implementacion:
 
 - `/medical.html`: pantalla privada solo para admin.
 - `/api/admin/medical`: API para listar y crear notas sensibles.
+- Admin ya puede editar y eliminar notas sensibles desde el mismo modulo.
 - Requiere confirmacion explicita de consentimiento antes de guardar.
 - El modulo admin ya acepta `student_id` en URL y mantiene visibilidad de alumnos inactivos para revision administrativa.
 - El modulo admin de datos medicos ya resume consentimiento, contacto de emergencia, filtros por tipo/visibilidad y una vista previa exacta de las notas compartidas con coach.

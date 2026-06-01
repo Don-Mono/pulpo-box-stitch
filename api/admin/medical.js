@@ -210,7 +210,47 @@ async function updateMedicalProfile(supabase, body) {
   };
 }
 
-async function createMedicalNote(supabase, body) {
+async function loadStudentForMedicalWrite(supabase, studentId) {
+  const { data: student, error } = await supabase
+    .from("pb_students")
+    .select("profile_id, medical_consent_at")
+    .eq("profile_id", studentId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!student) {
+    const missingStudentError = new Error("No encontramos al alumno solicitado.");
+    missingStudentError.statusCode = 404;
+    throw missingStudentError;
+  }
+
+  return student;
+}
+
+async function ensureMedicalConsent(supabase, studentId, consentConfirmed) {
+  const student = await loadStudentForMedicalWrite(supabase, studentId);
+  if (student.medical_consent_at) {
+    return { consentRegisteredNow: false };
+  }
+
+  if (!consentConfirmed) {
+    const error = new Error("Necesitas confirmar consentimiento antes de guardar datos sensibles.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const consentAt = new Date().toISOString();
+  const { error: consentError } = await supabase
+    .from("pb_students")
+    .update({ medical_consent_at: consentAt, updated_at: consentAt })
+    .eq("profile_id", studentId)
+    .is("medical_consent_at", null);
+
+  if (consentError) throw consentError;
+  return { consentRegisteredNow: true };
+}
+
+function normalizeMedicalNoteInput(body) {
   const studentId = clean(body.student_id, 90);
   const noteType = clean(body.note_type, 80);
   const description = clean(body.description, 1200);
@@ -229,34 +269,105 @@ async function createMedicalNote(supabase, body) {
     throw error;
   }
 
-  if (!consentConfirmed) {
-    const error = new Error("Necesitas confirmar consentimiento antes de guardar datos sensibles.");
-    error.statusCode = 400;
-    throw error;
-  }
+  return {
+    studentId,
+    noteType,
+    description,
+    visibleToCoach,
+    consentConfirmed,
+  };
+}
 
-  const consentAt = new Date().toISOString();
-  const { error: consentError } = await supabase
-    .from("pb_students")
-    .update({ medical_consent_at: consentAt, updated_at: consentAt })
-    .eq("profile_id", studentId)
-    .is("medical_consent_at", null);
-
-  if (consentError) throw consentError;
+async function createMedicalNote(supabase, body) {
+  const noteInput = normalizeMedicalNoteInput(body);
+  const consentResult = await ensureMedicalConsent(supabase, noteInput.studentId, noteInput.consentConfirmed);
 
   const { data, error } = await supabase
     .from("pb_medical_notes")
     .insert({
-      student_id: studentId,
-      note_type: noteType,
-      description,
-      visible_to_coach: visibleToCoach,
+      student_id: noteInput.studentId,
+      note_type: noteInput.noteType,
+      description: noteInput.description,
+      visible_to_coach: noteInput.visibleToCoach,
     })
     .select("id")
     .single();
 
   if (error) throw error;
-  return data;
+  return { ...data, consentRegisteredNow: consentResult.consentRegisteredNow };
+}
+
+async function updateMedicalNote(supabase, body) {
+  const noteId = clean(body.note_id, 90);
+  if (!noteId) {
+    const error = new Error("Debes indicar la nota a editar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const noteInput = normalizeMedicalNoteInput(body);
+  const { data: existingNote, error: existingError } = await supabase
+    .from("pb_medical_notes")
+    .select("id, student_id")
+    .eq("id", noteId)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (!existingNote?.id) {
+    const error = new Error("La nota indicada no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (existingNote.student_id !== noteInput.studentId) {
+    const error = new Error("La nota no pertenece al alumno seleccionado.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const consentResult = await ensureMedicalConsent(supabase, noteInput.studentId, noteInput.consentConfirmed);
+
+  const { error: updateError } = await supabase
+    .from("pb_medical_notes")
+    .update({
+      note_type: noteInput.noteType,
+      description: noteInput.description,
+      visible_to_coach: noteInput.visibleToCoach,
+    })
+    .eq("id", noteId);
+
+  if (updateError) throw updateError;
+  return { id: noteId, consentRegisteredNow: consentResult.consentRegisteredNow };
+}
+
+async function deleteMedicalNote(supabase, body) {
+  const noteId = clean(body.note_id, 90);
+  if (!noteId) {
+    const error = new Error("Debes indicar la nota a eliminar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { data: existingNote, error: existingError } = await supabase
+    .from("pb_medical_notes")
+    .select("id")
+    .eq("id", noteId)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (!existingNote?.id) {
+    const error = new Error("La nota indicada no existe.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const { error: deleteError } = await supabase
+    .from("pb_medical_notes")
+    .delete()
+    .eq("id", noteId);
+
+  if (deleteError) throw deleteError;
+  return { id: noteId };
 }
 
 module.exports = async function handler(req, res) {
@@ -300,7 +411,9 @@ module.exports = async function handler(req, res) {
         const created = await createMedicalNote(supabase, body);
         return json(res, 201, {
           ok: true,
-          message: "Dato sensible registrado con consentimiento confirmado.",
+          message: created.consentRegisteredNow
+            ? "Dato sensible registrado y consentimiento confirmado."
+            : "Dato sensible registrado con consentimiento confirmado.",
           note: created,
         });
       } catch (error) {
@@ -309,7 +422,39 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    res.setHeader("Allow", "GET, PATCH, POST");
+    if (req.method === "PUT") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        const updated = await updateMedicalNote(supabase, body);
+        return json(res, 200, {
+          ok: true,
+          message: updated.consentRegisteredNow
+            ? "Nota sensible actualizada y consentimiento confirmado."
+            : "Nota sensible actualizada correctamente.",
+          note: updated,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    if (req.method === "DELETE") {
+      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      try {
+        const deleted = await deleteMedicalNote(supabase, body);
+        return json(res, 200, {
+          ok: true,
+          message: "Nota sensible eliminada correctamente.",
+          note: deleted,
+        });
+      } catch (error) {
+        if (isMissingManagementSchema(error)) return json(res, 503, setupPayload());
+        throw error;
+      }
+    }
+
+    res.setHeader("Allow", "GET, PATCH, POST, PUT, DELETE");
     return json(res, 405, { error: "Method not allowed" });
   } catch (error) {
     console.error("Admin medical endpoint failed", error);

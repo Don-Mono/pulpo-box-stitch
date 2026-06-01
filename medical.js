@@ -10,6 +10,12 @@
   const safetyStatus = document.querySelector("#safetyStatus");
   const medicalForm = document.querySelector("#medicalForm");
   const medicalStatus = document.querySelector("#medicalStatus");
+  const medicalEditorMode = document.querySelector("#medicalEditorMode");
+  const medicalFormTitle = document.querySelector("#medicalFormTitle");
+  const medicalFormCopy = document.querySelector("#medicalFormCopy");
+  const medicalConsentCopy = document.querySelector("#medicalConsentCopy");
+  const saveMedicalButton = document.querySelector("#saveMedicalButton");
+  const cancelMedicalEditButton = document.querySelector("#cancelMedicalEditButton");
   const noteTypeFilter = document.querySelector("#noteTypeFilter");
   const visibilityFilter = document.querySelector("#visibilityFilter");
   const notesFilterHint = document.querySelector("#notesFilterHint");
@@ -22,6 +28,8 @@
   let currentStudent = null;
   let currentNotes = [];
   let currentNoteTypes = [];
+  let noteById = new Map();
+  let editingNoteId = "";
 
   function getInitialStudentId() {
     try {
@@ -45,6 +53,23 @@
   function setStatus(element, message, type = "") {
     element.textContent = message;
     element.className = `status ${type}`.trim();
+  }
+
+  function setMedicalEditorMode(mode, note = null) {
+    const isEditing = mode === "edit";
+    editingNoteId = isEditing ? note?.id || "" : "";
+    medicalEditorMode.classList.toggle("hidden", !isEditing);
+    medicalEditorMode.textContent = isEditing ? "Edicion" : "Creacion";
+    medicalFormTitle.textContent = isEditing ? "Editar nota medica" : "Nueva nota medica";
+    medicalFormCopy.textContent = isEditing
+      ? "Corrige tipo, descripcion o visibilidad de una nota sensible sin perder el historial operativo."
+      : "Ejemplos: lesion previa, restriccion de movimiento, contacto de emergencia o permiso especial.";
+    medicalConsentCopy.textContent = isEditing
+      ? "Confirmo que la edicion de esta informacion sensible sigue contando con autorizacion del alumno."
+      : "Confirmo que el alumno autorizo registrar esta informacion sensible.";
+    saveMedicalButton.textContent = isEditing ? "Guardar cambios" : "Guardar nota";
+    cancelMedicalEditButton.classList.toggle("hidden", !isEditing);
+    medicalForm.consent_confirmed.required = !Boolean(currentStudent?.medical_consent_at);
   }
 
   function escapeHtml(value) {
@@ -190,6 +215,8 @@
   }
 
   function renderNotes(notes) {
+    noteById = new Map(notes.map((note) => [note.id, note]));
+
     if (!notes.length) {
       medicalNotesList.innerHTML = '<p class="muted">No hay notas para este filtro.</p>';
       return;
@@ -198,13 +225,40 @@
     medicalNotesList.innerHTML = notes.map((note) => {
       const visibilityLabel = note.visible_to_coach ? "Visible para coach" : "Solo admin";
       return `
-        <article class="mini-list-item">
-          <strong>${escapeHtml(note.note_type || "Nota medica")}</strong>
-          <span>${escapeHtml(note.description || "")}</span>
-          <small>${escapeHtml(`${formatDate(note.created_at)} · ${visibilityLabel}`)}</small>
+        <article class="mini-list-item action-list-item">
+          <div>
+            <strong>${escapeHtml(note.note_type || "Nota medica")}</strong>
+            <span>${escapeHtml(note.description || "")}</span>
+            <small>${escapeHtml(`${formatDate(note.created_at)} · ${visibilityLabel}`)}</small>
+          </div>
+          <div class="detail-action-group">
+            <button class="button ghost compact-button" data-note-edit="${escapeHtml(note.id)}" type="button">Editar</button>
+            <button class="button ghost compact-button" data-note-delete="${escapeHtml(note.id)}" type="button">Eliminar</button>
+          </div>
         </article>
       `;
     }).join("");
+  }
+
+  function resetMedicalForm() {
+    medicalForm.reset();
+    setMedicalEditorMode("create");
+  }
+
+  function populateMedicalForm(noteId) {
+    const note = noteById.get(noteId);
+    if (!note) {
+      setStatus(medicalStatus, "No encontramos la nota a editar.", "error");
+      return;
+    }
+
+    setMedicalEditorMode("edit", note);
+    medicalForm.note_type.value = note.note_type || "";
+    medicalForm.description.value = note.description || "";
+    medicalForm.visible_to_coach.checked = Boolean(note.visible_to_coach);
+    medicalForm.consent_confirmed.checked = Boolean(currentStudent?.medical_consent_at);
+    setStatus(medicalStatus, `Editando nota del ${formatDate(note.created_at)}.`, "ok");
+    medicalForm.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function refreshNotesView() {
@@ -248,6 +302,11 @@
       visibilityFilter.value = visibilityFilter.value || "";
       renderCoachPreview(payload.coachVisibleNotes || []);
       refreshNotesView();
+      if (editingNoteId && !noteById.has(editingNoteId)) {
+        resetMedicalForm();
+      } else {
+        setMedicalEditorMode(editingNoteId ? "edit" : "create", noteById.get(editingNoteId));
+      }
       syncUrl(currentStudentId);
       setStatus(medicalStatus, "");
       setStatus(safetyStatus, "");
@@ -256,6 +315,7 @@
       currentStudent = null;
       currentNotes = [];
       currentNoteTypes = [];
+      noteById = new Map();
       setupMessage.textContent = error.message;
       renderStudents([], "");
       renderConsent(null);
@@ -303,7 +363,7 @@
     }
   }
 
-  async function createMedicalNote(event) {
+  async function saveMedicalNote(event) {
     event.preventDefault();
     if (setupRequired) {
       setStatus(medicalStatus, "Primero debemos ejecutar el SQL de gestion en Supabase.", "error");
@@ -316,22 +376,51 @@
       return;
     }
 
-    setStatus(medicalStatus, "Guardando nota sensible...");
+    setStatus(medicalStatus, editingNoteId ? "Guardando cambios..." : "Guardando nota sensible...");
     const formData = new FormData(medicalForm);
     const body = Object.fromEntries(formData.entries());
     body.student_id = studentId;
     body.visible_to_coach = formData.has("visible_to_coach");
     body.consent_confirmed = formData.has("consent_confirmed");
+    if (editingNoteId) {
+      body.note_id = editingNoteId;
+    }
 
     try {
       const response = await fetch("/api/admin/medical", {
-        method: "POST",
+        method: editingNoteId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar la nota.");
-      medicalForm.reset();
+      resetMedicalForm();
+      setStatus(medicalStatus, payload.message, "ok");
+      await loadMedical(studentId);
+    } catch (error) {
+      setStatus(medicalStatus, error.message, "error");
+    }
+  }
+
+  async function deleteMedicalNote(noteId) {
+    if (!noteId) return;
+    const note = noteById.get(noteId);
+    const noteLabel = note?.note_type || "esta nota";
+    if (!window.confirm(`Se eliminara la nota sensible "${noteLabel}". Esta accion no se puede deshacer.`)) {
+      return;
+    }
+
+    setStatus(medicalStatus, "Eliminando nota...");
+    try {
+      const response = await fetch("/api/admin/medical", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note_id: noteId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo eliminar la nota.");
+      const studentId = studentFilter.value;
+      if (editingNoteId === noteId) resetMedicalForm();
       setStatus(medicalStatus, payload.message, "ok");
       await loadMedical(studentId);
     } catch (error) {
@@ -347,7 +436,23 @@
   noteTypeFilter.addEventListener("change", refreshNotesView);
   visibilityFilter.addEventListener("change", refreshNotesView);
   safetyForm.addEventListener("submit", saveSafetyProfile);
-  medicalForm.addEventListener("submit", createMedicalNote);
+  medicalForm.addEventListener("submit", saveMedicalNote);
+  medicalNotesList.addEventListener("click", (event) => {
+    const editButton = event.target.closest("[data-note-edit]");
+    if (editButton) {
+      populateMedicalForm(editButton.dataset.noteEdit);
+      return;
+    }
+
+    const deleteButton = event.target.closest("[data-note-delete]");
+    if (deleteButton) {
+      deleteMedicalNote(deleteButton.dataset.noteDelete);
+    }
+  });
+  cancelMedicalEditButton.addEventListener("click", () => {
+    resetMedicalForm();
+    setStatus(medicalStatus, "Edicion cancelada.", "ok");
+  });
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login.html";
@@ -356,6 +461,7 @@
   async function boot() {
     const user = await requireAdminSession();
     if (!user) return;
+    setMedicalEditorMode("create");
     await loadMedical(getInitialStudentId());
   }
 

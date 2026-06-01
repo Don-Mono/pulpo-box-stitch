@@ -70,6 +70,7 @@ Los ejercicios personalizados se pueden agregar y desactivar desde `/exercises.h
 El portal alumno ya puede registrar marcas vinculadas a ejercicios concretos de sus rutinas asignadas.
 Admin ya puede editar y eliminar resultados desde el modulo de resultados, manteniendo validacion entre alumno, rutina y ejercicio.
 Admin ya puede editar y eliminar mediciones corporales desde el modulo de progreso, manteniendo el historial mas limpio y corregible.
+Admin ya puede editar y eliminar notas medicas sensibles desde el modulo medico, manteniendo consentimiento y visibilidad por rol.
 El portal alumno ya puede filtrar su historial por rutina y ejercicio, ver tendencias rapidas y leer feedback del coach dentro de sus propias marcas.
 El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios de sus rutinas asignadas, incluyendo una vista previa al registrar marcas.
 El portal alumno ya puede actualizar sus datos de contacto permitidos y su contacto de emergencia sin tocar coach, sede ni objetivo.
