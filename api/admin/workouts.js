@@ -127,7 +127,7 @@ async function listWorkouts(supabase) {
     exerciseIds.length
       ? supabase.from("pb_exercises").select("id, name, description, movement_type, video_url").in("id", exerciseIds)
       : Promise.resolve({ data: [], error: null }),
-    supabase.from("pb_workout_assignments").select("id, workout_id, student_id, status").in("workout_id", workoutIds),
+    supabase.from("pb_workout_assignments").select("id, workout_id, student_id, status, completed_at").in("workout_id", workoutIds),
     listAssignableStudents(supabase),
   ]);
 
@@ -174,6 +174,7 @@ async function listWorkouts(supabase) {
       student_id: assignment.student_id,
       student_name: assignedProfileMap.get(assignment.student_id)?.full_name || "Alumno asignado",
       status: assignment.status,
+      completed_at: assignment.completed_at,
     });
     assignmentsByWorkout.set(assignment.workout_id, list);
   });

@@ -53,6 +53,29 @@
     return value == null ? "--" : `${formatNumber(value)} ${unit}`.trim();
   }
 
+  function getAssignmentStatusMeta(status) {
+    switch (String(status || "assigned").toLowerCase()) {
+      case "completed":
+        return {
+          label: "Completada",
+          className: "is-completed",
+          helper: "Rutina cerrada por el alumno.",
+        };
+      case "skipped":
+        return {
+          label: "Omitida",
+          className: "is-skipped",
+          helper: "El alumno marco esta rutina como omitida.",
+        };
+      default:
+        return {
+          label: "Pendiente",
+          className: "is-assigned",
+          helper: "Rutina aun pendiente por completar.",
+        };
+    }
+  }
+
   function safeExternalUrl(value) {
     if (!value) return "";
 
@@ -237,18 +260,22 @@
       const workout = assignment.workout || {};
       const exercises = assignment.exercises || [];
       const assignedAt = assignment.assigned_at ? new Date(assignment.assigned_at).toLocaleDateString("es-CL") : "Sin fecha";
+      const statusMeta = getAssignmentStatusMeta(assignment.status);
+      const completedLabel = assignment.completed_at ? formatDate(assignment.completed_at) : "";
 
       return `
         <article class="workout-card">
           <div>
-            <span class="status-pill">${escapeHtml(assignment.status || "assigned")}</span>
+            <span class="status-pill ${escapeHtml(statusMeta.className)}">${escapeHtml(statusMeta.label)}</span>
             <h3>${escapeHtml(workout.title || "Rutina asignada")}</h3>
             <p>${escapeHtml(workout.summary || "Sin resumen.")}</p>
           </div>
           <div class="workout-meta">
             <span>${escapeHtml(workout.workout_date || assignedAt)}</span>
             <span>${exercises.length} ejercicio(s)</span>
+            ${completedLabel ? `<span>${escapeHtml(`Cerrada ${completedLabel}`)}</span>` : ""}
           </div>
+          <p class="muted assignment-status-helper">${escapeHtml(statusMeta.helper)}</p>
           ${renderExerciseStack(exercises, "Sin ejercicios cargados.")}
         </article>
       `;

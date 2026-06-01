@@ -70,6 +70,7 @@ El portal alumno ya puede registrar marcas vinculadas a ejercicios concretos de 
 El portal alumno ya puede filtrar su historial por rutina y ejercicio, ver tendencias rapidas y leer feedback del coach dentro de sus propias marcas.
 El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios de sus rutinas asignadas, incluyendo una vista previa al registrar marcas.
 El portal alumno ya puede actualizar sus datos de contacto permitidos y su contacto de emergencia sin tocar coach, sede ni objetivo.
+El portal alumno ya puede marcar cada rutina asignada como pendiente, completada u omitida, y ese estado se refleja tambien en coach y admin.
 El portal coach ya puede revisar resultados de sus alumnos asignados y guardar feedback tecnico sobre cada marca.
 Admin ya puede regenerar claves temporales para alumnos y coaches desde sus listados, y coach/alumno ya pueden cambiar su propia clave desde una vista privada.
 Admin ya puede crear, editar y desactivar sedes, y el alta inicial de alumnos ya permite asignarles una sede desde el mismo formulario.
@@ -78,6 +79,7 @@ El coach ya puede reasignar o quitar alumnos dentro de rutinas creadas por su pr
 El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, mediciones, marcas y notas medicas visibles para seguimiento.
 La ficha del coach ya expone descripcion, enfoque y enlaces de video dentro de los ejercicios asignados al alumno para revisar tecnica sin salir de la vista.
 La ficha del coach ya permite filtrar historial por rutina y ejercicio, con indicadores rapidos para leer tendencias sin salir de la vista.
+El login extendido de coach y alumno ya fue validado con credenciales de Supabase Auth y perfil activo en `pb_profiles`.
 Admin ya puede abrir una ficha unificada por coach, editar datos base y revisar alumnos asignados, rutinas creadas y ultimas marcas relacionadas.
 Admin ya puede abrir una ficha unificada por alumno, editar datos base y saltar directo a progreso, resultados y datos medicos manteniendo el mismo `student_id` en la URL.
 La ficha admin del alumno ya incluye acceso rapido al modulo de rutinas con el mismo contexto de alumno.

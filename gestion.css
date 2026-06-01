@@ -173,6 +173,21 @@ body {
   text-transform: uppercase;
 }
 
+.status-pill.is-assigned {
+  background: #edf4f7;
+  color: #475467;
+}
+
+.status-pill.is-completed {
+  background: rgba(2, 122, 72, 0.14);
+  color: #027a48;
+}
+
+.status-pill.is-skipped {
+  background: rgba(180, 35, 24, 0.14);
+  color: #b42318;
+}
+
 .auth-title {
   font-size: clamp(3rem, 9vw, 5.5rem);
   margin: 1rem 0;
@@ -692,6 +707,20 @@ body {
   font-size: 0.8rem;
   font-weight: 800;
   padding: 0.35rem 0.7rem;
+}
+
+.assignment-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.assignment-action-row .button {
+  flex: 1 1 9rem;
+}
+
+.assignment-status-helper {
+  margin-top: -0.25rem !important;
 }
 
 .metric-grid {

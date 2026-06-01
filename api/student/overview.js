@@ -14,6 +14,11 @@ function cleanNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function cleanAssignmentStatus(value) {
+  const status = clean(value, 24).toLowerCase();
+  return ["assigned", "completed", "skipped"].includes(status) ? status : "";
+}
+
 function isMissingManagementSchema(error) {
   if (!error) return false;
   const message = `${error.message || ""} ${error.details || ""} ${error.hint || ""}`.toLowerCase();
@@ -62,7 +67,7 @@ async function loadStudentOverview(supabase, studentId) {
       .maybeSingle(),
     supabase
       .from("pb_workout_assignments")
-      .select("id, workout_id, status, assigned_at")
+      .select("id, workout_id, status, assigned_at, completed_at")
       .eq("student_id", studentId)
       .order("assigned_at", { ascending: false })
       .limit(ASSIGNMENT_HISTORY_LIMIT),
@@ -236,6 +241,54 @@ async function updateStudentProfile(supabase, studentId, body) {
   return { id: studentId };
 }
 
+async function updateStudentAssignmentStatus(supabase, studentId, body) {
+  const assignmentId = clean(body.assignment_id, 90);
+  const status = cleanAssignmentStatus(body.status);
+
+  if (!assignmentId) {
+    const error = new Error("Debes indicar la asignacion a actualizar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!status) {
+    const error = new Error("El estado de rutina no es valido.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { data: assignment, error: assignmentError } = await supabase
+    .from("pb_workout_assignments")
+    .select("id, student_id, status")
+    .eq("id", assignmentId)
+    .eq("student_id", studentId)
+    .maybeSingle();
+
+  if (assignmentError) throw assignmentError;
+  if (!assignment?.id) {
+    const error = new Error("La rutina seleccionada no pertenece a tu perfil.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const timestamp = new Date().toISOString();
+  const updates = {
+    status,
+    completed_at: status === "completed" ? timestamp : null,
+  };
+
+  const { data, error } = await supabase
+    .from("pb_workout_assignments")
+    .update(updates)
+    .eq("id", assignmentId)
+    .eq("student_id", studentId)
+    .select("id, status, completed_at")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 async function createStudentResult(supabase, studentId, body) {
   const workoutId = clean(body.workout_id, 90) || null;
   const exerciseId = clean(body.exercise_id, 90) || null;
@@ -333,6 +386,20 @@ module.exports = async function handler(req, res) {
     if (req.method === "PATCH") {
       const body = parseBody(req);
       try {
+        if (body.action === "assignment-status" || body.assignment_id) {
+          const updated = await updateStudentAssignmentStatus(supabase, studentId, body);
+          const statusLabels = {
+            assigned: "Rutina marcada como pendiente nuevamente.",
+            completed: "Rutina marcada como completada.",
+            skipped: "Rutina marcada como omitida.",
+          };
+          return json(res, 200, {
+            ok: true,
+            message: statusLabels[updated.status] || "Estado de rutina actualizado correctamente.",
+            assignment: updated,
+          });
+        }
+
         const updated = await updateStudentProfile(supabase, studentId, body);
         return json(res, 200, {
           ok: true,

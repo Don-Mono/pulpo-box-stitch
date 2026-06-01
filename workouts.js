@@ -42,6 +42,21 @@
       .replaceAll('"', "&quot;");
   }
 
+  function formatDate(value) {
+    return value ? new Date(value).toLocaleDateString("es-CL") : "Sin fecha";
+  }
+
+  function getAssignmentStatusMeta(status) {
+    switch (String(status || "assigned").toLowerCase()) {
+      case "completed":
+        return { label: "Completada", className: "is-completed" };
+      case "skipped":
+        return { label: "Omitida", className: "is-skipped" };
+      default:
+        return { label: "Pendiente", className: "is-assigned" };
+    }
+  }
+
   function getInitialStudentId() {
     try {
       return new URLSearchParams(window.location.search).get("student_id") || "";
@@ -274,15 +289,21 @@
         }).join("")
         : '<option value="">Todos los alumnos activos ya estan asignados</option>';
       const assignmentRows = assignments.length
-        ? assignments.map((assignment) => `
+        ? assignments.map((assignment) => {
+          const assignmentMeta = getAssignmentStatusMeta(assignment.status);
+          const assignmentDate = assignment.completed_at && assignmentMeta.label === "Completada"
+            ? ` · ${formatDate(assignment.completed_at)}`
+            : "";
+          return `
           <article class="mini-list-item action-list-item">
             <div>
               <strong>${escapeHtml(assignment.student_name)}</strong>
-              <small>${escapeHtml(assignment.status || "assigned")}</small>
+              <small>${escapeHtml(`${assignmentMeta.label}${assignmentDate}`)}</small>
             </div>
             <button class="button ghost compact-button" data-workout-unassign="${escapeHtml(assignment.id)}" type="button">Quitar</button>
           </article>
-        `).join("")
+        `;
+        }).join("")
         : '<p class="muted">Sin alumnos asignados todavia.</p>';
 
       return `

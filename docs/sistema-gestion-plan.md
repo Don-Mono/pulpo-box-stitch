@@ -86,6 +86,7 @@ Primera implementacion:
 - `/admin.html`: panel clasico de contenido, se mantiene disponible.
 - Rol activo inicial: `admin`.
 - Login extendido: usuarios creados en Supabase Auth pueden entrar si tienen perfil activo en `pb_profiles`.
+- El login extendido ya fue validado de punta a punta para coach y alumno usando credenciales reales creadas desde el panel admin.
 - Rol `student`: redirige a `/student.html` para ver rutinas asignadas y registrar resultados propios.
 - Rol `coach`: redirige a `/coach.html` para ver alumnos asignados y ultimas marcas.
 - Admin ya puede regenerar claves temporales para alumnos y coaches desde sus listados si olvidan el acceso.
@@ -175,6 +176,8 @@ Primera implementacion:
 - El alumno ya puede actualizar su telefono y contacto de emergencia desde su propio portal, manteniendo coach, sede y objetivo como datos administrados por el equipo.
 - El portal alumno ya filtra historial por rutina y ejercicio, resume tendencia y muestra feedback del coach dentro de sus registros.
 - El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios asignados, incluyendo una vista previa contextual al registrar una marca.
+- El portal alumno ya puede cambiar el estado de una rutina asignada entre pendiente, completada u omitida.
+- Coach y admin ya ven ese mismo estado reflejado en sus paneles operativos.
 - El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
 
 ### Etapa 5 - Progreso

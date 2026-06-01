@@ -116,7 +116,7 @@ async function loadStudentDetail(supabase, coachId, studentId) {
       .maybeSingle(),
     supabase
       .from("pb_workout_assignments")
-      .select("id, workout_id, status, assigned_at")
+      .select("id, workout_id, status, assigned_at, completed_at")
       .eq("student_id", selectedStudentId)
       .order("assigned_at", { ascending: false })
       .limit(ASSIGNMENT_HISTORY_LIMIT),

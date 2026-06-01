@@ -31,8 +31,8 @@ function redirectForRole(role) {
 }
 
 async function trySupabaseLogin(email, password, req, res) {
-  const supabase = getSupabase();
-  const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+  const authClient = getSupabase();
+  const { data: authData, error: authError } = await authClient.auth.signInWithPassword({
     email,
     password,
   });
@@ -41,7 +41,8 @@ async function trySupabaseLogin(email, password, req, res) {
     return json(res, 401, { error: "Correo o clave incorrectos." });
   }
 
-  const { data: profile, error: profileError } = await supabase
+  const adminClient = getSupabase();
+  const { data: profile, error: profileError } = await adminClient
     .from("pb_profiles")
     .select("id, role, full_name, email, is_active")
     .eq("id", authData.user.id)

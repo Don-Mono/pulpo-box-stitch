@@ -8,6 +8,7 @@
   const profileContextCard = document.querySelector("#profileContextCard");
   const summaryGrid = document.querySelector("#summaryGrid");
   const assignmentsList = document.querySelector("#assignmentsList");
+  const assignmentStatus = document.querySelector("#assignmentStatus");
   const workoutSelect = document.querySelector("#workout_id");
   const exerciseSelect = document.querySelector("#exercise_id");
   const exerciseHint = document.querySelector("#exerciseHint");
@@ -53,6 +54,32 @@
 
   function formatMetric(value, unit) {
     return value == null ? "--" : `${formatNumber(value)} ${unit}`.trim();
+  }
+
+  function getAssignmentStatusMeta(status) {
+    switch (String(status || "assigned").toLowerCase()) {
+      case "completed":
+        return {
+          code: "completed",
+          label: "Completada",
+          className: "is-completed",
+          helper: "Rutina marcada como realizada.",
+        };
+      case "skipped":
+        return {
+          code: "skipped",
+          label: "Omitida",
+          className: "is-skipped",
+          helper: "Rutina marcada como omitida por ahora.",
+        };
+      default:
+        return {
+          code: "assigned",
+          label: "Pendiente",
+          className: "is-assigned",
+          helper: "Rutina pendiente por completar.",
+        };
+    }
   }
 
   function safeExternalUrl(value) {
@@ -258,14 +285,27 @@
     assignmentsList.innerHTML = assignments.map((assignment) => {
       const workout = assignment.workout || {};
       const exercises = assignment.exercises || [];
+      const statusMeta = getAssignmentStatusMeta(assignment.status);
+      const completedLabel = assignment.completed_at ? formatDate(assignment.completed_at) : "";
 
       return `
         <article class="workout-card">
           <div>
-            <span class="status-pill">${escapeHtml(workout.level || assignment.status || "Asignada")}</span>
+            <span class="status-pill ${escapeHtml(statusMeta.className)}">${escapeHtml(statusMeta.label)}</span>
             <h3>${escapeHtml(workout.title || "Rutina asignada")}</h3>
             <p>${escapeHtml(workout.summary || "Sin resumen.")}</p>
           </div>
+          <div class="workout-meta">
+            <span>${escapeHtml(formatDate(assignment.assigned_at))}</span>
+            <span>${exercises.length} ejercicio(s)</span>
+            ${completedLabel ? `<span>${escapeHtml(`Cerrada ${completedLabel}`)}</span>` : ""}
+          </div>
+          <div class="assignment-action-row">
+            <button class="button ghost compact-button${statusMeta.code === "assigned" ? " is-disabled" : ""}" data-assignment-status="${escapeHtml(assignment.id)}" data-assignment-value="assigned" type="button"${statusMeta.code === "assigned" ? " disabled" : ""}>Pendiente</button>
+            <button class="button accent compact-button${statusMeta.code === "completed" ? " is-disabled" : ""}" data-assignment-status="${escapeHtml(assignment.id)}" data-assignment-value="completed" type="button"${statusMeta.code === "completed" ? " disabled" : ""}>Completar</button>
+            <button class="button ghost compact-button${statusMeta.code === "skipped" ? " is-disabled" : ""}" data-assignment-status="${escapeHtml(assignment.id)}" data-assignment-value="skipped" type="button"${statusMeta.code === "skipped" ? " disabled" : ""}>Omitir</button>
+          </div>
+          <p class="muted assignment-status-helper">${escapeHtml(statusMeta.helper)}</p>
           ${renderExerciseStack(exercises, "Revisa las indicaciones con tu coach.")}
         </article>
       `;
@@ -508,6 +548,7 @@
       setupMessage.textContent = setupRequired
         ? payload.message
         : "Panel listo. Revisa tu progreso, tus rutinas, actualiza tus datos y registra tus marcas.";
+      setStatus(assignmentStatus, "");
       renderProfile(currentProfile);
       renderSummary(currentSummary, currentMeasurements);
       renderAssignments(payload.assignments || []);
@@ -530,7 +571,37 @@
       exerciseHistoryFilter.innerHTML = '<option value="">Todos los ejercicios</option>';
       resultsFilterHint.textContent = "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
       renderResultsSummary([]);
+      setStatus(assignmentStatus, "");
       setStatus(profileStatus, error.message, "error");
+    }
+  }
+
+  async function updateAssignmentStatusRequest(assignmentId, status) {
+    if (setupRequired) {
+      setStatus(assignmentStatus, "Tu panel aun no esta activo en Supabase.", "error");
+      return;
+    }
+
+    if (!assignmentId || !status) return;
+
+    setStatus(assignmentStatus, "Actualizando estado de la rutina...");
+
+    try {
+      const response = await fetch("/api/student/overview", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "assignment-status",
+          assignment_id: assignmentId,
+          status,
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo actualizar el estado.");
+      await loadOverview();
+      setStatus(assignmentStatus, payload.message || "Estado actualizado correctamente.", "ok");
+    } catch (error) {
+      setStatus(assignmentStatus, error.message, "error");
     }
   }
 
@@ -613,6 +684,11 @@
     refreshResultsView();
   });
   exerciseHistoryFilter.addEventListener("change", refreshResultsView);
+  assignmentsList.addEventListener("click", (event) => {
+    const statusButton = event.target.closest("[data-assignment-status]");
+    if (!statusButton) return;
+    updateAssignmentStatusRequest(statusButton.dataset.assignmentStatus, statusButton.dataset.assignmentValue);
+  });
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login.html";

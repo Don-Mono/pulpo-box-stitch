@@ -154,9 +154,9 @@ async function listCoachWorkouts(supabase, coachId) {
 
   const studentIds = students.map((student) => student.id);
   const { data: assignments, error: assignmentsError } = studentIds.length
-    ? await supabase
+      ? await supabase
       .from("pb_workout_assignments")
-      .select("id, workout_id, student_id, status, assigned_at")
+      .select("id, workout_id, student_id, status, assigned_at, completed_at")
       .in("student_id", studentIds)
     : { data: [], error: null };
 
@@ -241,6 +241,7 @@ async function listCoachWorkouts(supabase, coachId) {
       student_id: assignment.student_id,
       student_name: studentMap.get(assignment.student_id)?.full_name || "Alumno asignado",
       status: assignment.status,
+      completed_at: assignment.completed_at,
     });
     assignmentsByWorkout.set(assignment.workout_id, list);
   });
