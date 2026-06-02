@@ -1,10 +1,17 @@
 const { getSupabase, json, requireAdmin } = require("../_shared");
 
-const WORKOUT_LIMIT = 80;
+const DEFAULT_WORKOUT_PAGE_SIZE = 20;
+const MAX_WORKOUT_PAGE_SIZE = 50;
 const STUDENT_LIMIT = 200;
 
 function clean(value, maxLength = 220) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function cleanPositiveInteger(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.floor(parsed);
 }
 
 function cleanDate(value) {
@@ -33,6 +40,12 @@ function isMissingManagementSchema(error) {
     || message.includes('relation "pb_')
     || message.includes('relation "public.pb_')
   );
+}
+
+function getQuery(req) {
+  if (req.query) return req.query;
+  const url = new URL(req.url || "/", "http://localhost");
+  return Object.fromEntries(url.searchParams.entries());
 }
 
 function parseJsonArray(value) {
@@ -67,6 +80,17 @@ function setupPayload() {
   return {
     workouts: [],
     students: [],
+    pagination: {
+      total: 0,
+      page: 1,
+      pageSize: DEFAULT_WORKOUT_PAGE_SIZE,
+      totalPages: 1,
+    },
+    filters: {
+      q: "",
+      studentId: "",
+      level: "",
+    },
     setupRequired: true,
     message: "Para activar rutinas debes ejecutar primero supabase_management_schema.sql en Supabase.",
   };
@@ -98,17 +122,89 @@ async function listAssignableStudents(supabase) {
   }));
 }
 
-async function listWorkouts(supabase) {
-  const { data: workouts, error } = await supabase
-    .from("pb_workouts")
-    .select("id, title, summary, workout_date, level, notes, created_at")
-    .order("created_at", { ascending: false })
-    .limit(WORKOUT_LIMIT);
+async function listWorkouts(supabase, options = {}) {
+  const page = cleanPositiveInteger(options.page, 1);
+  const requestedPageSize = cleanPositiveInteger(options.pageSize, DEFAULT_WORKOUT_PAGE_SIZE);
+  const pageSize = Math.min(requestedPageSize, MAX_WORKOUT_PAGE_SIZE);
+  const search = clean(options.q, 120);
+  const studentId = clean(options.studentId, 90);
+  const level = clean(options.level, 80);
+
+  let filteredWorkoutIds = null;
+
+  if (studentId) {
+    const { data: assignmentMatches, error: assignmentMatchesError } = await supabase
+      .from("pb_workout_assignments")
+      .select("workout_id")
+      .eq("student_id", studentId)
+      .limit(5000);
+
+    if (assignmentMatchesError) throw assignmentMatchesError;
+    filteredWorkoutIds = [...new Set((assignmentMatches || []).map((assignment) => assignment.workout_id).filter(Boolean))];
+
+    if (!filteredWorkoutIds.length) {
+      const students = await listAssignableStudents(supabase);
+      return {
+        students,
+        workouts: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          pageSize,
+          totalPages: 1,
+        },
+      };
+    }
+  }
+
+  const applyWorkoutFilters = (query, { includeLevelFilter = true } = {}) => {
+    let nextQuery = query;
+    if (filteredWorkoutIds) nextQuery = nextQuery.in("id", filteredWorkoutIds);
+    if (includeLevelFilter && level) nextQuery = nextQuery.eq("level", level);
+    if (search) {
+      const escapedSearch = search.replaceAll(",", " ").trim();
+      nextQuery = nextQuery.or([
+        `title.ilike.%${escapedSearch}%`,
+        `summary.ilike.%${escapedSearch}%`,
+        `level.ilike.%${escapedSearch}%`,
+        `notes.ilike.%${escapedSearch}%`,
+      ].join(","));
+    }
+    return nextQuery;
+  };
+
+  let workoutsQuery = applyWorkoutFilters(
+    supabase
+      .from("pb_workouts")
+      .select("id, title, summary, workout_date, level, notes, created_at", { count: "exact" })
+      .order("created_at", { ascending: false }),
+  );
+
+  const rangeFrom = (page - 1) * pageSize;
+  const rangeTo = rangeFrom + pageSize - 1;
+  const [{ data: workouts, count: totalWorkouts, error }, { data: levelRows, error: levelRowsError }] = await Promise.all([
+    workoutsQuery.range(rangeFrom, rangeTo),
+    applyWorkoutFilters(
+      supabase.from("pb_workouts").select("level"),
+      { includeLevelFilter: false },
+    ).limit(5000),
+  ]);
 
   if (error) throw error;
+  if (levelRowsError) throw levelRowsError;
   if (!workouts?.length) {
     const students = await listAssignableStudents(supabase);
-    return { workouts: [], students };
+    return {
+      workouts: [],
+      students,
+      levels: [...new Set((levelRows || []).map((row) => clean(row.level, 80)).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es")),
+      pagination: {
+        total: 0,
+        page: 1,
+        pageSize,
+        totalPages: 1,
+      },
+    };
   }
 
   const workoutIds = workouts.map((workout) => workout.id);
@@ -180,13 +276,25 @@ async function listWorkouts(supabase) {
     assignmentsByWorkout.set(assignment.workout_id, list);
   });
 
+  const levels = [...new Set((levelRows || []).map((row) => clean(row.level, 80)).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+  const total = Math.max(Number(totalWorkouts || 0), 0);
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+  const normalizedPage = Math.min(Math.max(page, 1), totalPages);
+
   return {
     students,
+    levels,
     workouts: workouts.map((workout) => ({
       ...workout,
       exercises: exercisesByWorkout.get(workout.id) || [],
       assignments: assignmentsByWorkout.get(workout.id) || [],
     })),
+    pagination: {
+      total,
+      page: normalizedPage,
+      pageSize,
+      totalPages,
+    },
   };
 }
 
@@ -545,9 +653,24 @@ module.exports = async function handler(req, res) {
     const supabase = getSupabase();
 
     if (req.method === "GET") {
+      const query = getQuery(req);
       try {
-        const payload = await listWorkouts(supabase);
-        return json(res, 200, { ...payload, setupRequired: false });
+        const payload = await listWorkouts(supabase, {
+          page: query.page,
+          pageSize: query.page_size,
+          q: query.q,
+          studentId: query.student_id,
+          level: query.level,
+        });
+        return json(res, 200, {
+          ...payload,
+          filters: {
+            q: clean(query.q, 120),
+            studentId: clean(query.student_id, 90),
+            level: clean(query.level, 80),
+          },
+          setupRequired: false,
+        });
       } catch (error) {
         if (isMissingManagementSchema(error)) return json(res, 200, setupPayload());
         throw error;

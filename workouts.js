@@ -7,6 +7,13 @@
   const refreshButton = document.querySelector("#refreshButton");
   const logoutButton = document.querySelector("#logoutButton");
   const studentSelect = document.querySelector("#student_id");
+  const workoutSearch = document.querySelector("#workoutSearch");
+  const workoutStudentFilter = document.querySelector("#workoutStudentFilter");
+  const workoutLevelFilter = document.querySelector("#workoutLevelFilter");
+  const workoutsPageSize = document.querySelector("#workoutsPageSize");
+  const workoutsPaginationStatus = document.querySelector("#workoutsPaginationStatus");
+  const previousWorkoutsPageButton = document.querySelector("#previousWorkoutsPageButton");
+  const nextWorkoutsPageButton = document.querySelector("#nextWorkoutsPageButton");
   const librarySectionSelect = document.querySelector("#library_section");
   const libraryExerciseSelect = document.querySelector("#library_exercise");
   const libraryHint = document.querySelector("#libraryHint");
@@ -40,6 +47,14 @@
   let currentWorkouts = [];
   let workoutById = new Map();
   let editingWorkoutId = "";
+  let currentPage = Number(workoutsPageSize?.dataset.initialPage || 1);
+  let currentPageSize = Number(workoutsPageSize?.value || 20);
+  let currentTotalPages = 1;
+  let currentTotalWorkouts = 0;
+  let currentSearch = "";
+  let currentStudentFilter = "";
+  let currentLevelFilter = "";
+  let currentLevels = [];
 
   function setStatus(element, message, type = "") {
     element.textContent = message;
@@ -182,11 +197,46 @@
     }
   }
 
+  function getInitialPage() {
+    try {
+      const page = Number(new URLSearchParams(window.location.search).get("page") || "1");
+      return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  function getInitialPageSize() {
+    try {
+      const pageSize = Number(new URLSearchParams(window.location.search).get("page_size") || String(currentPageSize));
+      if ([10, 20, 50].includes(pageSize)) return pageSize;
+      return currentPageSize;
+    } catch {
+      return currentPageSize;
+    }
+  }
+
+  function getInitialFilter(name) {
+    try {
+      return new URLSearchParams(window.location.search).get(name) || "";
+    } catch {
+      return "";
+    }
+  }
+
   function syncUrl(studentId) {
     try {
       const url = new URL(window.location.href);
       if (studentId) url.searchParams.set("student_id", studentId);
       else url.searchParams.delete("student_id");
+      if (currentSearch) url.searchParams.set("q", currentSearch);
+      else url.searchParams.delete("q");
+      if (currentStudentFilter) url.searchParams.set("filter_student_id", currentStudentFilter);
+      else url.searchParams.delete("filter_student_id");
+      if (currentLevelFilter) url.searchParams.set("level", currentLevelFilter);
+      else url.searchParams.delete("level");
+      url.searchParams.set("page", String(currentPage));
+      url.searchParams.set("page_size", String(currentPageSize));
       window.history.replaceState({}, "", url.toString());
     } catch {
       // Ignore URL sync errors in constrained environments.
@@ -220,10 +270,37 @@
     if (preferredStudentId && students.some((student) => student.id === preferredStudentId)) {
       studentSelect.value = preferredStudentId;
     }
+
+    const filterOptions = ['<option value="">Todos</option>'];
+    students.forEach((student) => {
+      filterOptions.push(`<option value="${escapeHtml(student.id)}">${escapeHtml(student.full_name)}</option>`);
+    });
+    workoutStudentFilter.innerHTML = filterOptions.join("");
+    workoutStudentFilter.value = currentStudentFilter;
   }
 
   function renderEmpty(message) {
     workoutsList.innerHTML = `<p class="muted">${escapeHtml(message)}</p>`;
+  }
+
+  function renderLevelOptions(levels) {
+    currentLevels = levels || [];
+    const options = ['<option value="">Todos</option>'];
+    currentLevels.forEach((level) => {
+      options.push(`<option value="${escapeHtml(level)}">${escapeHtml(level)}</option>`);
+    });
+    workoutLevelFilter.innerHTML = options.join("");
+    workoutLevelFilter.value = currentLevelFilter;
+  }
+
+  function renderPagination() {
+    const start = currentTotalWorkouts ? ((currentPage - 1) * currentPageSize) + 1 : 0;
+    const end = Math.min(currentPage * currentPageSize, currentTotalWorkouts);
+    workoutsPaginationStatus.textContent = currentTotalWorkouts
+      ? `Mostrando ${start}-${end} de ${currentTotalWorkouts} rutina(s). Pagina ${currentPage} de ${currentTotalPages}.`
+      : "Sin rutinas para este filtro.";
+    previousWorkoutsPageButton.disabled = currentPage <= 1;
+    nextWorkoutsPageButton.disabled = currentPage >= currentTotalPages;
   }
 
   function exerciseKey(exercise) {
@@ -490,6 +567,7 @@
 
     if (!workouts.length) {
       renderEmpty("Todavia no hay rutinas registradas.");
+      renderPagination();
       return;
     }
 
@@ -559,6 +637,7 @@
         </article>
       `;
     }).join("");
+    renderPagination();
   }
 
   async function loadWorkouts() {
@@ -567,7 +646,15 @@
 
     try {
       await loadExerciseLibrary();
-      const response = await fetch("/api/admin/workouts");
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        page_size: String(currentPageSize),
+      });
+      if (currentSearch) params.set("q", currentSearch);
+      if (currentStudentFilter) params.set("student_id", currentStudentFilter);
+      if (currentLevelFilter) params.set("level", currentLevelFilter);
+
+      const response = await fetch(`/api/admin/workouts?${params.toString()}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo cargar rutinas.");
 
@@ -575,15 +662,30 @@
       setupMessage.textContent = setupRequired
         ? payload.message
         : "Modulo conectado. Ya puedes registrar rutinas cuando lo necesites.";
+      currentPage = Math.max(Number(payload.pagination?.page || currentPage || 1), 1);
+      currentPageSize = Number(payload.pagination?.pageSize || currentPageSize || 20);
+      currentTotalPages = Math.max(Number(payload.pagination?.totalPages || 1), 1);
+      currentTotalWorkouts = Math.max(Number(payload.pagination?.total || 0), 0);
+      currentSearch = payload.filters?.q || "";
+      currentStudentFilter = payload.filters?.studentId || "";
+      currentLevelFilter = payload.filters?.level || "";
+      workoutSearch.value = currentSearch;
+      workoutsPageSize.value = String(currentPageSize);
       renderStudents(payload.students || []);
+      renderLevelOptions(payload.levels || []);
       renderWorkouts(payload.workouts || []);
       if (editingWorkoutId && !workoutById.has(editingWorkoutId)) {
         resetWorkoutForm();
       }
+      syncUrl(preferredStudentId);
     } catch (error) {
       setupMessage.textContent = error.message;
       renderStudents([]);
+      renderLevelOptions([]);
+      currentTotalWorkouts = 0;
+      currentTotalPages = 1;
       renderEmpty(error.message);
+      renderPagination();
     }
   }
 
@@ -742,6 +844,36 @@
     preferredStudentId = studentSelect.value;
     syncUrl(preferredStudentId);
   });
+  workoutSearch.addEventListener("change", () => {
+    currentSearch = workoutSearch.value.trim();
+    currentPage = 1;
+    loadWorkouts();
+  });
+  workoutStudentFilter.addEventListener("change", () => {
+    currentStudentFilter = workoutStudentFilter.value;
+    currentPage = 1;
+    loadWorkouts();
+  });
+  workoutLevelFilter.addEventListener("change", () => {
+    currentLevelFilter = workoutLevelFilter.value;
+    currentPage = 1;
+    loadWorkouts();
+  });
+  workoutsPageSize.addEventListener("change", () => {
+    currentPageSize = Number(workoutsPageSize.value || 20);
+    currentPage = 1;
+    loadWorkouts();
+  });
+  previousWorkoutsPageButton.addEventListener("click", () => {
+    if (currentPage <= 1) return;
+    currentPage -= 1;
+    loadWorkouts();
+  });
+  nextWorkoutsPageButton.addEventListener("click", () => {
+    if (currentPage >= currentTotalPages) return;
+    currentPage += 1;
+    loadWorkouts();
+  });
   refreshButton.addEventListener("click", loadWorkouts);
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -752,6 +884,13 @@
     const user = await requireAdminSession();
     if (!user) return;
     preferredStudentId = getInitialStudentId();
+    currentPage = getInitialPage();
+    currentPageSize = getInitialPageSize();
+    currentSearch = getInitialFilter("q");
+    currentStudentFilter = getInitialFilter("filter_student_id");
+    currentLevelFilter = getInitialFilter("level");
+    workoutSearch.value = currentSearch;
+    workoutsPageSize.value = String(currentPageSize);
     setWorkoutEditorMode("create");
     await loadWorkouts();
   }

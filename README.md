@@ -105,3 +105,4 @@ Los modulos admin de progreso, resultados y datos medicos ya aceptan deep-link p
 El modulo admin de progreso ya filtra historial por rutina y ejercicio, resume tendencias rapidas y expone mejores marcas por ejercicio para cada alumno.
 El modulo admin de datos medicos ya resume consentimiento, contacto de emergencia, filtros por tipo/visibilidad y una vista previa exacta de las notas compartidas con coach.
 El modulo admin de resultados ahora usa paginacion por pagina y cantidad de filas configurable, para que el historial siga siendo operativo cuando aumente el volumen por sede.
+El modulo admin de rutinas ahora soporta busqueda, filtro por alumno/nivel y paginacion desde backend para ordenar mejor la operacion cuando la biblioteca de sesiones crezca.
