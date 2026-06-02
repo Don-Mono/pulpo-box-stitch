@@ -939,6 +939,11 @@ body {
   margin-top: 1rem;
 }
 
+.pagination-toolbar {
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
 .data-table {
   border-collapse: collapse;
   min-width: 820px;

@@ -15,12 +15,20 @@
   const resultEditorMode = document.querySelector("#resultEditorMode");
   const saveResultButton = document.querySelector("#saveResultButton");
   const cancelResultEditButton = document.querySelector("#cancelResultEditButton");
+  const pageSizeSelect = document.querySelector("#page_size");
+  const paginationStatus = document.querySelector("#paginationStatus");
+  const previousPageButton = document.querySelector("#previousPageButton");
+  const nextPageButton = document.querySelector("#nextPageButton");
 
   let setupRequired = false;
   let workoutExerciseMap = new Map();
   let currentResults = [];
   let resultById = new Map();
   let editingResultId = "";
+  let currentPage = 1;
+  let currentPageSize = Number(pageSizeSelect?.value || 25);
+  let totalPages = 1;
+  let totalResults = 0;
 
   function getInitialStudentId() {
     try {
@@ -35,9 +43,30 @@
       const url = new URL(window.location.href);
       if (studentId) url.searchParams.set("student_id", studentId);
       else url.searchParams.delete("student_id");
+      url.searchParams.set("page", String(currentPage));
+      url.searchParams.set("page_size", String(currentPageSize));
       window.history.replaceState({}, "", url.toString());
     } catch {
       // Ignore URL sync errors in constrained environments.
+    }
+  }
+
+  function getInitialPage() {
+    try {
+      const page = Number(new URLSearchParams(window.location.search).get("page") || "1");
+      return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  function getInitialPageSize() {
+    try {
+      const pageSize = Number(new URLSearchParams(window.location.search).get("page_size") || String(currentPageSize));
+      if ([25, 50, 100].includes(pageSize)) return pageSize;
+      return currentPageSize;
+    } catch {
+      return currentPageSize;
     }
   }
 
@@ -132,6 +161,9 @@
     currentResults = [];
     resultById = new Map();
     resultsBody.innerHTML = `<tr><td colspan="6">${escapeHtml(message)}</td></tr>`;
+    paginationStatus.textContent = message;
+    previousPageButton.disabled = true;
+    nextPageButton.disabled = true;
   }
 
   function resetResultForm() {
@@ -207,14 +239,33 @@
     }).join("");
   }
 
+  function renderPagination(pagination) {
+    totalPages = Math.max(Number(pagination?.totalPages || 1), 1);
+    totalResults = Math.max(Number(pagination?.total || 0), 0);
+    currentPage = Math.min(Math.max(Number(pagination?.page || 1), 1), totalPages);
+    currentPageSize = Number(pagination?.pageSize || currentPageSize || 25);
+    pageSizeSelect.value = String(currentPageSize);
+
+    const start = totalResults ? ((currentPage - 1) * currentPageSize) + 1 : 0;
+    const end = Math.min(currentPage * currentPageSize, totalResults);
+    paginationStatus.textContent = totalResults
+      ? `Mostrando ${start}-${end} de ${totalResults} resultado(s) · Pagina ${currentPage} de ${totalPages}`
+      : "Sin resultados para este filtro.";
+    previousPageButton.disabled = currentPage <= 1;
+    nextPageButton.disabled = currentPage >= totalPages;
+  }
+
   async function loadResults(preferredStudentId = studentSelect.value || getInitialStudentId()) {
     renderEmpty("Cargando resultados...");
     setupMessage.textContent = "Revisando tablas de gestion...";
 
     try {
-      const url = preferredStudentId
-        ? `/api/admin/results?student_id=${encodeURIComponent(preferredStudentId)}`
-        : "/api/admin/results";
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        page_size: String(currentPageSize),
+      });
+      if (preferredStudentId) params.set("student_id", preferredStudentId);
+      const url = `/api/admin/results?${params.toString()}`;
       const response = await fetch(url);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo cargar resultados.");
@@ -234,6 +285,7 @@
       });
       syncExerciseOptions();
       renderResults(payload.results || []);
+      renderPagination(payload.pagination || {});
       if (editingResultId && !resultById.has(editingResultId)) {
         resetResultForm();
       }
@@ -247,6 +299,8 @@
       currentResults = [];
       resultById = new Map();
       exerciseHint.textContent = error.message;
+      totalPages = 1;
+      totalResults = 0;
       renderEmpty(error.message);
     }
   }
@@ -274,6 +328,7 @@
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar el resultado.");
       const selectedStudentId = studentSelect.value;
+      currentPage = 1;
       resetResultForm();
       studentSelect.value = selectedStudentId;
       setStatus(resultStatus, payload.message, "ok");
@@ -301,6 +356,9 @@
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo eliminar el resultado.");
       const selectedStudentId = studentSelect.value;
       if (editingResultId === resultId) resetResultForm();
+      if (currentPage > 1 && currentResults.length === 1) {
+        currentPage -= 1;
+      }
       setStatus(resultStatus, payload.message, "ok");
       await loadResults(selectedStudentId);
     } catch (error) {
@@ -310,7 +368,10 @@
 
   resultForm.addEventListener("submit", createResult);
   workoutSelect.addEventListener("change", syncExerciseOptions);
-  studentSelect.addEventListener("change", () => loadResults(studentSelect.value));
+  studentSelect.addEventListener("change", () => {
+    currentPage = 1;
+    loadResults(studentSelect.value);
+  });
   resultsBody.addEventListener("click", (event) => {
     const editButton = event.target.closest("[data-result-edit]");
     if (editButton) {
@@ -328,6 +389,21 @@
     setStatus(resultStatus, "Edicion cancelada.", "ok");
   });
   refreshButton.addEventListener("click", () => loadResults(studentSelect.value));
+  pageSizeSelect.addEventListener("change", () => {
+    currentPageSize = Number(pageSizeSelect.value || 25);
+    currentPage = 1;
+    loadResults(studentSelect.value);
+  });
+  previousPageButton.addEventListener("click", () => {
+    if (currentPage <= 1) return;
+    currentPage -= 1;
+    loadResults(studentSelect.value);
+  });
+  nextPageButton.addEventListener("click", () => {
+    if (currentPage >= totalPages) return;
+    currentPage += 1;
+    loadResults(studentSelect.value);
+  });
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login.html";
@@ -336,6 +412,9 @@
   async function boot() {
     const user = await requireAdminSession();
     if (!user) return;
+    currentPage = getInitialPage();
+    currentPageSize = getInitialPageSize();
+    pageSizeSelect.value = String(currentPageSize);
     setResultEditorMode("create");
     await loadResults(getInitialStudentId());
   }

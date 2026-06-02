@@ -1,7 +1,8 @@
 const { getSupabase, json, requireAdmin } = require("../_shared");
 
 const OPTION_LIMIT = 250;
-const RESULT_LIMIT = 120;
+const DEFAULT_RESULT_LIMIT = 25;
+const MAX_RESULT_LIMIT = 100;
 
 function clean(value, maxLength = 220) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -17,6 +18,12 @@ function getQuery(req) {
   if (req.query) return req.query;
   const url = new URL(req.url || "/", "http://localhost");
   return Object.fromEntries(url.searchParams.entries());
+}
+
+function cleanPositiveInteger(value, fallback) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return fallback;
+  return Math.floor(number);
 }
 
 async function loadWorkoutExercises(supabase, workoutIds) {
@@ -105,24 +112,45 @@ async function listSimpleOptions(supabase) {
   };
 }
 
-async function listResults(supabase, studentId) {
+async function listResults(supabase, studentId, page = 1, pageSize = DEFAULT_RESULT_LIMIT) {
   const students = await listStudents(supabase);
   const selectedStudentId = studentId || students[0]?.id || "";
+  const safePageSize = Math.min(cleanPositiveInteger(pageSize, DEFAULT_RESULT_LIMIT), MAX_RESULT_LIMIT);
+  const safePage = cleanPositiveInteger(page, 1);
+  const from = (safePage - 1) * safePageSize;
+  const to = from + safePageSize - 1;
   const resultQuery = supabase
     .from("pb_performance_logs")
-    .select("id, student_id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes")
+    .select("id, student_id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes", { count: "exact" })
     .order("logged_at", { ascending: false })
-    .limit(RESULT_LIMIT);
+    .range(from, to);
 
   if (selectedStudentId) resultQuery.eq("student_id", selectedStudentId);
 
-  const [options, { data: results, error: resultsError }] = await Promise.all([
+  const [options, resultsResponse] = await Promise.all([
     listSimpleOptions(supabase),
     resultQuery,
   ]);
 
+  const { data: results, error: resultsError, count } = resultsResponse;
+
   if (resultsError) throw resultsError;
-  if (!results?.length) return { students, selectedStudentId, ...options, results: [] };
+  const total = Number(count || 0);
+  const totalPages = Math.max(Math.ceil(total / safePageSize), 1);
+  if (!results?.length) {
+    return {
+      students,
+      selectedStudentId,
+      ...options,
+      results: [],
+      pagination: {
+        total,
+        page: Math.min(safePage, totalPages),
+        pageSize: safePageSize,
+        totalPages,
+      },
+    };
+  }
 
   const studentIds = [...new Set(results.map((result) => result.student_id).filter(Boolean))];
   const workoutIds = [...new Set(results.map((result) => result.workout_id).filter(Boolean))];
@@ -156,6 +184,12 @@ async function listResults(supabase, studentId) {
       workout_title: workoutMap.get(result.workout_id)?.title || "",
       exercise_name: exerciseMap.get(result.exercise_id)?.name || "",
     })),
+    pagination: {
+      total,
+      page: Math.min(safePage, totalPages),
+      pageSize: safePageSize,
+      totalPages,
+    },
   };
 }
 
@@ -347,7 +381,12 @@ module.exports = async function handler(req, res) {
     if (req.method === "GET") {
       try {
         const query = getQuery(req);
-        const payload = await listResults(supabase, clean(query.student_id, 90));
+        const payload = await listResults(
+          supabase,
+          clean(query.student_id, 90),
+          cleanPositiveInteger(query.page, 1),
+          cleanPositiveInteger(query.page_size, DEFAULT_RESULT_LIMIT),
+        );
         return json(res, 200, { ...payload, setupRequired: false });
       } catch (error) {
         if (isMissingManagementSchema(error)) return json(res, 200, setupPayload());

@@ -120,9 +120,24 @@
           <div class="table-header">
             <div>
               <h2>Ultimos resultados</h2>
-              <p class="muted">Historial inicial para revisar cargas y rendimiento.</p>
+              <p class="muted">Historial operativo para revisar cargas y rendimiento sin traer demasiados registros a la vez.</p>
             </div>
-            <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+            <div class="table-actions">
+              <div class="field inline-field">
+                <label for="page_size">Filas</label>
+                <select id="page_size" name="page_size">
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
+              <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+            </div>
+          </div>
+          <div class="detail-action-group pagination-toolbar">
+            <span class="muted" id="paginationStatus">Cargando paginacion...</span>
+            <button class="button ghost compact-button" id="previousPageButton" type="button">Anterior</button>
+            <button class="button ghost compact-button" id="nextPageButton" type="button">Siguiente</button>
           </div>
           <div class="table-shell">
             <table class="data-table">
