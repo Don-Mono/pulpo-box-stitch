@@ -19,8 +19,12 @@
   const resultStatus = document.querySelector("#resultStatus");
   const workoutHistoryFilter = document.querySelector("#workoutHistoryFilter");
   const exerciseHistoryFilter = document.querySelector("#exerciseHistoryFilter");
+  const resultsPageSizeSelect = document.querySelector("#results_page_size");
   const resultsFilterHint = document.querySelector("#resultsFilterHint");
   const resultsSummaryGrid = document.querySelector("#resultsSummaryGrid");
+  const resultsPaginationStatus = document.querySelector("#resultsPaginationStatus");
+  const previousResultsPageButton = document.querySelector("#previousResultsPageButton");
+  const nextResultsPageButton = document.querySelector("#nextResultsPageButton");
   const resultsBody = document.querySelector("#resultsBody");
   const measurementsList = document.querySelector("#measurementsList");
   const healthSummaryGrid = document.querySelector("#healthSummaryGrid");
@@ -35,11 +39,18 @@
   let assignmentsMap = new Map();
   let currentAssignments = [];
   let currentResults = [];
+  let currentResultsSummary = null;
   let currentMeasurements = [];
   let currentSummary = null;
   let currentMedicalNotes = [];
   let assignmentPlayerState = new Map();
   let activeStudentTab = "rutina";
+  let currentResultsPage = 1;
+  let currentResultsPageSize = Number(resultsPageSizeSelect?.value || 20);
+  let currentResultsTotalPages = 1;
+  let currentResultsTotal = 0;
+  let currentResultsWorkoutId = "";
+  let currentResultsExerciseId = "";
   const studentTabs = ["rutina", "progreso", "salud", "perfil"];
 
   function setStatus(element, message, type = "") {
@@ -65,6 +76,57 @@
 
   function formatMetric(value, unit) {
     return value == null ? "--" : `${formatNumber(value)} ${unit}`.trim();
+  }
+
+  function getInitialResultsPage() {
+    try {
+      const page = Number(new URLSearchParams(window.location.search).get("results_page") || "1");
+      return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  function getInitialResultsPageSize() {
+    try {
+      const pageSize = Number(new URLSearchParams(window.location.search).get("results_page_size") || String(currentResultsPageSize));
+      if ([10, 20, 50].includes(pageSize)) return pageSize;
+      return currentResultsPageSize;
+    } catch {
+      return currentResultsPageSize;
+    }
+  }
+
+  function getInitialWorkoutHistoryFilter() {
+    try {
+      return new URLSearchParams(window.location.search).get("workout_id") || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function getInitialExerciseHistoryFilter() {
+    try {
+      return new URLSearchParams(window.location.search).get("exercise_id") || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function syncStudentUrl() {
+    try {
+      const url = new URL(window.location.href);
+      if (currentResultsWorkoutId) url.searchParams.set("workout_id", currentResultsWorkoutId);
+      else url.searchParams.delete("workout_id");
+      if (currentResultsExerciseId) url.searchParams.set("exercise_id", currentResultsExerciseId);
+      else url.searchParams.delete("exercise_id");
+      url.searchParams.set("results_page", String(currentResultsPage));
+      url.searchParams.set("results_page_size", String(currentResultsPageSize));
+      url.hash = activeStudentTab;
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      // Ignore URL sync errors.
+    }
   }
 
   function getAssignmentStatusMeta(status) {
@@ -291,13 +353,7 @@
     });
 
     if (options.syncHash !== false) {
-      try {
-        const url = new URL(window.location.href);
-        url.hash = nextTab;
-        window.history.replaceState({}, "", url.toString());
-      } catch {
-        // Ignore hash sync errors.
-      }
+      syncStudentUrl();
     }
   }
 
@@ -640,33 +696,12 @@
     return [...exerciseMap.entries()].map(([id, name]) => ({ id, name }));
   }
 
-  function getFilteredResults() {
-    const selectedWorkoutId = workoutHistoryFilter.value;
-    const selectedExerciseId = exerciseHistoryFilter.value;
-
-    return currentResults.filter((result) => {
-      if (selectedWorkoutId && result.workout_id !== selectedWorkoutId) return false;
-      if (selectedExerciseId && result.exercise_id !== selectedExerciseId) return false;
-      return true;
-    });
-  }
-
-  function renderResultsSummary(filteredResults) {
-    const latestResult = filteredResults[0] || null;
-    const bestWeight = filteredResults
-      .map((result) => result.weight_kg)
-      .filter((value) => value != null)
-      .reduce((max, value) => Math.max(max, value), Number.NEGATIVE_INFINITY);
-    const bestReps = filteredResults
-      .map((result) => result.reps)
-      .filter((value) => value != null)
-      .reduce((max, value) => Math.max(max, value), Number.NEGATIVE_INFINITY);
-
+  function renderResultsSummary() {
     const values = [
-      ["Registros", String(filteredResults.length)],
-      ["Ultimo registro", latestResult ? formatDate(latestResult.logged_at) : "--"],
-      ["Mejor carga", Number.isFinite(bestWeight) ? `${formatNumber(bestWeight)} kg` : "--"],
-      ["Mayor reps", Number.isFinite(bestReps) ? String(bestReps) : "--"],
+      ["Registros", String(currentResultsSummary?.total || 0)],
+      ["Ultimo registro", currentResultsSummary?.latestLoggedAt ? formatDate(currentResultsSummary.latestLoggedAt) : "--"],
+      ["Mejor carga", currentResultsSummary?.bestWeightKg != null ? `${formatNumber(currentResultsSummary.bestWeightKg)} kg` : "--"],
+      ["Mayor reps", currentResultsSummary?.bestReps != null ? String(currentResultsSummary.bestReps) : "--"],
     ];
 
     resultsSummaryGrid.innerHTML = values.map(([label, value]) => `
@@ -677,13 +712,13 @@
     `).join("");
   }
 
-  function renderResults(filteredResults) {
-    if (!filteredResults.length) {
+  function renderResults(results) {
+    if (!results.length) {
       resultsBody.innerHTML = '<tr><td colspan="4">No hay marcas para este filtro.</td></tr>';
       return;
     }
 
-    resultsBody.innerHTML = filteredResults.map((result) => {
+    resultsBody.innerHTML = results.map((result) => {
       const notes = [
         result.student_notes ? `Tu nota: ${result.student_notes}` : "",
         result.coach_notes ? `Coach: ${result.coach_notes}` : "",
@@ -703,21 +738,26 @@
     }).join("");
   }
 
-  function refreshResultsView() {
-    const filteredResults = getFilteredResults();
+  function renderResultsPagination() {
+    currentResultsTotal = Math.max(Number(currentResultsSummary?.total || 0), 0);
+    currentResultsTotalPages = Math.max(Math.ceil(currentResultsTotal / currentResultsPageSize), 1);
+    const start = currentResultsTotal ? ((currentResultsPage - 1) * currentResultsPageSize) + 1 : 0;
+    const end = Math.min(currentResultsPage * currentResultsPageSize, currentResultsTotal);
     const selectedWorkoutLabel = workoutHistoryFilter.options[workoutHistoryFilter.selectedIndex]?.text || "Todas las rutinas";
     const selectedExerciseLabel = exerciseHistoryFilter.options[exerciseHistoryFilter.selectedIndex]?.text || "Todos los ejercicios";
 
-    resultsFilterHint.textContent = workoutHistoryFilter.value || exerciseHistoryFilter.value
-      ? `${filteredResults.length} registro(s) para ${selectedWorkoutLabel} / ${selectedExerciseLabel}.`
-      : "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
+    resultsPaginationStatus.textContent = currentResultsTotal
+      ? `Mostrando ${start}-${end} de ${currentResultsTotal} registro(s). Pagina ${currentResultsPage} de ${currentResultsTotalPages}.`
+      : "Sin registros para este filtro.";
+    previousResultsPageButton.disabled = currentResultsPage <= 1;
+    nextResultsPageButton.disabled = currentResultsPage >= currentResultsTotalPages;
 
-    renderResultsSummary(filteredResults);
-    renderResults(filteredResults);
+    resultsFilterHint.textContent = currentResultsWorkoutId || currentResultsExerciseId
+      ? `${currentResultsTotal} registro(s) para ${selectedWorkoutLabel} / ${selectedExerciseLabel}.`
+      : "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
   }
 
   function syncHistoryFilters() {
-    const previousWorkoutId = workoutHistoryFilter.value;
     const workoutOptions = collectWorkoutHistoryOptions();
 
     workoutHistoryFilter.innerHTML = [
@@ -725,40 +765,62 @@
       ...workoutOptions.map((workout) => `<option value="${escapeHtml(workout.id)}">${escapeHtml(workout.title)}</option>`),
     ].join("");
 
-    if (workoutOptions.some((workout) => workout.id === previousWorkoutId)) {
-      workoutHistoryFilter.value = previousWorkoutId;
+    if (workoutOptions.some((workout) => workout.id === currentResultsWorkoutId)) {
+      workoutHistoryFilter.value = currentResultsWorkoutId;
+    } else {
+      currentResultsWorkoutId = "";
+      workoutHistoryFilter.value = "";
     }
 
-    const previousExerciseId = exerciseHistoryFilter.value;
-    const exerciseOptions = collectExerciseHistoryOptions(workoutHistoryFilter.value);
+    const exerciseOptions = collectExerciseHistoryOptions(currentResultsWorkoutId);
 
     exerciseHistoryFilter.innerHTML = [
       '<option value="">Todos los ejercicios</option>',
       ...exerciseOptions.map((exercise) => `<option value="${escapeHtml(exercise.id)}">${escapeHtml(exercise.name)}</option>`),
     ].join("");
 
-    if (exerciseOptions.some((exercise) => exercise.id === previousExerciseId)) {
-      exerciseHistoryFilter.value = previousExerciseId;
+    if (exerciseOptions.some((exercise) => exercise.id === currentResultsExerciseId)) {
+      exerciseHistoryFilter.value = currentResultsExerciseId;
+    } else {
+      currentResultsExerciseId = "";
+      exerciseHistoryFilter.value = "";
     }
 
-    refreshResultsView();
+    renderResultsSummary();
+    renderResults(currentResults);
+    renderResultsPagination();
   }
 
   async function loadOverview() {
     setupMessage.textContent = "Cargando tu informacion...";
     resultsBody.innerHTML = '<tr><td colspan="4">Cargando marcas...</td></tr>';
+    resultsPaginationStatus.textContent = "Cargando paginacion...";
 
     try {
-      const response = await fetch("/api/student/overview");
+      const params = new URLSearchParams({
+        results_page: String(currentResultsPage),
+        results_page_size: String(currentResultsPageSize),
+      });
+      if (currentResultsWorkoutId) params.set("workout_id", currentResultsWorkoutId);
+      if (currentResultsExerciseId) params.set("exercise_id", currentResultsExerciseId);
+      const response = await fetch(`/api/student/overview?${params.toString()}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo cargar tu panel.");
 
       setupRequired = Boolean(payload.setupRequired);
       currentProfile = payload.studentProfile || null;
       currentResults = payload.results || [];
+      currentResultsSummary = payload.resultsSummary || null;
       currentMeasurements = payload.measurements || [];
       currentSummary = payload.summary || null;
       currentMedicalNotes = payload.medicalNotes || [];
+      currentResultsWorkoutId = payload.selectedWorkoutId || "";
+      currentResultsExerciseId = payload.selectedExerciseId || "";
+      currentResultsTotal = Math.max(Number(payload.pagination?.total || 0), 0);
+      currentResultsTotalPages = Math.max(Number(payload.pagination?.totalPages || 1), 1);
+      currentResultsPage = Math.min(Math.max(Number(payload.pagination?.page || currentResultsPage || 1), 1), currentResultsTotalPages);
+      currentResultsPageSize = Number(payload.pagination?.pageSize || currentResultsPageSize || 20);
+      resultsPageSizeSelect.value = String(currentResultsPageSize);
 
       setupMessage.textContent = setupRequired
         ? payload.message
@@ -772,6 +834,7 @@
       renderAssignments(payload.assignments || []);
       renderMeasurements(currentMeasurements);
       syncHistoryFilters();
+      syncStudentUrl();
       setStatus(profileStatus, "");
       setActiveStudentTab(activeStudentTab, { syncHash: false });
     } catch (error) {
@@ -779,9 +842,12 @@
       currentProfile = null;
       currentAssignments = [];
       currentResults = [];
+      currentResultsSummary = null;
       currentMeasurements = [];
       currentSummary = null;
       currentMedicalNotes = [];
+      currentResultsTotal = 0;
+      currentResultsTotalPages = 1;
       renderProfile(null);
       renderStudentOverview(null, []);
       renderSummary(null, []);
@@ -793,7 +859,8 @@
       workoutHistoryFilter.innerHTML = '<option value="">Todas las rutinas</option>';
       exerciseHistoryFilter.innerHTML = '<option value="">Todos los ejercicios</option>';
       resultsFilterHint.textContent = "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
-      renderResultsSummary([]);
+      renderResultsSummary();
+      renderResultsPagination();
       setStatus(assignmentStatus, "");
       setStatus(profileStatus, error.message, "error");
     }
@@ -900,18 +967,43 @@
   workoutSelect.addEventListener("change", syncExerciseOptions);
   exerciseSelect.addEventListener("change", renderSelectedExercisePreview);
   workoutHistoryFilter.addEventListener("change", () => {
-    const previousExerciseId = exerciseHistoryFilter.value;
-    const exerciseOptions = collectExerciseHistoryOptions(workoutHistoryFilter.value);
+    currentResultsWorkoutId = workoutHistoryFilter.value;
+    const previousExerciseId = currentResultsExerciseId;
+    const exerciseOptions = collectExerciseHistoryOptions(currentResultsWorkoutId);
     exerciseHistoryFilter.innerHTML = [
       '<option value="">Todos los ejercicios</option>',
       ...exerciseOptions.map((exercise) => `<option value="${escapeHtml(exercise.id)}">${escapeHtml(exercise.name)}</option>`),
     ].join("");
     if (exerciseOptions.some((exercise) => exercise.id === previousExerciseId)) {
+      currentResultsExerciseId = previousExerciseId;
       exerciseHistoryFilter.value = previousExerciseId;
+    } else {
+      currentResultsExerciseId = "";
+      exerciseHistoryFilter.value = "";
     }
-    refreshResultsView();
+    currentResultsPage = 1;
+    loadOverview();
   });
-  exerciseHistoryFilter.addEventListener("change", refreshResultsView);
+  exerciseHistoryFilter.addEventListener("change", () => {
+    currentResultsExerciseId = exerciseHistoryFilter.value;
+    currentResultsPage = 1;
+    loadOverview();
+  });
+  resultsPageSizeSelect.addEventListener("change", () => {
+    currentResultsPageSize = Number(resultsPageSizeSelect.value || 20);
+    currentResultsPage = 1;
+    loadOverview();
+  });
+  previousResultsPageButton.addEventListener("click", () => {
+    if (currentResultsPage <= 1) return;
+    currentResultsPage -= 1;
+    loadOverview();
+  });
+  nextResultsPageButton.addEventListener("click", () => {
+    if (currentResultsPage >= currentResultsTotalPages) return;
+    currentResultsPage += 1;
+    loadOverview();
+  });
   assignmentsList.addEventListener("click", (event) => {
     const previousButton = event.target.closest("[data-guided-prev]");
     if (previousButton) {
@@ -947,6 +1039,11 @@
     const user = await requireStudentSession();
     if (!user) return;
     activeStudentTab = getPreferredStudentTab();
+    currentResultsPage = getInitialResultsPage();
+    currentResultsPageSize = getInitialResultsPageSize();
+    currentResultsWorkoutId = getInitialWorkoutHistoryFilter();
+    currentResultsExerciseId = getInitialExerciseHistoryFilter();
+    resultsPageSizeSelect.value = String(currentResultsPageSize);
     setActiveStudentTab(activeStudentTab, { syncHash: false });
     await loadOverview();
   }

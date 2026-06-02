@@ -182,6 +182,7 @@ Primera implementacion:
 - El alumno registra resultados sobre ejercicios reales de sus rutinas asignadas.
 - El alumno ya puede actualizar su telefono y contacto de emergencia desde su propio portal, manteniendo coach, sede y objetivo como datos administrados por el equipo.
 - El portal alumno ya filtra historial por rutina y ejercicio, resume tendencia y muestra feedback del coach dentro de sus registros.
+- El historial del alumno ya pagina resultados por pagina, cantidad de filas y filtros por rutina/ejercicio desde backend para soportar mejor el crecimiento de marcas sin degradar el panel.
 - El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios asignados, incluyendo una vista previa contextual al registrar una marca.
 - El portal alumno ya consume la rutina en formato guiado paso a paso, con navegacion entre ejercicios y accion rapida para usar el ejercicio activo en el registro de marcas.
 - El portal alumno ya se presenta como una experiencia tipo app con modulos internos de Rutina, Progreso, Salud y Perfil para uso mas claro desde celular.

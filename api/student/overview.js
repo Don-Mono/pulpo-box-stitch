@@ -1,8 +1,15 @@
 const { getSupabase, json, requireRole } = require("../_shared");
 
 const ASSIGNMENT_HISTORY_LIMIT = 20;
-const RESULT_HISTORY_LIMIT = 60;
+const DEFAULT_RESULT_PAGE_SIZE = 20;
+const MAX_RESULT_PAGE_SIZE = 50;
 const MEASUREMENT_HISTORY_LIMIT = 24;
+
+function cleanPositiveInteger(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.floor(parsed);
+}
 
 function clean(value, maxLength = 220) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -17,6 +24,20 @@ function cleanNumber(value) {
 function cleanAssignmentStatus(value) {
   const status = clean(value, 24).toLowerCase();
   return ["assigned", "completed", "skipped"].includes(status) ? status : "";
+}
+
+function applyStudentResultFilters(query, studentId, filters = {}) {
+  let nextQuery = query.eq("student_id", studentId);
+
+  if (filters.workoutId) {
+    nextQuery = nextQuery.eq("workout_id", filters.workoutId);
+  }
+
+  if (filters.exerciseId) {
+    nextQuery = nextQuery.eq("exercise_id", filters.exerciseId);
+  }
+
+  return nextQuery;
 }
 
 function isMissingManagementSchema(error) {
@@ -44,6 +65,20 @@ function setupPayload() {
     studentDetails: null,
     assignments: [],
     results: [],
+    resultsSummary: {
+      total: 0,
+      latestLoggedAt: null,
+      bestWeightKg: null,
+      bestReps: null,
+    },
+    pagination: {
+      total: 0,
+      page: 1,
+      pageSize: DEFAULT_RESULT_PAGE_SIZE,
+      totalPages: 1,
+    },
+    selectedWorkoutId: "",
+    selectedExerciseId: "",
     measurements: [],
     medicalNotes: [],
     summary: null,
@@ -52,12 +87,36 @@ function setupPayload() {
   };
 }
 
-async function loadStudentOverview(supabase, studentId) {
+async function loadStudentOverview(supabase, studentId, options = {}) {
+  const resultPage = cleanPositiveInteger(options.page, 1);
+  const requestedPageSize = cleanPositiveInteger(options.pageSize, DEFAULT_RESULT_PAGE_SIZE);
+  const resultPageSize = Math.min(requestedPageSize, MAX_RESULT_PAGE_SIZE);
+  const selectedWorkoutId = clean(options.workoutId, 90);
+  const selectedExerciseId = clean(options.exerciseId, 90);
+  const resultRangeFrom = (resultPage - 1) * resultPageSize;
+  const resultRangeTo = resultRangeFrom + resultPageSize - 1;
+
+  const paginatedResultsQuery = applyStudentResultFilters(
+    supabase
+      .from("pb_performance_logs")
+      .select("id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes", { count: "exact" })
+      .order("logged_at", { ascending: false })
+      .range(resultRangeFrom, resultRangeTo),
+    studentId,
+    {
+      workoutId: selectedWorkoutId,
+      exerciseId: selectedExerciseId,
+    },
+  );
+
   const [
     { data: profile, error: profileError },
     { data: studentDetails, error: studentDetailsError },
     { data: assignments, error: assignmentsError },
-    { data: results, error: resultsError },
+    { data: results, count: resultCount, error: resultsError },
+    { data: latestResult, error: latestResultError },
+    { data: bestWeightResult, error: bestWeightResultError },
+    { data: bestRepsResult, error: bestRepsResultError },
     { data: measurements, error: measurementsError },
     { data: medicalNotes, error: medicalNotesError },
   ] = await Promise.all([
@@ -73,12 +132,48 @@ async function loadStudentOverview(supabase, studentId) {
       .eq("student_id", studentId)
       .order("assigned_at", { ascending: false })
       .limit(ASSIGNMENT_HISTORY_LIMIT),
-    supabase
-      .from("pb_performance_logs")
-      .select("id, workout_id, exercise_id, logged_at, weight_kg, reps, rounds, time_seconds, score_text, student_notes, coach_notes")
-      .eq("student_id", studentId)
-      .order("logged_at", { ascending: false })
-      .limit(RESULT_HISTORY_LIMIT),
+    paginatedResultsQuery,
+    applyStudentResultFilters(
+      supabase
+        .from("pb_performance_logs")
+        .select("id, logged_at")
+        .order("logged_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      studentId,
+      {
+        workoutId: selectedWorkoutId,
+        exerciseId: selectedExerciseId,
+      },
+    ),
+    applyStudentResultFilters(
+      supabase
+        .from("pb_performance_logs")
+        .select("id, weight_kg")
+        .not("weight_kg", "is", null)
+        .order("weight_kg", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      studentId,
+      {
+        workoutId: selectedWorkoutId,
+        exerciseId: selectedExerciseId,
+      },
+    ),
+    applyStudentResultFilters(
+      supabase
+        .from("pb_performance_logs")
+        .select("id, reps")
+        .not("reps", "is", null)
+        .order("reps", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      studentId,
+      {
+        workoutId: selectedWorkoutId,
+        exerciseId: selectedExerciseId,
+      },
+    ),
     supabase
       .from("pb_body_measurements")
       .select("id, measured_at, body_weight_kg, height_cm, waist_cm")
@@ -97,6 +192,9 @@ async function loadStudentOverview(supabase, studentId) {
   if (studentDetailsError) throw studentDetailsError;
   if (assignmentsError) throw assignmentsError;
   if (resultsError) throw resultsError;
+  if (latestResultError) throw latestResultError;
+  if (bestWeightResultError) throw bestWeightResultError;
+  if (bestRepsResultError) throw bestRepsResultError;
   if (measurementsError) throw measurementsError;
   if (medicalNotesError) throw medicalNotesError;
 
@@ -178,6 +276,10 @@ async function loadStudentOverview(supabase, studentId) {
     }
     : null;
 
+  const totalResults = Math.max(Number(resultCount || 0), 0);
+  const totalPages = Math.max(Math.ceil(totalResults / resultPageSize), 1);
+  const normalizedPage = Math.min(Math.max(resultPage, 1), totalPages);
+
   return {
     studentProfile,
     profile,
@@ -195,6 +297,20 @@ async function loadStudentOverview(supabase, studentId) {
       movement_type: exerciseMap.get(result.exercise_id)?.movement_type || "",
       video_url: exerciseMap.get(result.exercise_id)?.video_url || "",
     })),
+    resultsSummary: {
+      total: totalResults,
+      latestLoggedAt: latestResult?.logged_at || null,
+      bestWeightKg: bestWeightResult?.weight_kg ?? null,
+      bestReps: bestRepsResult?.reps ?? null,
+    },
+    pagination: {
+      total: totalResults,
+      page: normalizedPage,
+      pageSize: resultPageSize,
+      totalPages,
+    },
+    selectedWorkoutId,
+    selectedExerciseId,
     measurements: measurements || [],
     medicalNotes: medicalNotes || [],
     summary: {
@@ -386,7 +502,16 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "GET") {
       try {
-        const payload = await loadStudentOverview(supabase, studentId);
+        const page = cleanPositiveInteger(req.query.results_page, 1);
+        const pageSize = cleanPositiveInteger(req.query.results_page_size, DEFAULT_RESULT_PAGE_SIZE);
+        const workoutId = typeof req.query.workout_id === "string" ? req.query.workout_id.trim() : "";
+        const exerciseId = typeof req.query.exercise_id === "string" ? req.query.exercise_id.trim() : "";
+        const payload = await loadStudentOverview(supabase, studentId, {
+          page,
+          pageSize,
+          workoutId,
+          exerciseId,
+        });
         return json(res, 200, { ...payload, setupRequired: false });
       } catch (error) {
         if (isMissingManagementSchema(error)) return json(res, 200, setupPayload());

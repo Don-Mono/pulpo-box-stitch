@@ -193,6 +193,16 @@
           <div class="dashboard-row student-layout">
             <article class="panel-card">
               <h2>Mis ultimas marcas</h2>
+              <div class="table-actions student-results-actions">
+                <div class="field inline-field">
+                  <label for="results_page_size">Filas</label>
+                  <select id="results_page_size">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                  </select>
+                </div>
+              </div>
               <div class="filter-grid">
                 <div class="field inline-field">
                   <label for="workoutHistoryFilter">Rutina</label>
@@ -229,6 +239,11 @@
                   <span>Mayor reps</span>
                   <strong>--</strong>
                 </article>
+              </div>
+              <div class="detail-action-group pagination-toolbar">
+                <span class="muted" id="resultsPaginationStatus">Cargando paginacion...</span>
+                <button class="button ghost compact-button" id="previousResultsPageButton" type="button">Anterior</button>
+                <button class="button ghost compact-button" id="nextResultsPageButton" type="button">Siguiente</button>
               </div>
               <div class="table-shell">
                 <table class="data-table compact-data-table">
