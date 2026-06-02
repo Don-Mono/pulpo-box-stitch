@@ -189,6 +189,7 @@ Primera implementacion:
 - El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
 - El portal coach ahora se presenta como una experiencia tipo app con modulos internos de Alumnos, Seguimiento, Feedback y Perfil para uso mas claro desde celular o escritorio.
 - La ficha del coach ya usa el mismo formato guiado para revisar la rutina activa del alumno sin perder el contexto de seguimiento.
+- La ficha individual `coach-student` ahora se presenta en modulos de Perfil, Rutina, Progreso y Salud para ordenar mejor la lectura operativa del alumno.
 
 ### Etapa 5 - Progreso
 

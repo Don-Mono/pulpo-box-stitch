@@ -4,21 +4,29 @@
   const setupMessage = document.querySelector("#setupMessage");
   const studentMeta = document.querySelector("#studentMeta");
   const studentFilter = document.querySelector("#studentFilter");
+  const coachStudentOverviewGrid = document.querySelector("#coachStudentOverviewGrid");
+  const coachStudentModuleNav = document.querySelector("#coachStudentModuleNav");
   const summaryGrid = document.querySelector("#summaryGrid");
   const studentProfileCard = document.querySelector("#studentProfileCard");
+  const coachStudentActionList = document.querySelector("#coachStudentActionList");
   const measurementForm = document.querySelector("#measurementForm");
   const measurementStatus = document.querySelector("#measurementStatus");
   const assignmentsList = document.querySelector("#assignmentsList");
+  const coachStudentRoutineHelper = document.querySelector("#coachStudentRoutineHelper");
   const measurementsList = document.querySelector("#measurementsList");
   const workoutFilter = document.querySelector("#workoutFilter");
   const exerciseFilter = document.querySelector("#exerciseFilter");
   const resultsFilterHint = document.querySelector("#resultsFilterHint");
   const resultsSummaryGrid = document.querySelector("#resultsSummaryGrid");
   const resultsBody = document.querySelector("#resultsBody");
+  const coachStudentProgressHelper = document.querySelector("#coachStudentProgressHelper");
   const medicalCard = document.querySelector("#medicalCard");
   const medicalNotesList = document.querySelector("#medicalNotesList");
+  const coachStudentHealthHelper = document.querySelector("#coachStudentHealthHelper");
   const refreshButton = document.querySelector("#refreshButton");
   const logoutButton = document.querySelector("#logoutButton");
+  const coachStudentModuleButtons = Array.from(document.querySelectorAll("[data-coach-student-tab]"));
+  const coachStudentModuleSections = Array.from(document.querySelectorAll("[data-coach-student-panel]"));
 
   let setupRequired = false;
   let currentStudentId = "";
@@ -28,6 +36,8 @@
   let currentMeasurements = [];
   let currentResults = [];
   let assignmentPlayerState = new Map();
+  let activeCoachStudentTab = "perfil";
+  const coachStudentTabs = ["perfil", "rutina", "progreso", "salud"];
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -227,6 +237,42 @@
     }
   }
 
+  function getPreferredCoachStudentTab() {
+    try {
+      const hash = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+      return coachStudentTabs.includes(hash) ? hash : "perfil";
+    } catch {
+      return "perfil";
+    }
+  }
+
+  function setActiveCoachStudentTab(tab, options = {}) {
+    const nextTab = coachStudentTabs.includes(tab) ? tab : "perfil";
+    activeCoachStudentTab = nextTab;
+
+    coachStudentModuleButtons.forEach((button) => {
+      const isActive = button.dataset.coachStudentTab === nextTab;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-current", isActive ? "page" : "false");
+    });
+
+    coachStudentModuleSections.forEach((section) => {
+      const isActive = section.dataset.coachStudentPanel === nextTab;
+      section.classList.toggle("is-active", isActive);
+      section.classList.toggle("hidden", !isActive);
+    });
+
+    if (options.syncHash !== false) {
+      try {
+        const url = new URL(window.location.href);
+        url.hash = nextTab;
+        window.history.replaceState({}, "", url.toString());
+      } catch {
+        // Ignore hash sync errors.
+      }
+    }
+  }
+
   function syncUrl(studentId) {
     try {
       const url = new URL(window.location.href);
@@ -262,6 +308,24 @@
       options.push(`<option value="${escapeHtml(student.id)}"${selected}>${escapeHtml(student.full_name)}</option>`);
     });
     studentFilter.innerHTML = options.join("");
+  }
+
+  function renderCoachStudentOverview(student, assignments, results, medicalNotes) {
+    const latestResult = results[0] || null;
+    const cards = [
+      ["Alumno", student?.full_name || "--", student?.goal || "Objetivo pendiente"],
+      ["Rutinas activas", String(assignments.length || 0), assignments.length ? "Cargadas para seguimiento" : "Sin rutinas activas"],
+      ["Ultima marca", latestResult ? formatDate(latestResult.logged_at) : "--", latestResult?.exercise_name || "Sin resultados recientes"],
+      ["Notas visibles", String(medicalNotes.length || 0), medicalNotes.length ? "Disponibles para el coach" : "Sin notas compartidas"],
+    ];
+
+    coachStudentOverviewGrid.innerHTML = cards.map(([label, value, helper]) => `
+      <article class="student-overview-card">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+        <small>${escapeHtml(helper)}</small>
+      </article>
+    `).join("");
   }
 
   function renderSummary(summary, measurements) {
@@ -316,9 +380,45 @@
     `;
   }
 
+  function renderCoachStudentActions(profile) {
+    if (!profile?.id) {
+      coachStudentActionList.innerHTML = '<p class="muted">Selecciona un alumno para ver accesos rapidos.</p>';
+      return;
+    }
+
+    const studentId = encodeURIComponent(profile.id);
+    coachStudentActionList.innerHTML = `
+      <article class="mini-list-item action-list-item">
+        <div>
+          <strong>Ver progreso completo</strong>
+          <span>Abre la lectura detallada del alumno con sus marcas y mediciones.</span>
+          <small>Ideal para revisar la evolucion antes o despues de una clase.</small>
+        </div>
+        <a class="button ghost compact-button" href="/coach-student.html?id=${studentId}#progreso">Abrir</a>
+      </article>
+      <article class="mini-list-item action-list-item">
+        <div>
+          <strong>Volver a alumnos</strong>
+          <span>Regresa al panel general del coach.</span>
+          <small>Desde ahi puedes revisar a todo tu grupo o dejar feedback rapido.</small>
+        </div>
+        <a class="button ghost compact-button" href="/coach.html#alumnos">Abrir</a>
+      </article>
+      <article class="mini-list-item action-list-item">
+        <div>
+          <strong>Mis rutinas</strong>
+          <span>Abre el constructor privado del coach.</span>
+          <small>Util para ajustar sesiones sin perder el hilo del seguimiento.</small>
+        </div>
+        <a class="button ghost compact-button" href="/coach-workouts.html">Abrir</a>
+      </article>
+    `;
+  }
+
   function renderAssignments(assignments) {
     if (!assignments.length) {
       assignmentsList.innerHTML = '<p class="muted">No hay rutinas asignadas a este alumno.</p>';
+      coachStudentRoutineHelper.innerHTML = '<p class="muted">Cuando tenga rutinas activas, aqui veras una lectura rapida de la sesion.</p>';
       assignmentPlayerState = new Map();
       return;
     }
@@ -351,6 +451,26 @@
       `;
     }).join("");
     assignmentPlayerState = nextPlayerState;
+
+    const latestAssignment = assignments[0] || null;
+    const completedAssignments = assignments.filter((assignment) => String(assignment.status || "").toLowerCase() === "completed").length;
+    coachStudentRoutineHelper.innerHTML = `
+      <article class="mini-list-item">
+        <strong>Rutina mas reciente</strong>
+        <span>${escapeHtml(latestAssignment?.workout?.title || "Sin rutina")}</span>
+        <small>${escapeHtml(latestAssignment?.assigned_at ? `Asignada el ${formatDate(latestAssignment.assigned_at)}.` : "Sin fecha de asignacion.")}</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Estado del trabajo</strong>
+        <span>${escapeHtml(`${completedAssignments} completada(s) de ${assignments.length}.`)}</span>
+        <small>El estado lo marca el alumno desde su propio portal.</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Uso sugerido</strong>
+        <span>Entra a cada paso de la sesion para revisar el ejercicio activo, su descripcion y el video de apoyo.</span>
+        <small>Asi puedes corregir tecnica sin salir de esta ficha.</small>
+      </article>
+    `;
   }
 
   function renderMeasurements(measurements) {
@@ -385,6 +505,13 @@
         <span>Pendiente</span>
       `;
       medicalNotesList.innerHTML = '<p class="muted">No hay notas compartidas para este alumno.</p>';
+      coachStudentHealthHelper.innerHTML = `
+        <article class="mini-list-item">
+          <strong>Sin restricciones visibles</strong>
+          <span>No hay notas compartidas por administracion para este alumno.</span>
+          <small>Si cambia algo sensible, el equipo admin lo reflejara aqui.</small>
+        </article>
+      `;
       return;
     }
 
@@ -415,6 +542,19 @@
         </article>
       `;
     }).join("");
+
+    coachStudentHealthHelper.innerHTML = `
+      <article class="mini-list-item">
+        <strong>Consentimiento</strong>
+        <span>${escapeHtml(consent ? "Existe consentimiento registrado para seguimiento." : "Solo ves notas explicitamente compartidas.")}</span>
+        <small>La visibilidad la controla administracion segun la ficha del alumno.</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Notas visibles</strong>
+        <span>${escapeHtml(`${notes.length} registro(s) compartido(s) para este seguimiento.`)}</span>
+        <small>Revisa tipo y descripcion antes de definir cargas o tecnica.</small>
+      </article>
+    `;
   }
 
   function collectWorkoutOptions() {
@@ -531,6 +671,26 @@
 
     renderResultsSummary(filteredResults);
     renderResults(filteredResults);
+
+    const latestResult = filteredResults[0] || null;
+    const resultsWithCoachNotes = filteredResults.filter((result) => String(result.coach_notes || "").trim()).length;
+    coachStudentProgressHelper.innerHTML = `
+      <article class="mini-list-item">
+        <strong>Ultima marca del filtro</strong>
+        <span>${escapeHtml(latestResult ? `${latestResult.exercise_name || "Ejercicio"} - ${formatDate(latestResult.logged_at)}` : "Sin registros para este filtro")}</span>
+        <small>${escapeHtml(latestResult?.student_notes || "Cuando el alumno deje notas, se veran aqui junto a su ultima marca.")}</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Feedback registrado</strong>
+        <span>${escapeHtml(`${resultsWithCoachNotes} registro(s) del filtro ya tienen observacion del coach.`)}</span>
+        <small>Usa esto para detectar rapido si falta cerrar el seguimiento tecnico.</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Lectura sugerida</strong>
+        <span>${escapeHtml(workoutFilter.value || exerciseFilter.value ? "El filtro esta afinado para revisar una tendencia puntual." : "Activa un filtro para leer mejor la progresion por rutina o ejercicio.")}</span>
+        <small>La tabla y el resumen cambian juntos para facilitar la lectura.</small>
+      </article>
+    `;
   }
 
   function syncResultFilters() {
@@ -580,19 +740,23 @@
       currentAssignments = payload.assignments || [];
       currentMeasurements = payload.measurements || [];
       currentResults = payload.results || [];
+      const visibleMedicalNotes = payload.medicalNotes || [];
 
       setupMessage.textContent = setupRequired
         ? payload.message
         : "Ficha conectada. Aqui ves solo alumnos asignados a tu perfil.";
       renderStudents(payload.students || [], currentStudentId);
+      renderCoachStudentOverview(currentStudent, currentAssignments, currentResults, visibleMedicalNotes);
       renderSummary(currentSummary, currentMeasurements);
       renderProfile(currentStudent);
+      renderCoachStudentActions(currentStudent);
       renderAssignments(currentAssignments);
       renderMeasurements(currentMeasurements);
-      renderMedical(payload.consent || null, payload.medicalNotes || []);
+      renderMedical(payload.consent || null, visibleMedicalNotes);
       syncResultFilters();
       syncUrl(currentStudentId);
       setStatus(measurementStatus, "");
+      setActiveCoachStudentTab(activeCoachStudentTab, { syncHash: false });
     } catch (error) {
       currentStudentId = "";
       currentStudent = null;
@@ -602,8 +766,10 @@
       currentResults = [];
       setupMessage.textContent = error.message;
       renderStudents([], "");
+      renderCoachStudentOverview(null, [], [], []);
       renderSummary(null, []);
       renderProfile(null);
+      renderCoachStudentActions(null);
       renderAssignments([]);
       renderMeasurements([]);
       renderMedical(null, []);
@@ -612,6 +778,7 @@
       resultsFilterHint.textContent = "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
       renderResultsSummary([]);
       resultsBody.innerHTML = `<tr><td colspan="4">${escapeHtml(error.message)}</td></tr>`;
+      coachStudentProgressHelper.innerHTML = '<p class="muted">No fue posible cargar la lectura del progreso.</p>';
     }
   }
 
@@ -681,14 +848,24 @@
   });
   measurementForm.addEventListener("submit", createMeasurement);
   refreshButton.addEventListener("click", () => loadStudentDetail(currentStudentId || studentFilter.value));
+  coachStudentModuleNav.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-coach-student-tab]");
+    if (!button) return;
+    setActiveCoachStudentTab(button.dataset.coachStudentTab);
+  });
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login.html";
+  });
+  window.addEventListener("hashchange", () => {
+    setActiveCoachStudentTab(getPreferredCoachStudentTab(), { syncHash: false });
   });
 
   async function boot() {
     const user = await requireCoachSession();
     if (!user) return;
+    activeCoachStudentTab = getPreferredCoachStudentTab();
+    setActiveCoachStudentTab(activeCoachStudentTab, { syncHash: false });
     await loadStudentDetail();
   }
 

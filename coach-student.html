@@ -51,7 +51,29 @@
               </select>
             </div>
           </div>
-          <div class="metric-grid" id="summaryGrid">
+          <div class="student-overview-grid coach-student-overview-grid" id="coachStudentOverviewGrid">
+            <article class="student-overview-card">
+              <span>Alumno</span>
+              <strong>--</strong>
+              <small>Cargando...</small>
+            </article>
+            <article class="student-overview-card">
+              <span>Rutinas activas</span>
+              <strong>--</strong>
+              <small>Cargando...</small>
+            </article>
+            <article class="student-overview-card">
+              <span>Ultima marca</span>
+              <strong>--</strong>
+              <small>Cargando...</small>
+            </article>
+            <article class="student-overview-card">
+              <span>Notas visibles</span>
+              <strong>--</strong>
+              <small>Cargando...</small>
+            </article>
+          </div>
+          <div class="metric-grid coach-student-summary-grid" id="summaryGrid">
             <article class="metric-card">
               <span>Peso actual</span>
               <strong>--</strong>
@@ -79,144 +101,204 @@
           </div>
         </section>
 
-        <section class="dashboard-row student-layout">
-          <article class="panel-card">
-            <h2>Ficha rapida</h2>
-            <div id="studentProfileCard" class="mini-list">
-              <p class="muted">Cargando ficha...</p>
-            </div>
-          </article>
+        <nav class="student-module-nav coach-student-module-nav" id="coachStudentModuleNav" aria-label="Modulos de la ficha del alumno">
+          <button class="student-module-button coach-module-button is-active" data-coach-student-tab="perfil" type="button">
+            <strong>Perfil</strong>
+            <span>Ficha y contexto</span>
+          </button>
+          <button class="student-module-button coach-module-button" data-coach-student-tab="rutina" type="button">
+            <strong>Rutina</strong>
+            <span>Sesion asignada</span>
+          </button>
+          <button class="student-module-button coach-module-button" data-coach-student-tab="progreso" type="button">
+            <strong>Progreso</strong>
+            <span>Marcas y mediciones</span>
+          </button>
+          <button class="student-module-button coach-module-button" data-coach-student-tab="salud" type="button">
+            <strong>Salud</strong>
+            <span>Notas visibles</span>
+          </button>
+        </nav>
 
-          <article class="panel-card">
-            <h2>Nueva medicion</h2>
-            <p>Registra peso y medidas del alumno para alimentar el seguimiento corporal.</p>
-            <form class="student-form" id="measurementForm">
-              <div class="form-grid-two">
-                <div class="field">
-                  <label for="body_weight_kg">Peso corporal kg</label>
-                  <input id="body_weight_kg" name="body_weight_kg" inputmode="decimal" placeholder="75" />
-                </div>
-                <div class="field">
-                  <label for="height_cm">Estatura cm</label>
-                  <input id="height_cm" name="height_cm" inputmode="decimal" placeholder="170" />
-                </div>
+        <section class="student-module-section is-active" data-coach-student-panel="perfil">
+          <div class="dashboard-row student-layout">
+            <article class="panel-card">
+              <h2>Ficha rapida</h2>
+              <div id="studentProfileCard" class="mini-list">
+                <p class="muted">Cargando ficha...</p>
               </div>
-              <div class="form-grid-two">
-                <div class="field">
-                  <label for="waist_cm">Cintura cm</label>
-                  <input id="waist_cm" name="waist_cm" inputmode="decimal" placeholder="82" />
-                </div>
-                <div class="field">
-                  <label for="chest_cm">Pecho cm</label>
-                  <input id="chest_cm" name="chest_cm" inputmode="decimal" placeholder="98" />
-                </div>
+            </article>
+
+            <article class="panel-card">
+              <h2>Acciones rapidas</h2>
+              <div id="coachStudentActionList" class="mini-list">
+                <p class="muted">Cargando accesos...</p>
               </div>
-              <div class="field">
-                <label for="hip_cm">Cadera cm</label>
-                <input id="hip_cm" name="hip_cm" inputmode="decimal" placeholder="95" />
-              </div>
-              <div class="field">
-                <label for="notes">Notas</label>
-                <input id="notes" name="notes" placeholder="Contexto de la medicion" />
-              </div>
-              <span class="status" id="measurementStatus"></span>
-              <button class="button accent" type="submit">Guardar medicion</button>
-            </form>
-          </article>
+            </article>
+          </div>
         </section>
 
-        <section class="dashboard-row student-layout">
-          <article class="panel-card">
-            <h2>Rutinas asignadas</h2>
-            <div id="assignmentsList" class="workout-list single-column-list">
-              <p class="muted">Cargando rutinas...</p>
-            </div>
-          </article>
+        <section class="student-module-section" data-coach-student-panel="rutina">
+          <div class="dashboard-row student-layout">
+            <article class="panel-card">
+              <h2>Rutinas asignadas</h2>
+              <p>Revisa la sesion paso a paso, el estado que marco el alumno y el material de apoyo del ejercicio activo.</p>
+              <div id="assignmentsList" class="workout-list single-column-list">
+                <p class="muted">Cargando rutinas...</p>
+              </div>
+            </article>
 
-          <article class="panel-card">
-            <h2>Mediciones recientes</h2>
-            <div id="measurementsList" class="mini-list">
-              <p class="muted">Cargando mediciones...</p>
-            </div>
-          </article>
+            <article class="panel-card">
+              <h2>Lectura de la sesion</h2>
+              <div id="coachStudentRoutineHelper" class="mini-list">
+                <p class="muted">Cargando resumen de la sesion...</p>
+              </div>
+            </article>
+          </div>
         </section>
 
-        <section class="dashboard-row student-layout">
-          <article class="panel-card">
-            <div class="table-header">
-              <div>
-                <h2>Ultimas marcas</h2>
-                <p class="muted">Resultados recientes del alumno seleccionado.</p>
-              </div>
-              <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
-            </div>
-            <div class="filter-grid">
-              <div class="field inline-field">
-                <label for="workoutFilter">Rutina</label>
-                <select id="workoutFilter">
-                  <option value="">Todas las rutinas</option>
-                </select>
-              </div>
-              <div class="field inline-field">
-                <label for="exerciseFilter">Ejercicio</label>
-                <select id="exerciseFilter">
-                  <option value="">Todos los ejercicios</option>
-                </select>
-              </div>
-              <article class="mini-list-item filter-helper">
-                <strong>Lectura rapida</strong>
-                <span id="resultsFilterHint">Filtra por rutina o ejercicio para revisar una tendencia puntual.</span>
-                <small>Los indicadores de abajo cambian segun el filtro activo.</small>
-              </article>
-            </div>
-            <div class="metric-grid compact-metrics" id="resultsSummaryGrid">
-              <article class="metric-card">
-                <span>Registros</span>
-                <strong>--</strong>
-              </article>
-              <article class="metric-card">
-                <span>Ultimo registro</span>
-                <strong>--</strong>
-              </article>
-              <article class="metric-card">
-                <span>Mejor carga</span>
-                <strong>--</strong>
-              </article>
-              <article class="metric-card">
-                <span>Mayor reps</span>
-                <strong>--</strong>
-              </article>
-            </div>
-            <div class="table-shell">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Rutina / Ejercicio</th>
-                    <th>Marca</th>
-                    <th>Notas</th>
-                    <th>Fecha</th>
-                  </tr>
-                </thead>
-                <tbody id="resultsBody">
-                  <tr>
-                    <td colspan="4">Cargando marcas...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </article>
+        <section class="student-module-section" data-coach-student-panel="progreso">
+          <div class="dashboard-row student-layout">
+            <article class="panel-card">
+              <h2>Nueva medicion</h2>
+              <p>Registra peso y medidas del alumno para alimentar el seguimiento corporal.</p>
+              <form class="student-form" id="measurementForm">
+                <div class="form-grid-two">
+                  <div class="field">
+                    <label for="body_weight_kg">Peso corporal kg</label>
+                    <input id="body_weight_kg" name="body_weight_kg" inputmode="decimal" placeholder="75" />
+                  </div>
+                  <div class="field">
+                    <label for="height_cm">Estatura cm</label>
+                    <input id="height_cm" name="height_cm" inputmode="decimal" placeholder="170" />
+                  </div>
+                </div>
+                <div class="form-grid-two">
+                  <div class="field">
+                    <label for="waist_cm">Cintura cm</label>
+                    <input id="waist_cm" name="waist_cm" inputmode="decimal" placeholder="82" />
+                  </div>
+                  <div class="field">
+                    <label for="chest_cm">Pecho cm</label>
+                    <input id="chest_cm" name="chest_cm" inputmode="decimal" placeholder="98" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="hip_cm">Cadera cm</label>
+                  <input id="hip_cm" name="hip_cm" inputmode="decimal" placeholder="95" />
+                </div>
+                <div class="field">
+                  <label for="notes">Notas</label>
+                  <input id="notes" name="notes" placeholder="Contexto de la medicion" />
+                </div>
+                <span class="status" id="measurementStatus"></span>
+                <button class="button accent" type="submit">Guardar medicion</button>
+              </form>
+            </article>
 
-          <article class="panel-card">
-            <h2>Datos visibles para coach</h2>
-            <div class="warning-card" id="medicalCard">
-              <strong>Sin datos visibles</strong>
-              <p>Aqui apareceran restricciones o notas medicas que administracion haya compartido contigo.</p>
-              <span>Pendiente</span>
-            </div>
-            <div id="medicalNotesList" class="mini-list">
-              <p class="muted">Cargando notas visibles...</p>
-            </div>
-          </article>
+            <article class="panel-card">
+              <h2>Mediciones recientes</h2>
+              <div id="measurementsList" class="mini-list">
+                <p class="muted">Cargando mediciones...</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="dashboard-row student-layout">
+            <article class="panel-card">
+              <div class="table-header">
+                <div>
+                  <h2>Ultimas marcas</h2>
+                  <p class="muted">Resultados recientes del alumno seleccionado.</p>
+                </div>
+                <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+              </div>
+              <div class="filter-grid">
+                <div class="field inline-field">
+                  <label for="workoutFilter">Rutina</label>
+                  <select id="workoutFilter">
+                    <option value="">Todas las rutinas</option>
+                  </select>
+                </div>
+                <div class="field inline-field">
+                  <label for="exerciseFilter">Ejercicio</label>
+                  <select id="exerciseFilter">
+                    <option value="">Todos los ejercicios</option>
+                  </select>
+                </div>
+                <article class="mini-list-item filter-helper">
+                  <strong>Lectura rapida</strong>
+                  <span id="resultsFilterHint">Filtra por rutina o ejercicio para revisar una tendencia puntual.</span>
+                  <small>Los indicadores de abajo cambian segun el filtro activo.</small>
+                </article>
+              </div>
+              <div class="metric-grid compact-metrics" id="resultsSummaryGrid">
+                <article class="metric-card">
+                  <span>Registros</span>
+                  <strong>--</strong>
+                </article>
+                <article class="metric-card">
+                  <span>Ultimo registro</span>
+                  <strong>--</strong>
+                </article>
+                <article class="metric-card">
+                  <span>Mejor carga</span>
+                  <strong>--</strong>
+                </article>
+                <article class="metric-card">
+                  <span>Mayor reps</span>
+                  <strong>--</strong>
+                </article>
+              </div>
+              <div class="table-shell">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Rutina / Ejercicio</th>
+                      <th>Marca</th>
+                      <th>Notas</th>
+                      <th>Fecha</th>
+                    </tr>
+                  </thead>
+                  <tbody id="resultsBody">
+                    <tr>
+                      <td colspan="4">Cargando marcas...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <h2>Lectura del progreso</h2>
+              <div id="coachStudentProgressHelper" class="mini-list">
+                <p class="muted">Cargando lectura del progreso...</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="student-module-section" data-coach-student-panel="salud">
+          <div class="dashboard-row student-layout">
+            <article class="panel-card">
+              <h2>Datos visibles para coach</h2>
+              <div class="warning-card" id="medicalCard">
+                <strong>Sin datos visibles</strong>
+                <p>Aqui apareceran restricciones o notas medicas que administracion haya compartido contigo.</p>
+                <span>Pendiente</span>
+              </div>
+              <div id="medicalNotesList" class="mini-list">
+                <p class="muted">Cargando notas visibles...</p>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <h2>Lectura de seguridad</h2>
+              <div id="coachStudentHealthHelper" class="mini-list">
+                <p class="muted">Cargando lectura de seguridad...</p>
+              </div>
+            </article>
+          </div>
         </section>
       </div>
     </main>
