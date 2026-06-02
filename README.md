@@ -99,6 +99,7 @@ El login extendido de coach y alumno ya fue validado con credenciales de Supabas
 Admin ya puede abrir una ficha unificada por coach, editar datos base y revisar alumnos asignados, rutinas creadas y ultimas marcas relacionadas.
 Admin ya puede abrir una ficha unificada por alumno, editar datos base y saltar directo a progreso, resultados y datos medicos manteniendo el mismo `student_id` en la URL.
 La ficha admin del alumno ya incluye acceso rapido al modulo de rutinas con el mismo contexto de alumno.
+El modulo admin de alumnos ahora soporta busqueda, filtros por coach/sede/estado y paginacion desde backend, para sostener mejor el crecimiento operativo por sucursal.
 Los modulos admin de progreso, resultados y datos medicos ya aceptan deep-link por `student_id`, incluyendo alumnos inactivos para seguimiento administrativo.
 El modulo admin de progreso ya filtra historial por rutina y ejercicio, resume tendencias rapidas y expone mejores marcas por ejercicio para cada alumno.
 El modulo admin de datos medicos ya resume consentimiento, contacto de emergencia, filtros por tipo/visibilidad y una vista previa exacta de las notas compartidas con coach.

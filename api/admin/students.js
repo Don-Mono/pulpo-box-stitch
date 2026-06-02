@@ -1,10 +1,23 @@
 const crypto = require("node:crypto");
 const { getSupabase, json, requireAdmin } = require("../_shared");
 
-const STUDENT_LIMIT = 100;
+const DEFAULT_STUDENT_PAGE_SIZE = 20;
+const MAX_STUDENT_PAGE_SIZE = 50;
 
 function clean(value, maxLength = 180) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function cleanPositiveInteger(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.floor(parsed);
+}
+
+function getQuery(req) {
+  if (req.query) return req.query;
+  const url = new URL(req.url || "/", "http://localhost");
+  return Object.fromEntries(url.searchParams.entries());
 }
 
 function isMissingManagementSchema(error) {
@@ -25,20 +38,97 @@ function setupPayload() {
     students: [],
     coaches: [],
     locations: [],
+    pagination: {
+      total: 0,
+      page: 1,
+      pageSize: DEFAULT_STUDENT_PAGE_SIZE,
+      totalPages: 1,
+    },
+    filters: {
+      q: "",
+      coachId: "",
+      locationId: "",
+      status: "",
+    },
     setupRequired: true,
     message: "Para activar alumnos debes ejecutar primero supabase_management_schema.sql en Supabase.",
   };
 }
 
-async function listStudents(supabase) {
-  const { data: students, error } = await supabase
+async function listStudents(supabase, options = {}) {
+  const page = cleanPositiveInteger(options.page, 1);
+  const requestedPageSize = cleanPositiveInteger(options.pageSize, DEFAULT_STUDENT_PAGE_SIZE);
+  const pageSize = Math.min(requestedPageSize, MAX_STUDENT_PAGE_SIZE);
+  const search = clean(options.q, 120);
+  const coachId = clean(options.coachId, 90);
+  const locationId = clean(options.locationId, 90);
+  const status = ["active", "inactive"].includes(clean(options.status, 24).toLowerCase())
+    ? clean(options.status, 24).toLowerCase()
+    : "";
+
+  let matchingProfileIds = null;
+
+  if (search || status) {
+    let profilesQuery = supabase
+      .from("pb_profiles")
+      .select("id")
+      .eq("role", "student");
+
+    if (status === "active") profilesQuery = profilesQuery.eq("is_active", true);
+    if (status === "inactive") profilesQuery = profilesQuery.eq("is_active", false);
+
+    if (search) {
+      const escapedSearch = search.replaceAll(",", " ").trim();
+      profilesQuery = profilesQuery.or([
+        `full_name.ilike.%${escapedSearch}%`,
+        `email.ilike.%${escapedSearch}%`,
+        `phone.ilike.%${escapedSearch}%`,
+      ].join(","));
+    }
+
+    const { data: profileMatches, error: profileMatchesError } = await profilesQuery.limit(5000);
+    if (profileMatchesError) throw profileMatchesError;
+    matchingProfileIds = (profileMatches || []).map((profile) => profile.id);
+
+    if (!matchingProfileIds.length) {
+      return {
+        students: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          pageSize,
+          totalPages: 1,
+        },
+      };
+    }
+  }
+
+  let studentsQuery = supabase
     .from("pb_students")
-    .select("profile_id, location_id, primary_coach_id, goal, height_cm, current_weight_kg, created_at, updated_at")
-    .order("created_at", { ascending: false })
-    .limit(STUDENT_LIMIT);
+    .select("profile_id, location_id, primary_coach_id, goal, height_cm, current_weight_kg, created_at, updated_at", { count: "exact" })
+    .order("created_at", { ascending: false });
+
+  if (coachId) studentsQuery = studentsQuery.eq("primary_coach_id", coachId);
+  if (locationId) studentsQuery = studentsQuery.eq("location_id", locationId);
+  if (matchingProfileIds) studentsQuery = studentsQuery.in("profile_id", matchingProfileIds);
+
+  const rangeFrom = (page - 1) * pageSize;
+  const rangeTo = rangeFrom + pageSize - 1;
+
+  const { data: students, count: totalStudents, error } = await studentsQuery.range(rangeFrom, rangeTo);
 
   if (error) throw error;
-  if (!students?.length) return [];
+  if (!students?.length) {
+    return {
+      students: [],
+      pagination: {
+        total: 0,
+        page: 1,
+        pageSize,
+        totalPages: 1,
+      },
+    };
+  }
 
   const profileIds = students.map((student) => student.profile_id);
   const locationIds = [...new Set(students.map((student) => student.location_id).filter(Boolean))];
@@ -62,21 +152,33 @@ async function listStudents(supabase) {
   const locationMap = new Map((locations || []).map((location) => [location.id, location]));
   const coachMap = new Map((coachProfiles || []).map((coach) => [coach.id, coach]));
 
-  return students.map((student) => ({
-    id: student.profile_id,
-    primary_coach_id: student.primary_coach_id || "",
-    location_id: student.location_id || "",
-    full_name: profileMap.get(student.profile_id)?.full_name || "Alumno sin nombre",
-    email: profileMap.get(student.profile_id)?.email || "",
-    phone: profileMap.get(student.profile_id)?.phone || "",
-    is_active: profileMap.get(student.profile_id)?.is_active ?? true,
-    location_name: locationMap.get(student.location_id)?.name || "",
-    coach_name: coachMap.get(student.primary_coach_id)?.full_name || "",
-    goal: student.goal || "",
-    height_cm: student.height_cm,
-    current_weight_kg: student.current_weight_kg,
-    created_at: student.created_at,
-  }));
+  const total = Math.max(Number(totalStudents || 0), 0);
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+  const normalizedPage = Math.min(Math.max(page, 1), totalPages);
+
+  return {
+    students: students.map((student) => ({
+      id: student.profile_id,
+      primary_coach_id: student.primary_coach_id || "",
+      location_id: student.location_id || "",
+      full_name: profileMap.get(student.profile_id)?.full_name || "Alumno sin nombre",
+      email: profileMap.get(student.profile_id)?.email || "",
+      phone: profileMap.get(student.profile_id)?.phone || "",
+      is_active: profileMap.get(student.profile_id)?.is_active ?? true,
+      location_name: locationMap.get(student.location_id)?.name || "",
+      coach_name: coachMap.get(student.primary_coach_id)?.full_name || "",
+      goal: student.goal || "",
+      height_cm: student.height_cm,
+      current_weight_kg: student.current_weight_kg,
+      created_at: student.created_at,
+    })),
+    pagination: {
+      total,
+      page: normalizedPage,
+      pageSize,
+      totalPages,
+    },
+  };
 }
 
 async function listCoaches(supabase) {
@@ -217,13 +319,35 @@ module.exports = async function handler(req, res) {
     const supabase = getSupabase();
 
     if (req.method === "GET") {
+      const query = getQuery(req);
       try {
-        const [students, coaches, locations] = await Promise.all([
-          listStudents(supabase),
+        const [studentsPayload, coaches, locations] = await Promise.all([
+          listStudents(supabase, {
+            page: query.page,
+            pageSize: query.page_size,
+            q: query.q,
+            coachId: query.coach_id,
+            locationId: query.location_id,
+            status: query.status,
+          }),
           listCoaches(supabase),
           listLocations(supabase),
         ]);
-        return json(res, 200, { students, coaches, locations, setupRequired: false });
+        return json(res, 200, {
+          students: studentsPayload.students,
+          pagination: studentsPayload.pagination,
+          filters: {
+            q: clean(query.q, 120),
+            coachId: clean(query.coach_id, 90),
+            locationId: clean(query.location_id, 90),
+            status: ["active", "inactive"].includes(clean(query.status, 24).toLowerCase())
+              ? clean(query.status, 24).toLowerCase()
+              : "",
+          },
+          coaches,
+          locations,
+          setupRequired: false,
+        });
       } catch (error) {
         if (isMissingManagementSchema(error)) return json(res, 200, setupPayload());
         throw error;
