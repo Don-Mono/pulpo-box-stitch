@@ -459,11 +459,12 @@
 
   function renderHealthSummary(summary, profile, notes) {
     const visibleToCoachCount = notes.filter((note) => note.visible_to_coach).length;
+    const consentLabel = profile?.medical_consent_at ? `Registrado ${formatDate(profile.medical_consent_at)}` : "Pendiente";
     const values = [
       ["Altura", summary?.latest_height_cm ? `${formatNumber(summary.latest_height_cm)} cm` : "--"],
       ["Peso base", summary?.latest_weight_kg ? `${formatNumber(summary.latest_weight_kg)} kg` : "--"],
       ["Notas medicas", String(notes.length || 0)],
-      ["Compartidas coach", String(visibleToCoachCount)],
+      ["Consentimiento", consentLabel],
     ];
 
     healthSummaryGrid.innerHTML = values.map(([label, value]) => `
@@ -486,6 +487,11 @@
         <strong>Visibilidad con tu coach</strong>
         <span>${escapeHtml(visibleToCoachCount ? `${visibleToCoachCount} nota(s) visibles para seguimiento.` : "No hay notas visibles para coach.")}</span>
         <small>El equipo admin define que informacion medica se comparte para cuidar tu entrenamiento.</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Consentimiento y seguimiento</strong>
+        <span>${escapeHtml(profile?.medical_consent_at ? `Consentimiento registrado el ${formatDate(profile.medical_consent_at)}.` : "Consentimiento aun pendiente de registro.")}</span>
+        <small>Si notas algo incompleto en salud o emergencia, solicitalo al equipo admin.</small>
       </article>
     `;
   }
@@ -936,6 +942,8 @@
     setStatus(resultStatus, "Guardando resultado...");
     const formData = new FormData(studentResultForm);
     const body = Object.fromEntries(formData.entries());
+    const previousWorkoutId = workoutSelect.value;
+    const previousExerciseId = exerciseSelect.value;
 
     try {
       const response = await fetch("/api/student/overview", {
@@ -946,10 +954,16 @@
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar.");
       studentResultForm.reset();
-      if (currentAssignments.length === 1 && currentAssignments[0]?.workout_id) {
+      if (previousWorkoutId) {
+        workoutSelect.value = previousWorkoutId;
+      } else if (currentAssignments.length === 1 && currentAssignments[0]?.workout_id) {
         workoutSelect.value = currentAssignments[0].workout_id;
       }
       syncExerciseOptions();
+      if (previousExerciseId) {
+        exerciseSelect.value = previousExerciseId;
+        renderSelectedExercisePreview();
+      }
       setStatus(resultStatus, payload.message, "ok");
       await loadOverview();
     } catch (error) {

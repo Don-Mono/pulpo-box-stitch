@@ -1453,3 +1453,107 @@ body {
     margin-top: 1rem;
   }
 }
+
+@media (max-width: 620px) {
+  .management-shell {
+    padding: 0.75rem;
+  }
+
+  .management-topbar {
+    border-radius: 1.25rem;
+    margin-bottom: 1rem;
+    padding: 0.9rem;
+  }
+
+  .brand-lockup {
+    width: 100%;
+  }
+
+  .brand-lockup strong {
+    font-size: 1.45rem;
+  }
+
+  .topbar-actions {
+    width: 100%;
+  }
+
+  .topbar-actions .button {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 0;
+  }
+
+  .dashboard-title {
+    font-size: clamp(2.1rem, 11vw, 3.1rem);
+  }
+
+  .student-overview-grid,
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-module-nav {
+    grid-template-columns: 1fr;
+    position: static;
+  }
+
+  .student-module-button {
+    min-height: 4.2rem;
+  }
+
+  .inline-field {
+    min-width: 0;
+  }
+
+  .pagination-toolbar,
+  .table-actions,
+  .detail-action-group,
+  .assignment-action-row {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .pagination-toolbar .button,
+  .table-actions .button,
+  .detail-action-group .button,
+  .assignment-action-row .button {
+    width: 100%;
+  }
+
+  .exercise-item-head,
+  .guided-routine-head,
+  .routine-preview-block-head,
+  .routine-preview-step-head,
+  .workout-meta,
+  .routine-builder-block-head {
+    align-items: flex-start;
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .guided-routine-surface {
+    min-height: auto;
+    padding: 0.85rem;
+  }
+
+  .guided-routine-surface h4,
+  .exercise-item-title {
+    font-size: 1.5rem;
+  }
+
+  .routine-builder-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .routine-builder-move {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .student-form .button,
+  .panel-card .button.full-button {
+    width: 100%;
+  }
+
+  .table-shell {
+    -webkit-overflow-scrolling: touch;
+  }
+}

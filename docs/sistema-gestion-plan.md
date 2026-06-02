@@ -187,13 +187,16 @@ Primera implementacion:
 - El portal alumno ya consume la rutina en formato guiado paso a paso, con navegacion entre ejercicios y accion rapida para usar el ejercicio activo en el registro de marcas.
 - El portal alumno ya se presenta como una experiencia tipo app con modulos internos de Rutina, Progreso, Salud y Perfil para uso mas claro desde celular.
 - El portal alumno ya puede cambiar el estado de una rutina asignada entre pendiente, completada u omitida.
+- El portal alumno ahora exige al menos una marca, tiempo, ronda, texto o nota antes de guardar un resultado y puede marcar la rutina como completada desde el mismo registro.
 - Coach y admin ya ven ese mismo estado reflejado en sus paneles operativos.
 - El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
 - El portal coach ahora se presenta como una experiencia tipo app con modulos internos de Alumnos, Seguimiento, Feedback y Perfil para uso mas claro desde celular o escritorio.
 - El modulo Seguimiento del coach ya pagina resultados por pagina, cantidad de filas y filtro por alumno desde backend, para soportar mejor el crecimiento operativo por sede.
+- El modulo de rutinas del coach ahora soporta busqueda, filtro por alumno/nivel y paginacion para mantener el creador operativo cuando crezca la biblioteca de sesiones.
 - La ficha del coach ya usa el mismo formato guiado para revisar la rutina activa del alumno sin perder el contexto de seguimiento.
 - La ficha individual `coach-student` ahora se presenta en modulos de Perfil, Rutina, Progreso y Salud para ordenar mejor la lectura operativa del alumno.
 - La ficha individual `coach-student` ahora pagina las marcas por pagina, cantidad de filas y filtros por rutina/ejercicio desde backend para que el seguimiento individual siga siendo fluido con historiales largos.
+- Los paneles privados criticos del sistema ya incorporan una capa responsive adicional para mejorar uso movil en alumno, ficha coach y creadores de rutinas.
 - El modulo admin de alumnos ahora soporta busqueda, filtros por coach/sede/estado y paginacion desde backend para sostener mejor el crecimiento operativo por sucursal.
 - El modulo admin de coaches ahora soporta busqueda, filtro de estado y paginacion desde backend para sostener mejor el crecimiento del equipo por sede o unidad de negocio.
 - El modulo admin de rutinas ahora soporta busqueda, filtro por alumno/nivel y paginacion desde backend para ordenar mejor la operacion cuando el volumen de sesiones crezca.

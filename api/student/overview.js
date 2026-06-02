@@ -123,7 +123,7 @@ async function loadStudentOverview(supabase, studentId, options = {}) {
     supabase.from("pb_profiles").select("id, full_name, email, phone").eq("id", studentId).maybeSingle(),
     supabase
       .from("pb_students")
-      .select("goal, height_cm, current_weight_kg, emergency_contact_name, emergency_contact_phone, location_id, primary_coach_id")
+      .select("goal, height_cm, current_weight_kg, emergency_contact_name, emergency_contact_phone, medical_consent_at, location_id, primary_coach_id")
       .eq("profile_id", studentId)
       .maybeSingle(),
     supabase
@@ -271,6 +271,7 @@ async function loadStudentOverview(supabase, studentId, options = {}) {
       goal: studentDetails?.goal || "",
       emergency_contact_name: studentDetails?.emergency_contact_name || "",
       emergency_contact_phone: studentDetails?.emergency_contact_phone || "",
+      medical_consent_at: studentDetails?.medical_consent_at || null,
       primary_coach_name: coachProfile?.full_name || "",
       location_name: location?.name || "",
     }
@@ -425,6 +426,7 @@ async function createStudentResult(supabase, studentId, body) {
   const timeSeconds = cleanNumber(body.time_seconds);
   const scoreText = clean(body.score_text, 160);
   const studentNotes = clean(body.student_notes, 500);
+  const markCompleted = String(body.mark_completed || "").toLowerCase() === "true";
 
   if (!workoutId) {
     const error = new Error("Debes seleccionar una rutina.");
@@ -438,9 +440,22 @@ async function createStudentResult(supabase, studentId, body) {
     throw error;
   }
 
+  if (
+    weightKg == null
+    && reps == null
+    && rounds == null
+    && timeSeconds == null
+    && !scoreText
+    && !studentNotes
+  ) {
+    const error = new Error("Ingresa al menos una marca, tiempo, ronda, texto o nota antes de guardar.");
+    error.statusCode = 400;
+    throw error;
+  }
+
   const { data: assignment, error: assignmentError } = await supabase
     .from("pb_workout_assignments")
-    .select("id")
+    .select("id, status")
     .eq("student_id", studentId)
     .eq("workout_id", workoutId)
     .maybeSingle();
@@ -485,6 +500,21 @@ async function createStudentResult(supabase, studentId, body) {
     .single();
 
   if (error) throw error;
+
+  if (markCompleted && assignment?.id) {
+    const timestamp = new Date().toISOString();
+    const { error: assignmentUpdateError } = await supabase
+      .from("pb_workout_assignments")
+      .update({
+        status: "completed",
+        completed_at: timestamp,
+      })
+      .eq("id", assignment.id)
+      .eq("student_id", studentId);
+
+    if (assignmentUpdateError) throw assignmentUpdateError;
+  }
+
   return data;
 }
 

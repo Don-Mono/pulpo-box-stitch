@@ -1,12 +1,20 @@
 const { getSupabase, json, requireRole } = require("../_shared");
 const { exerciseLibrary, exerciseSections } = require("../../data/exercise-library");
 
-const WORKOUT_LIMIT = 80;
+const DEFAULT_WORKOUT_PAGE_SIZE = 20;
+const MAX_WORKOUT_PAGE_SIZE = 50;
+const WORKOUT_LIMIT = 500;
 const STUDENT_LIMIT = 200;
 const EXERCISE_LIMIT = 500;
 
 function clean(value, maxLength = 220) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function cleanPositiveInteger(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.floor(parsed);
 }
 
 function cleanDate(value) {
@@ -35,6 +43,12 @@ function isMissingManagementSchema(error) {
     || message.includes('relation "pb_')
     || message.includes('relation "public.pb_')
   );
+}
+
+function getQuery(req) {
+  if (req.query) return req.query;
+  const url = new URL(req.url || "/", "http://localhost");
+  return Object.fromEntries(url.searchParams.entries());
 }
 
 function parseJsonArray(value) {
@@ -94,6 +108,17 @@ function setupPayload() {
     students: [],
     exerciseLibrary,
     sections: exerciseSections,
+    pagination: {
+      total: 0,
+      page: 1,
+      pageSize: DEFAULT_WORKOUT_PAGE_SIZE,
+      totalPages: 1,
+    },
+    filters: {
+      q: "",
+      studentId: "",
+      level: "",
+    },
     setupRequired: true,
     message: "Para activar rutinas del coach debes ejecutar primero supabase_management_schema.sql en Supabase.",
   };
@@ -138,7 +163,37 @@ async function listCoachStudents(supabase, coachId) {
   }));
 }
 
-async function listCoachWorkouts(supabase, coachId) {
+function applyWorkoutFiltersInMemory(workout, filters = {}) {
+  const search = clean(filters.q, 120).toLowerCase();
+  const level = clean(filters.level, 80);
+  const selectedStudentId = clean(filters.studentId, 90);
+  const assignments = workout.assignments || [];
+
+  if (selectedStudentId && !assignments.some((assignment) => assignment.student_id === selectedStudentId)) {
+    return false;
+  }
+
+  if (level && clean(workout.level, 80) !== level) {
+    return false;
+  }
+
+  if (!search) return true;
+  const haystack = [
+    workout.title,
+    workout.summary,
+    workout.level,
+    workout.notes,
+  ].map((value) => clean(value, 500).toLowerCase()).join(" ");
+  return haystack.includes(search);
+}
+
+async function listCoachWorkouts(supabase, coachId, options = {}) {
+  const page = cleanPositiveInteger(options.page, 1);
+  const requestedPageSize = cleanPositiveInteger(options.pageSize, DEFAULT_WORKOUT_PAGE_SIZE);
+  const pageSize = Math.min(requestedPageSize, MAX_WORKOUT_PAGE_SIZE);
+  const search = clean(options.q, 120);
+  const selectedStudentId = clean(options.studentId, 90);
+  const selectedLevel = clean(options.level, 80);
   const [students, savedExercises, createdResponse] = await Promise.all([
     listCoachStudents(supabase, coachId),
     listSavedExercises(supabase),
@@ -151,8 +206,28 @@ async function listCoachWorkouts(supabase, coachId) {
   ]);
 
   if (createdResponse.error) throw createdResponse.error;
+  if (selectedStudentId && !students.some((student) => student.id === selectedStudentId)) {
+    return {
+      students,
+      workouts: [],
+      levels: [],
+      exerciseLibrary: [...exerciseLibrary, ...savedExercises],
+      sections: buildSections(savedExercises),
+      pagination: {
+        total: 0,
+        page: 1,
+        pageSize,
+        totalPages: 1,
+      },
+      filters: {
+        q: search,
+        studentId: "",
+        level: selectedLevel,
+      },
+    };
+  }
 
-  const studentIds = students.map((student) => student.id);
+  const studentIds = selectedStudentId ? [selectedStudentId] : students.map((student) => student.id);
   const { data: assignments, error: assignmentsError } = studentIds.length
       ? await supabase
       .from("pb_workout_assignments")
@@ -191,8 +266,20 @@ async function listCoachWorkouts(supabase, coachId) {
     return {
       students,
       workouts: [],
+      levels: [],
       exerciseLibrary: [...exerciseLibrary, ...savedExercises],
       sections: buildSections(savedExercises),
+      pagination: {
+        total: 0,
+        page: 1,
+        pageSize,
+        totalPages: 1,
+      },
+      filters: {
+        q: search,
+        studentId: selectedStudentId,
+        level: selectedLevel,
+      },
     };
   }
 
@@ -247,16 +334,48 @@ async function listCoachWorkouts(supabase, coachId) {
     assignmentsByWorkout.set(assignment.workout_id, list);
   });
 
+  const mergedWorkouts = workouts.map((workout) => ({
+    ...workout,
+    created_by_me: workout.created_by === coachId,
+    exercises: exercisesByWorkout.get(workout.id) || [],
+    assignments: assignmentsByWorkout.get(workout.id) || [],
+  }));
+
+  const levelOptions = [...new Set(
+    mergedWorkouts
+      .filter((workout) => applyWorkoutFiltersInMemory(workout, { q: search, studentId: selectedStudentId }))
+      .map((workout) => clean(workout.level, 80))
+      .filter(Boolean),
+  )].sort((a, b) => a.localeCompare(b, "es"));
+
+  const filteredWorkouts = mergedWorkouts.filter((workout) => applyWorkoutFiltersInMemory(workout, {
+    q: search,
+    studentId: selectedStudentId,
+    level: selectedLevel,
+  }));
+  const total = filteredWorkouts.length;
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+  const normalizedPage = Math.min(Math.max(page, 1), totalPages);
+  const rangeFrom = (normalizedPage - 1) * pageSize;
+  const pageItems = filteredWorkouts.slice(rangeFrom, rangeFrom + pageSize);
+
   return {
     students,
     exerciseLibrary: [...exerciseLibrary, ...savedExercises],
     sections: buildSections(savedExercises),
-    workouts: workouts.map((workout) => ({
-      ...workout,
-      created_by_me: workout.created_by === coachId,
-      exercises: exercisesByWorkout.get(workout.id) || [],
-      assignments: assignmentsByWorkout.get(workout.id) || [],
-    })),
+    levels: levelOptions,
+    workouts: pageItems,
+    pagination: {
+      total,
+      page: normalizedPage,
+      pageSize,
+      totalPages,
+    },
+    filters: {
+      q: search,
+      studentId: selectedStudentId,
+      level: selectedLevel,
+    },
   };
 }
 
@@ -674,7 +793,14 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "GET") {
       try {
-        const payload = await listCoachWorkouts(supabase, session.userId);
+        const query = getQuery(req);
+        const payload = await listCoachWorkouts(supabase, session.userId, {
+          page: cleanPositiveInteger(query.page, 1),
+          pageSize: cleanPositiveInteger(query.page_size, DEFAULT_WORKOUT_PAGE_SIZE),
+          q: typeof query.q === "string" ? query.q : "",
+          studentId: typeof query.student_id === "string" ? query.student_id : "",
+          level: typeof query.level === "string" ? query.level : "",
+        });
         return json(res, 200, { ...payload, setupRequired: false });
       } catch (error) {
         if (isMissingManagementSchema(error)) return json(res, 200, setupPayload());

@@ -82,12 +82,15 @@ El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejerc
 El portal alumno ya puede actualizar sus datos de contacto permitidos y su contacto de emergencia sin tocar coach, sede ni objetivo.
 El modulo Salud del alumno ya muestra informacion base, contacto de emergencia, visibilidad hacia coach y observaciones medicas registradas por el equipo.
 El portal alumno ya puede marcar cada rutina asignada como pendiente, completada u omitida, y ese estado se refleja tambien en coach y admin.
+El portal alumno ahora exige al menos una marca, tiempo, ronda, texto o nota antes de guardar un resultado, y opcionalmente puede marcar la rutina como completada al registrar esa marca.
 El portal coach ya puede revisar resultados de sus alumnos asignados y guardar feedback tecnico sobre cada marca.
 Admin ya puede regenerar claves temporales para alumnos y coaches desde sus listados, y coach/alumno ya pueden cambiar su propia clave desde una vista privada.
 Admin ya puede crear, editar y desactivar sedes, y el alta inicial de alumnos ya permite asignarles una sede desde el mismo formulario.
 El coach ya cuenta con un modulo propio de rutinas para crear trabajo y asignarlo solo a sus alumnos activos.
 El coach ya puede reasignar o quitar alumnos dentro de rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
 El coach ya puede editar y eliminar sus propias rutinas, manteniendo solo lectura sobre rutinas externas asignadas a sus alumnos.
+El modulo de rutinas del coach ahora soporta busqueda, filtro por alumno/nivel y paginacion para sostener mejor el crecimiento operativo desde su propio panel.
+Los modulos privados principales ahora incluyen una capa responsive adicional para movil en panel alumno, ficha coach y creador de rutinas.
 El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, mediciones, marcas y notas medicas visibles para seguimiento.
 La ficha del coach ya expone descripcion, enfoque y enlaces de video dentro de los ejercicios asignados al alumno para revisar tecnica sin salir de la vista.
 La ficha del coach ya permite filtrar historial por rutina y ejercicio, con indicadores rapidos para leer tendencias sin salir de la vista.

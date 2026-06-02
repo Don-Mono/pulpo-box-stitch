@@ -181,8 +181,41 @@
             </div>
             <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
           </div>
+          <div class="filter-grid">
+            <div class="field inline-field">
+              <label for="workoutSearch">Busqueda</label>
+              <input id="workoutSearch" placeholder="Titulo, resumen, nivel o notas" />
+            </div>
+            <div class="field inline-field">
+              <label for="workoutStudentFilter">Alumno</label>
+              <select id="workoutStudentFilter">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="field inline-field">
+              <label for="workoutLevelFilter">Nivel</label>
+              <select id="workoutLevelFilter">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="field inline-field">
+              <label for="workoutsPageSize">Filas</label>
+              <select id="workoutsPageSize">
+                <option value="10">10</option>
+                <option selected value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+          </div>
           <div id="workoutsList" class="workout-list">
             <p class="muted">Cargando rutinas...</p>
+          </div>
+          <div class="table-header">
+            <span class="muted" id="workoutsPaginationStatus">Cargando paginacion...</span>
+            <div class="topbar-actions">
+              <button class="button ghost compact-button" id="previousWorkoutsPageButton" type="button">Anterior</button>
+              <button class="button ghost compact-button" id="nextWorkoutsPageButton" type="button">Siguiente</button>
+            </div>
           </div>
         </section>
       </div>
