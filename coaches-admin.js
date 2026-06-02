@@ -6,8 +6,20 @@
   const coachesBody = document.querySelector("#coachesBody");
   const refreshButton = document.querySelector("#refreshButton");
   const logoutButton = document.querySelector("#logoutButton");
+  const coachSearch = document.querySelector("#coachSearch");
+  const coachStatusFilter = document.querySelector("#coachStatusFilter");
+  const coachesPageSize = document.querySelector("#coachesPageSize");
+  const coachesPaginationStatus = document.querySelector("#coachesPaginationStatus");
+  const previousCoachesPageButton = document.querySelector("#previousCoachesPageButton");
+  const nextCoachesPageButton = document.querySelector("#nextCoachesPageButton");
 
   let setupRequired = false;
+  let currentPage = Number(coachesPageSize?.dataset.initialPage || 1);
+  let currentPageSize = Number(coachesPageSize?.value || 20);
+  let currentTotalPages = 1;
+  let currentTotalCoaches = 0;
+  let currentSearch = "";
+  let currentStatusFilter = "";
 
   function setStatus(element, message, type = "") {
     element.textContent = message;
@@ -20,6 +32,48 @@
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;");
+  }
+
+  function getInitialPage() {
+    try {
+      const page = Number(new URLSearchParams(window.location.search).get("page") || "1");
+      return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  function getInitialPageSize() {
+    try {
+      const pageSize = Number(new URLSearchParams(window.location.search).get("page_size") || String(currentPageSize));
+      if ([10, 20, 50].includes(pageSize)) return pageSize;
+      return currentPageSize;
+    } catch {
+      return currentPageSize;
+    }
+  }
+
+  function getInitialFilter(name) {
+    try {
+      return new URLSearchParams(window.location.search).get(name) || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function syncUrl() {
+    try {
+      const url = new URL(window.location.href);
+      if (currentSearch) url.searchParams.set("q", currentSearch);
+      else url.searchParams.delete("q");
+      if (currentStatusFilter) url.searchParams.set("status", currentStatusFilter);
+      else url.searchParams.delete("status");
+      url.searchParams.set("page", String(currentPage));
+      url.searchParams.set("page_size", String(currentPageSize));
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      // Ignore URL sync errors.
+    }
   }
 
   async function requireAdminSession() {
@@ -39,6 +93,16 @@
     return payload.user;
   }
 
+  function renderPagination() {
+    const start = currentTotalCoaches ? ((currentPage - 1) * currentPageSize) + 1 : 0;
+    const end = Math.min(currentPage * currentPageSize, currentTotalCoaches);
+    coachesPaginationStatus.textContent = currentTotalCoaches
+      ? `Mostrando ${start}-${end} de ${currentTotalCoaches} coach(es). Pagina ${currentPage} de ${currentTotalPages}.`
+      : "Sin coaches para este filtro.";
+    previousCoachesPageButton.disabled = currentPage <= 1;
+    nextCoachesPageButton.disabled = currentPage >= currentTotalPages;
+  }
+
   function renderEmpty(message) {
     coachesBody.innerHTML = `<tr><td colspan="6">${escapeHtml(message)}</td></tr>`;
   }
@@ -46,6 +110,7 @@
   function renderCoaches(coaches) {
     if (!coaches.length) {
       renderEmpty("Todavia no hay coaches registrados.");
+      renderPagination();
       return;
     }
 
@@ -75,6 +140,7 @@
         </tr>
       `;
     }).join("");
+    renderPagination();
   }
 
   async function loadCoaches() {
@@ -82,7 +148,14 @@
     setupMessage.textContent = "Revisando tablas de gestion...";
 
     try {
-      const response = await fetch("/api/admin/coaches");
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        page_size: String(currentPageSize),
+      });
+      if (currentSearch) params.set("q", currentSearch);
+      if (currentStatusFilter) params.set("status", currentStatusFilter);
+
+      const response = await fetch(`/api/admin/coaches?${params.toString()}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo cargar coaches.");
 
@@ -90,10 +163,23 @@
       setupMessage.textContent = setupRequired
         ? payload.message
         : "Modulo conectado. Ya puedes registrar coaches cuando lo necesites.";
+      currentPage = Math.max(Number(payload.pagination?.page || currentPage || 1), 1);
+      currentPageSize = Number(payload.pagination?.pageSize || currentPageSize || 20);
+      currentTotalPages = Math.max(Number(payload.pagination?.totalPages || 1), 1);
+      currentTotalCoaches = Math.max(Number(payload.pagination?.total || 0), 0);
+      currentSearch = payload.filters?.q || "";
+      currentStatusFilter = payload.filters?.status || "";
+      coachSearch.value = currentSearch;
+      coachStatusFilter.value = currentStatusFilter;
+      coachesPageSize.value = String(currentPageSize);
       renderCoaches(payload.coaches || []);
+      syncUrl();
     } catch (error) {
       setupMessage.textContent = error.message;
+      currentTotalCoaches = 0;
+      currentTotalPages = 1;
       renderEmpty(error.message);
+      renderPagination();
     }
   }
 
@@ -172,6 +258,31 @@
 
   coachForm.addEventListener("submit", createCoach);
   refreshButton.addEventListener("click", loadCoaches);
+  coachSearch.addEventListener("change", () => {
+    currentSearch = coachSearch.value.trim();
+    currentPage = 1;
+    loadCoaches();
+  });
+  coachStatusFilter.addEventListener("change", () => {
+    currentStatusFilter = coachStatusFilter.value;
+    currentPage = 1;
+    loadCoaches();
+  });
+  coachesPageSize.addEventListener("change", () => {
+    currentPageSize = Number(coachesPageSize.value || 20);
+    currentPage = 1;
+    loadCoaches();
+  });
+  previousCoachesPageButton.addEventListener("click", () => {
+    if (currentPage <= 1) return;
+    currentPage -= 1;
+    loadCoaches();
+  });
+  nextCoachesPageButton.addEventListener("click", () => {
+    if (currentPage >= currentTotalPages) return;
+    currentPage += 1;
+    loadCoaches();
+  });
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login.html";
@@ -180,6 +291,13 @@
   async function boot() {
     const user = await requireAdminSession();
     if (!user) return;
+    currentPage = getInitialPage();
+    currentPageSize = getInitialPageSize();
+    currentSearch = getInitialFilter("q");
+    currentStatusFilter = getInitialFilter("status");
+    coachSearch.value = currentSearch;
+    coachStatusFilter.value = currentStatusFilter;
+    coachesPageSize.value = String(currentPageSize);
     await loadCoaches();
   }
 

@@ -195,6 +195,7 @@ Primera implementacion:
 - La ficha individual `coach-student` ahora se presenta en modulos de Perfil, Rutina, Progreso y Salud para ordenar mejor la lectura operativa del alumno.
 - La ficha individual `coach-student` ahora pagina las marcas por pagina, cantidad de filas y filtros por rutina/ejercicio desde backend para que el seguimiento individual siga siendo fluido con historiales largos.
 - El modulo admin de alumnos ahora soporta busqueda, filtros por coach/sede/estado y paginacion desde backend para sostener mejor el crecimiento operativo por sucursal.
+- El modulo admin de coaches ahora soporta busqueda, filtro de estado y paginacion desde backend para sostener mejor el crecimiento del equipo por sede o unidad de negocio.
 
 ### Etapa 5 - Progreso
 

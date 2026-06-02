@@ -1,10 +1,23 @@
 const crypto = require("node:crypto");
 const { getSupabase, json, requireAdmin } = require("../_shared");
 
-const COACH_LIMIT = 100;
+const DEFAULT_COACH_PAGE_SIZE = 20;
+const MAX_COACH_PAGE_SIZE = 50;
 
 function clean(value, maxLength = 180) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function cleanPositiveInteger(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.floor(parsed);
+}
+
+function getQuery(req) {
+  if (req.query) return req.query;
+  const url = new URL(req.url || "/", "http://localhost");
+  return Object.fromEntries(url.searchParams.entries());
 }
 
 function isMissingManagementSchema(error) {
@@ -23,20 +36,112 @@ function isMissingManagementSchema(error) {
 function setupPayload() {
   return {
     coaches: [],
+    pagination: {
+      total: 0,
+      page: 1,
+      pageSize: DEFAULT_COACH_PAGE_SIZE,
+      totalPages: 1,
+    },
+    filters: {
+      q: "",
+      status: "",
+    },
     setupRequired: true,
     message: "Para activar coaches debes ejecutar primero supabase_management_schema.sql en Supabase.",
   };
 }
 
-async function listCoaches(supabase) {
-  const { data: coaches, error } = await supabase
+async function listCoaches(supabase, options = {}) {
+  const page = cleanPositiveInteger(options.page, 1);
+  const requestedPageSize = cleanPositiveInteger(options.pageSize, DEFAULT_COACH_PAGE_SIZE);
+  const pageSize = Math.min(requestedPageSize, MAX_COACH_PAGE_SIZE);
+  const search = clean(options.q, 120);
+  const status = ["active", "inactive"].includes(clean(options.status, 24).toLowerCase())
+    ? clean(options.status, 24).toLowerCase()
+    : "";
+
+  let matchingProfileIds = null;
+
+  if (search || status) {
+    const normalizedSearch = search.replaceAll(",", " ").trim();
+    let profilesQuery = supabase
+      .from("pb_profiles")
+      .select("id")
+      .eq("role", "coach");
+
+    if (status === "active") profilesQuery = profilesQuery.eq("is_active", true);
+    if (status === "inactive") profilesQuery = profilesQuery.eq("is_active", false);
+
+    if (search) {
+      profilesQuery = profilesQuery.or([
+        `full_name.ilike.%${normalizedSearch}%`,
+        `email.ilike.%${normalizedSearch}%`,
+        `phone.ilike.%${normalizedSearch}%`,
+      ].join(","));
+    }
+
+    const [profileResponse, coachSearchResponse] = await Promise.all([
+      profilesQuery.limit(5000),
+      search
+        ? supabase
+          .from("pb_coaches")
+          .select("profile_id")
+          .or([
+            `specialty.ilike.%${normalizedSearch}%`,
+            `bio.ilike.%${normalizedSearch}%`,
+          ].join(","))
+          .limit(5000)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    const { data: profileMatches, error: profileMatchesError } = profileResponse;
+    const { data: coachSearchMatches, error: coachSearchError } = coachSearchResponse;
+    if (profileMatchesError) throw profileMatchesError;
+    if (coachSearchError) throw coachSearchError;
+    matchingProfileIds = [...new Set([
+      ...(profileMatches || []).map((profile) => profile.id),
+      ...(coachSearchMatches || []).map((coach) => coach.profile_id),
+    ])];
+
+    if (!matchingProfileIds.length && !search) {
+      return {
+        coaches: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          pageSize,
+          totalPages: 1,
+        },
+      };
+    }
+  }
+
+  let coachesQuery = supabase
     .from("pb_coaches")
-    .select("profile_id, specialty, bio, photo_url, created_at, updated_at")
-    .order("created_at", { ascending: false })
-    .limit(COACH_LIMIT);
+    .select("profile_id, specialty, bio, photo_url, created_at, updated_at", { count: "exact" })
+    .order("created_at", { ascending: false });
+
+  if (matchingProfileIds) {
+    coachesQuery = coachesQuery.in("profile_id", matchingProfileIds);
+  }
+
+  const rangeFrom = (page - 1) * pageSize;
+  const rangeTo = rangeFrom + pageSize - 1;
+
+  const { data: coaches, count: totalCoaches, error } = await coachesQuery.range(rangeFrom, rangeTo);
 
   if (error) throw error;
-  if (!coaches?.length) return [];
+  if (!coaches?.length) {
+    return {
+      coaches: [],
+      pagination: {
+        total: 0,
+        page: 1,
+        pageSize,
+        totalPages: 1,
+      },
+    };
+  }
 
   const profileIds = coaches.map((coach) => coach.profile_id);
   const { data: profiles, error: profilesError } = await supabase
@@ -48,7 +153,7 @@ async function listCoaches(supabase) {
 
   const profileMap = new Map((profiles || []).map((profile) => [profile.id, profile]));
 
-  return coaches.map((coach) => ({
+  const filteredCoaches = coaches.map((coach) => ({
     id: coach.profile_id,
     full_name: profileMap.get(coach.profile_id)?.full_name || "Coach sin nombre",
     email: profileMap.get(coach.profile_id)?.email || "",
@@ -59,6 +164,20 @@ async function listCoaches(supabase) {
     photo_url: coach.photo_url || "",
     created_at: coach.created_at,
   }));
+
+  const total = Math.max(Number(totalCoaches || 0), 0);
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+  const normalizedPage = Math.min(Math.max(page, 1), totalPages);
+
+  return {
+    coaches: filteredCoaches,
+    pagination: {
+      total,
+      page: normalizedPage,
+      pageSize,
+      totalPages,
+    },
+  };
 }
 
 async function createCoach(supabase, body) {
@@ -163,9 +282,25 @@ module.exports = async function handler(req, res) {
     const supabase = getSupabase();
 
     if (req.method === "GET") {
+      const query = getQuery(req);
       try {
-        const coaches = await listCoaches(supabase);
-        return json(res, 200, { coaches, setupRequired: false });
+        const coachesPayload = await listCoaches(supabase, {
+          page: query.page,
+          pageSize: query.page_size,
+          q: query.q,
+          status: query.status,
+        });
+        return json(res, 200, {
+          coaches: coachesPayload.coaches,
+          pagination: coachesPayload.pagination,
+          filters: {
+            q: clean(query.q, 120),
+            status: ["active", "inactive"].includes(clean(query.status, 24).toLowerCase())
+              ? clean(query.status, 24).toLowerCase()
+              : "",
+          },
+          setupRequired: false,
+        });
       } catch (error) {
         if (isMissingManagementSchema(error)) return json(res, 200, setupPayload());
         throw error;

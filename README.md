@@ -97,6 +97,7 @@ La ficha individual `coach-student` ahora tambien se organiza como una experienc
 La ficha individual `coach-student` ahora pagina las marcas por pagina, cantidad de filas y filtros por rutina/ejercicio desde backend, para sostener historiales largos por alumno sin recargar toda la vista.
 El login extendido de coach y alumno ya fue validado con credenciales de Supabase Auth y perfil activo en `pb_profiles`.
 Admin ya puede abrir una ficha unificada por coach, editar datos base y revisar alumnos asignados, rutinas creadas y ultimas marcas relacionadas.
+El modulo admin de coaches ahora soporta busqueda, filtro de estado y paginacion desde backend, para sostener mejor la operacion cuando crezca el equipo por sede o unidad de negocio.
 Admin ya puede abrir una ficha unificada por alumno, editar datos base y saltar directo a progreso, resultados y datos medicos manteniendo el mismo `student_id` en la URL.
 La ficha admin del alumno ya incluye acceso rapido al modulo de rutinas con el mismo contexto de alumno.
 El modulo admin de alumnos ahora soporta busqueda, filtros por coach/sede/estado y paginacion desde backend, para sostener mejor el crecimiento operativo por sucursal.

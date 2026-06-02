@@ -91,6 +91,28 @@
             </div>
             <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
           </div>
+          <div class="filter-grid">
+            <div class="field inline-field">
+              <label for="coachSearch">Busqueda</label>
+              <input id="coachSearch" placeholder="Nombre, email, telefono o especialidad" />
+            </div>
+            <div class="field inline-field">
+              <label for="coachStatusFilter">Estado</label>
+              <select id="coachStatusFilter">
+                <option value="">Todos</option>
+                <option value="active">Activos</option>
+                <option value="inactive">Inactivos</option>
+              </select>
+            </div>
+            <div class="field inline-field">
+              <label for="coachesPageSize">Filas</label>
+              <select id="coachesPageSize">
+                <option value="10">10</option>
+                <option selected value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+          </div>
           <div class="table-shell">
             <table class="data-table">
               <thead>
@@ -109,6 +131,13 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="table-header">
+            <span class="muted" id="coachesPaginationStatus">Cargando paginacion...</span>
+            <div class="topbar-actions">
+              <button class="button ghost compact-button" id="previousCoachesPageButton" type="button">Anterior</button>
+              <button class="button ghost compact-button" id="nextCoachesPageButton" type="button">Siguiente</button>
+            </div>
           </div>
         </section>
       </div>
