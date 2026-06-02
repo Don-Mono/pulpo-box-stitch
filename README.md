@@ -83,6 +83,7 @@ El portal alumno ya puede actualizar sus datos de contacto permitidos y su conta
 El modulo Salud del alumno ya muestra informacion base, contacto de emergencia, visibilidad hacia coach y observaciones medicas registradas por el equipo.
 El portal alumno ya puede marcar cada rutina asignada como pendiente, completada u omitida, y ese estado se refleja tambien en coach y admin.
 El portal alumno ahora exige al menos una marca, tiempo, ronda, texto o nota antes de guardar un resultado, y opcionalmente puede marcar la rutina como completada al registrar esa marca.
+La rutina guiada del alumno ahora recuerda el paso activo por sesion y, al guardar una marca, puede dejar enfocado el siguiente ejercicio para sostener mejor el flujo en movil.
 El portal coach ya puede revisar resultados de sus alumnos asignados y guardar feedback tecnico sobre cada marca.
 Admin ya puede regenerar claves temporales para alumnos y coaches desde sus listados, y coach/alumno ya pueden cambiar su propia clave desde una vista privada.
 Admin ya puede crear, editar y desactivar sedes, y el alta inicial de alumnos ya permite asignarles una sede desde el mismo formulario.

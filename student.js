@@ -45,6 +45,7 @@
   let currentMedicalNotes = [];
   let assignmentPlayerState = new Map();
   let activeStudentTab = "rutina";
+  let pendingRoutineFocus = null;
   let currentResultsPage = 1;
   let currentResultsPageSize = Number(resultsPageSizeSelect?.value || 20);
   let currentResultsTotalPages = 1;
@@ -52,6 +53,7 @@
   let currentResultsWorkoutId = "";
   let currentResultsExerciseId = "";
   const studentTabs = ["rutina", "progreso", "salud", "perfil"];
+  const assignmentStateStoragePrefix = "pulpo-student-assignment-state";
 
   function setStatus(element, message, type = "") {
     element.textContent = message;
@@ -76,6 +78,37 @@
 
   function formatMetric(value, unit) {
     return value == null ? "--" : `${formatNumber(value)} ${unit}`.trim();
+  }
+
+  function getAssignmentStateStorageKey() {
+    return currentProfile?.id ? `${assignmentStateStoragePrefix}:${currentProfile.id}` : "";
+  }
+
+  function readStoredAssignmentPlayerState() {
+    const key = getAssignmentStateStorageKey();
+    if (!key || !window.localStorage) return new Map();
+
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) return new Map();
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return new Map();
+      return new Map(Object.entries(parsed).map(([assignmentId, index]) => [assignmentId, Number(index) || 0]));
+    } catch {
+      return new Map();
+    }
+  }
+
+  function persistAssignmentPlayerState() {
+    const key = getAssignmentStateStorageKey();
+    if (!key || !window.localStorage) return;
+
+    try {
+      const payload = Object.fromEntries([...assignmentPlayerState.entries()].map(([assignmentId, index]) => [assignmentId, Number(index) || 0]));
+      window.localStorage.setItem(key, JSON.stringify(payload));
+    } catch {
+      // Ignore storage failures on private sessions.
+    }
   }
 
   function getInitialResultsPage() {
@@ -308,7 +341,15 @@
         <div class="guided-routine-nav">
           <button class="button ghost compact-button" data-guided-prev="${escapeHtml(assignment.id)}" type="button"${activeIndex === 0 ? " disabled" : ""}>Anterior</button>
           <div class="guided-routine-dots">
-            ${exercises.map((_, index) => `<span class="guided-routine-dot${index === activeIndex ? " is-active" : ""}"></span>`).join("")}
+            ${exercises.map((_, index) => `
+              <button
+                class="guided-routine-dot${index === activeIndex ? " is-active" : ""}"
+                data-guided-step="${escapeHtml(assignment.id)}"
+                data-guided-step-index="${index}"
+                title="Ir al paso ${index + 1}"
+                type="button"
+              ></button>
+            `).join("")}
           </div>
           <button class="button ghost compact-button" data-guided-next="${escapeHtml(assignment.id)}" type="button"${activeIndex === exercises.length - 1 ? " disabled" : ""}>Siguiente</button>
         </div>
@@ -316,15 +357,23 @@
     `;
   }
 
-  function shiftAssignmentPlayer(assignmentId, delta) {
+  function setAssignmentPlayerIndex(assignmentId, nextIndex, options = {}) {
     const assignment = currentAssignments.find((item) => item.id === assignmentId);
     if (!assignment) return;
 
     const maxIndex = Math.max((assignment.exercises || []).length - 1, 0);
+    const safeIndex = Math.min(Math.max(Number(nextIndex) || 0, 0), maxIndex);
+    assignmentPlayerState.set(assignmentId, safeIndex);
+    persistAssignmentPlayerState();
+
+    if (options.rerender !== false) {
+      renderAssignments(currentAssignments);
+    }
+  }
+
+  function shiftAssignmentPlayer(assignmentId, delta) {
     const currentIndex = assignmentPlayerState.get(assignmentId) ?? 0;
-    const nextIndex = Math.min(Math.max(currentIndex + delta, 0), maxIndex);
-    assignmentPlayerState.set(assignmentId, nextIndex);
-    renderAssignments(currentAssignments);
+    setAssignmentPlayerIndex(assignmentId, currentIndex + delta);
   }
 
   function getPreferredStudentTab() {
@@ -378,6 +427,44 @@
     }
     setActiveStudentTab("rutina");
     studentResultForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function resolveNextRoutineFocus(workoutId, exerciseId, shouldKeepCurrent = false) {
+    const assignment = assignmentsMap.get(workoutId);
+    if (!assignment) return null;
+
+    const exercises = assignment.exercises || [];
+    if (!exercises.length) {
+      return { assignmentId: assignment.id, workoutId, exerciseId: "" };
+    }
+
+    const currentIndexFromState = assignmentPlayerState.get(assignment.id);
+    const fallbackIndex = exercises.findIndex((exercise) => exercise.exercise_id === exerciseId);
+    const baseIndex = Number.isFinite(currentIndexFromState) ? currentIndexFromState : (fallbackIndex >= 0 ? fallbackIndex : 0);
+    const nextIndex = shouldKeepCurrent ? baseIndex : Math.min(baseIndex + 1, exercises.length - 1);
+    setAssignmentPlayerIndex(assignment.id, nextIndex, { rerender: false });
+
+    return {
+      assignmentId: assignment.id,
+      workoutId,
+      exerciseId: exercises[nextIndex]?.exercise_id || "",
+    };
+  }
+
+  function applyPendingRoutineFocus() {
+    if (!pendingRoutineFocus) return;
+
+    const focus = pendingRoutineFocus;
+    pendingRoutineFocus = null;
+    if (!focus.workoutId || !assignmentsMap.has(focus.workoutId)) return;
+
+    setActiveStudentTab("rutina", { syncHash: false });
+    workoutSelect.value = focus.workoutId;
+    syncExerciseOptions();
+    if (focus.exerciseId) {
+      exerciseSelect.value = focus.exerciseId;
+      renderSelectedExercisePreview();
+    }
   }
 
   async function requireStudentSession() {
@@ -550,6 +637,7 @@
     }
 
     const nextPlayerState = new Map();
+    const storedPlayerState = readStoredAssignmentPlayerState();
     workoutSelect.innerHTML = [
       '<option value="">Selecciona tu rutina</option>',
       ...assignments.map((assignment) => `<option value="${escapeHtml(assignment.workout_id)}">${escapeHtml(assignment.workout?.title || "Rutina asignada")}</option>`),
@@ -560,7 +648,10 @@
       const exercises = assignment.exercises || [];
       const statusMeta = getAssignmentStatusMeta(assignment.status);
       const completedLabel = assignment.completed_at ? formatDate(assignment.completed_at) : "";
-      const activeIndex = Math.min(Math.max(assignmentPlayerState.get(assignment.id) ?? 0, 0), Math.max(exercises.length - 1, 0));
+      const previousIndex = assignmentPlayerState.get(assignment.id);
+      const storedIndex = storedPlayerState.get(assignment.id);
+      const resolvedIndex = Number.isFinite(previousIndex) ? previousIndex : storedIndex;
+      const activeIndex = Math.min(Math.max(resolvedIndex ?? 0, 0), Math.max(exercises.length - 1, 0));
       nextPlayerState.set(assignment.id, activeIndex);
 
       return `
@@ -586,6 +677,7 @@
       `;
     }).join("");
     assignmentPlayerState = nextPlayerState;
+    persistAssignmentPlayerState();
 
     if (assignments.length === 1) {
       workoutSelect.value = assignments[0].workout_id || "";
@@ -840,6 +932,7 @@
       renderAssignments(payload.assignments || []);
       renderMeasurements(currentMeasurements);
       syncHistoryFilters();
+      applyPendingRoutineFocus();
       syncStudentUrl();
       setStatus(profileStatus, "");
       setActiveStudentTab(activeStudentTab, { syncHash: false });
@@ -944,6 +1037,7 @@
     const body = Object.fromEntries(formData.entries());
     const previousWorkoutId = workoutSelect.value;
     const previousExerciseId = exerciseSelect.value;
+    const shouldKeepCurrent = String(body.mark_completed || "").toLowerCase() === "true";
 
     try {
       const response = await fetch("/api/student/overview", {
@@ -953,6 +1047,7 @@
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo guardar.");
+      pendingRoutineFocus = resolveNextRoutineFocus(previousWorkoutId, previousExerciseId, shouldKeepCurrent);
       studentResultForm.reset();
       if (previousWorkoutId) {
         workoutSelect.value = previousWorkoutId;
@@ -1028,6 +1123,12 @@
     const nextButton = event.target.closest("[data-guided-next]");
     if (nextButton) {
       shiftAssignmentPlayer(nextButton.dataset.guidedNext, 1);
+      return;
+    }
+
+    const stepButton = event.target.closest("[data-guided-step]");
+    if (stepButton) {
+      setAssignmentPlayerIndex(stepButton.dataset.guidedStep, Number(stepButton.dataset.guidedStepIndex || 0));
       return;
     }
 
