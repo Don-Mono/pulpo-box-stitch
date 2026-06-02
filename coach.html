@@ -134,7 +134,17 @@
                 <h2>Seguimiento del grupo</h2>
                 <p class="muted">Filtra las marcas recientes para entrar rapido al alumno o detectar quien necesita feedback.</p>
               </div>
-              <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+              <div class="table-actions">
+                <div class="field inline-field">
+                  <label for="results_page_size">Filas</label>
+                  <select id="results_page_size">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                  </select>
+                </div>
+                <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+              </div>
             </div>
             <div class="filter-grid coach-filter-grid">
               <div class="field inline-field">
@@ -166,6 +176,11 @@
                 <span>Sin feedback</span>
                 <strong>--</strong>
               </article>
+            </div>
+            <div class="detail-action-group pagination-toolbar">
+              <span class="muted" id="resultsPaginationStatus">Cargando paginacion...</span>
+              <button class="button ghost compact-button" id="previousResultsPageButton" type="button">Anterior</button>
+              <button class="button ghost compact-button" id="nextResultsPageButton" type="button">Siguiente</button>
             </div>
             <div class="table-shell">
               <table class="data-table">

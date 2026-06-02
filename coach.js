@@ -9,6 +9,10 @@
   const studentsList = document.querySelector("#studentsList");
   const resultsStudentFilter = document.querySelector("#resultsStudentFilter");
   const resultsFilterHint = document.querySelector("#resultsFilterHint");
+  const resultsPageSizeSelect = document.querySelector("#results_page_size");
+  const resultsPaginationStatus = document.querySelector("#resultsPaginationStatus");
+  const previousResultsPageButton = document.querySelector("#previousResultsPageButton");
+  const nextResultsPageButton = document.querySelector("#nextResultsPageButton");
   const coachResultsSummaryGrid = document.querySelector("#coachResultsSummaryGrid");
   const resultsBody = document.querySelector("#resultsBody");
   const refreshButton = document.querySelector("#refreshButton");
@@ -29,7 +33,13 @@
   let currentCoachProfile = null;
   let currentStudents = [];
   let currentResults = [];
+  let currentFeedbackResults = [];
   let activeCoachTab = "alumnos";
+  let currentResultsPage = 1;
+  let currentResultsPageSize = Number(resultsPageSizeSelect?.value || 25);
+  let currentResultsTotalPages = 1;
+  let currentResultsTotal = 0;
+  let currentResultsStudentId = "";
   const coachTabs = ["alumnos", "seguimiento", "feedback", "perfil"];
 
   function escapeHtml(value) {
@@ -68,6 +78,47 @@
     }
   }
 
+  function getInitialResultsPage() {
+    try {
+      const page = Number(new URLSearchParams(window.location.search).get("results_page") || "1");
+      return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  function getInitialResultsPageSize() {
+    try {
+      const pageSize = Number(new URLSearchParams(window.location.search).get("results_page_size") || String(currentResultsPageSize));
+      if ([10, 25, 50].includes(pageSize)) return pageSize;
+      return currentResultsPageSize;
+    } catch {
+      return currentResultsPageSize;
+    }
+  }
+
+  function getInitialResultsStudentId() {
+    try {
+      return new URLSearchParams(window.location.search).get("results_student_id") || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function syncCoachUrl() {
+    try {
+      const url = new URL(window.location.href);
+      if (currentResultsStudentId) url.searchParams.set("results_student_id", currentResultsStudentId);
+      else url.searchParams.delete("results_student_id");
+      url.searchParams.set("results_page", String(currentResultsPage));
+      url.searchParams.set("results_page_size", String(currentResultsPageSize));
+      url.hash = activeCoachTab;
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      // Ignore URL sync errors.
+    }
+  }
+
   function setActiveCoachTab(tab, options = {}) {
     const nextTab = coachTabs.includes(tab) ? tab : "alumnos";
     activeCoachTab = nextTab;
@@ -85,13 +136,7 @@
     });
 
     if (options.syncHash !== false) {
-      try {
-        const url = new URL(window.location.href);
-        url.hash = nextTab;
-        window.history.replaceState({}, "", url.toString());
-      } catch {
-        // Ignore hash sync errors.
-      }
+      syncCoachUrl();
     }
   }
 
@@ -118,12 +163,12 @@
     saveFeedbackButton.disabled = false;
   }
 
-  function renderCoachOverview(students, results) {
-    const studentsWithResults = new Set(results.map((result) => result.student_id).filter(Boolean)).size;
-    const latestResult = results[0] || null;
+  function renderCoachOverview(students, recentResults) {
+    const studentsWithResults = new Set(recentResults.map((result) => result.student_id).filter(Boolean)).size;
+    const latestResult = recentResults[0] || null;
     const cards = [
       ["Alumnos", String(students.length), students.length ? "Asignados a tu panel activo" : "Aun sin alumnos asignados"],
-      ["Marcas recientes", String(results.length), results.length ? "Listas para seguimiento tecnico" : "Sin marcas por revisar"],
+      ["Marcas recientes", String(recentResults.length), recentResults.length ? "Lista rapida para seguimiento tecnico" : "Sin marcas por revisar"],
       ["Con actividad", String(studentsWithResults), studentsWithResults ? "Ya registraron marcas recientes" : "Sin actividad registrada"],
       ["Ultimo registro", latestResult ? formatDate(latestResult.logged_at) : "--", latestResult ? (latestResult.student_name || "Alumno") : "Aun sin resultados"],
     ];
@@ -137,10 +182,10 @@
     `).join("");
   }
 
-  function renderCoachStudentSummary(students, results) {
+  function renderCoachStudentSummary(students, recentResults) {
     const studentsWithPhone = students.filter((student) => student.phone).length;
     const goalsCount = new Set(students.map((student) => String(student.goal || "").trim()).filter(Boolean)).size;
-    const studentsWithResults = new Set(results.map((result) => result.student_id).filter(Boolean)).size;
+    const studentsWithResults = new Set(recentResults.map((result) => result.student_id).filter(Boolean)).size;
     const studentsWithoutResults = Math.max(students.length - studentsWithResults, 0);
 
     const values = [
@@ -158,15 +203,15 @@
     `).join("");
   }
 
-  function renderCoachContext(students, results) {
+  function renderCoachContext(students, recentResults) {
     if (!students.length) {
       coachContextList.innerHTML = '<p class="muted">Cuando tengas alumnos asignados, aqui veras focos rapidos de tu grupo.</p>';
       return;
     }
 
-    const latestResult = results[0] || null;
+    const latestResult = recentResults[0] || null;
     const resultCountByStudent = new Map();
-    results.forEach((result) => {
+    recentResults.forEach((result) => {
       const key = result.student_id || "";
       resultCountByStudent.set(key, (resultCountByStudent.get(key) || 0) + 1);
     });
@@ -196,8 +241,8 @@
       <article class="mini-list-item">
         <strong>Accion sugerida</strong>
         <span>${escapeHtml(
-          results.length
-            ? "Revisa Seguimiento para ver que alumnos ya registraron marcas y deja feedback tecnico desde el modulo Feedback."
+          recentResults.length
+            ? "Revisa Seguimiento para entrar a las marcas recientes y usa Feedback para dejar correcciones puntuales."
             : "Empieza asignando o revisando rutinas desde Mis rutinas para activar el trabajo del grupo."
         )}</span>
         <small>La idea es que no tengas que saltar entre pantallas para leer el estado general.</small>
@@ -215,7 +260,7 @@
       <article class="mini-list-item">
         <strong>Panel conectado</strong>
         <span>${escapeHtml(currentStudents.length ? `${currentStudents.length} alumno(s) activos en tu grupo.` : "Aun no hay alumnos asignados.")}</span>
-        <small>${escapeHtml(currentResults.length ? `${currentResults.length} resultado(s) recientes disponibles para seguimiento.` : "Cuando los alumnos registren marcas, apareceran aqui.")}</small>
+        <small>${escapeHtml(currentFeedbackResults.length ? `${currentFeedbackResults.length} marca(s) recientes listas para feedback.` : "Cuando los alumnos registren marcas, apareceran aqui.")}</small>
       </article>
     `;
   }
@@ -272,13 +317,14 @@
     `;
   }
 
-  function renderResultsSummary(results) {
+  function renderResultsSummary(results, pagination) {
     const latestResult = results[0] || null;
     const withFeedback = results.filter((result) => String(result.coach_notes || "").trim()).length;
     const withoutFeedback = Math.max(results.length - withFeedback, 0);
+    const total = Math.max(Number(pagination?.total || 0), 0);
 
     const values = [
-      ["Registros", String(results.length)],
+      ["Registros", String(total)],
       ["Ultimo registro", latestResult ? formatDate(latestResult.logged_at) : "--"],
       ["Con feedback", String(withFeedback)],
       ["Sin feedback", String(withoutFeedback)],
@@ -292,18 +338,42 @@
     `).join("");
   }
 
-  function getFilteredResults() {
-    const studentId = resultsStudentFilter.value;
-    return studentId
-      ? currentResults.filter((result) => result.student_id === studentId)
-      : currentResults;
+  function renderResultsPagination(pagination) {
+    currentResultsTotal = Math.max(Number(pagination?.total || 0), 0);
+    currentResultsTotalPages = Math.max(Number(pagination?.totalPages || 1), 1);
+    currentResultsPage = Math.min(Math.max(Number(pagination?.page || 1), 1), currentResultsTotalPages);
+    currentResultsPageSize = Number(pagination?.pageSize || currentResultsPageSize || 25);
+    resultsPageSizeSelect.value = String(currentResultsPageSize);
+
+    const start = currentResultsTotal ? ((currentResultsPage - 1) * currentResultsPageSize) + 1 : 0;
+    const end = Math.min(currentResultsPage * currentResultsPageSize, currentResultsTotal);
+    const currentStudentLabel = resultsStudentFilter.options[resultsStudentFilter.selectedIndex]?.text || "todos mis alumnos";
+    resultsPaginationStatus.textContent = currentResultsTotal
+      ? `Mostrando ${start}-${end} de ${currentResultsTotal} registro(s) para ${currentStudentLabel}. Pagina ${currentResultsPage} de ${currentResultsTotalPages}.`
+      : "Sin registros para este filtro.";
+    previousResultsPageButton.disabled = currentResultsPage <= 1;
+    nextResultsPageButton.disabled = currentResultsPage >= currentResultsTotalPages;
+  }
+
+  function renderResultsFilterHint() {
+    const selectedLabel = resultsStudentFilter.options[resultsStudentFilter.selectedIndex]?.text || "Todos mis alumnos";
+    if (!currentResultsTotal) {
+      resultsFilterHint.textContent = currentResultsStudentId
+        ? `Sin registros recientes para ${selectedLabel}.`
+        : "No hay registros recientes para mostrar.";
+      return;
+    }
+
+    resultsFilterHint.textContent = currentResultsStudentId
+      ? `${currentResultsTotal} registro(s) encontrados para ${selectedLabel}.`
+      : `Vista general del grupo con ${currentResultsTotal} registro(s) recientes.`;
   }
 
   function syncResultOptions(preferredResultId = "") {
     const studentId = feedbackStudentSelect.value;
     const filteredResults = studentId
-      ? currentResults.filter((result) => result.student_id === studentId)
-      : currentResults;
+      ? currentFeedbackResults.filter((result) => result.student_id === studentId)
+      : currentFeedbackResults;
 
     if (!filteredResults.length) {
       feedbackResultSelect.innerHTML = '<option value="">Sin resultados disponibles</option>';
@@ -367,7 +437,7 @@
 
   function renderResults(results) {
     if (!results.length) {
-      resultsBody.innerHTML = '<tr><td colspan="5">Aun no hay marcas registradas para tus alumnos.</td></tr>';
+      resultsBody.innerHTML = '<tr><td colspan="5">Aun no hay marcas registradas para este filtro.</td></tr>';
       return;
     }
 
@@ -392,16 +462,6 @@
     }).join("");
   }
 
-  function refreshResultsView() {
-    const filteredResults = getFilteredResults();
-    const selectedLabel = resultsStudentFilter.options[resultsStudentFilter.selectedIndex]?.text || "Todos mis alumnos";
-    resultsFilterHint.textContent = resultsStudentFilter.value
-      ? `${filteredResults.length} registro(s) para ${selectedLabel}.`
-      : "Filtra por alumno para revisar una tendencia puntual.";
-    renderResultsSummary(filteredResults);
-    renderResults(filteredResults);
-  }
-
   async function requireCoachSession() {
     const response = await fetch("/api/auth/me");
     if (!response.ok) {
@@ -421,40 +481,58 @@
   }
 
   async function loadOverview(options = {}) {
+    const preservedFeedbackStudentId = options.feedbackStudentId ?? feedbackStudentSelect.value;
+    const preservedFeedbackResultId = options.feedbackResultId ?? feedbackResultSelect.value;
     setupMessage.textContent = "Cargando alumnos asignados...";
+    resultsBody.innerHTML = '<tr><td colspan="5">Cargando marcas...</td></tr>';
+    resultsPaginationStatus.textContent = "Cargando paginacion...";
 
     try {
-      const response = await fetch("/api/coach/overview");
+      const params = new URLSearchParams({
+        page: String(currentResultsPage),
+        page_size: String(currentResultsPageSize),
+      });
+      if (currentResultsStudentId) params.set("student_id", currentResultsStudentId);
+      const response = await fetch(`/api/coach/overview?${params.toString()}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || payload.message || "No se pudo cargar tu panel.");
 
       currentCoachProfile = payload.coachProfile || null;
       currentStudents = payload.students || [];
       currentResults = payload.results || [];
+      currentFeedbackResults = payload.feedbackResults || [];
+      currentResultsStudentId = payload.selectedStudentId || "";
 
       setupMessage.textContent = payload.setupRequired
         ? payload.message
         : "Panel conectado. Estos datos corresponden solo a tus alumnos asignados y ya puedes dejar feedback tecnico.";
-      renderCoachOverview(currentStudents, currentResults);
-      renderCoachStudentSummary(currentStudents, currentResults);
-      renderCoachContext(currentStudents, currentResults);
+      renderCoachOverview(currentStudents, currentFeedbackResults);
+      renderCoachStudentSummary(currentStudents, currentFeedbackResults);
+      renderCoachContext(currentStudents, currentFeedbackResults);
       renderCoachProfile(currentCoachProfile);
       renderCoachActions();
-      renderFeedbackHelpers(currentResults);
+      renderFeedbackHelpers(currentFeedbackResults);
       renderStudents(currentStudents);
 
-      if (options.studentId && currentStudents.some((student) => student.profile_id === options.studentId)) {
-        feedbackStudentSelect.value = options.studentId;
-        resultsStudentFilter.value = options.studentId;
+      resultsStudentFilter.value = currentResultsStudentId;
+      if (preservedFeedbackStudentId && currentStudents.some((student) => student.profile_id === preservedFeedbackStudentId)) {
+        feedbackStudentSelect.value = preservedFeedbackStudentId;
       }
 
-      refreshResultsView();
-      syncResultOptions(options.resultId || feedbackResultSelect.value);
+      renderResultsSummary(currentResults, payload.pagination || {});
+      renderResults(currentResults);
+      renderResultsPagination(payload.pagination || {});
+      renderResultsFilterHint();
+      syncResultOptions(preservedFeedbackResultId);
+      syncCoachUrl();
     } catch (error) {
       setupMessage.textContent = error.message;
       currentCoachProfile = null;
       currentStudents = [];
       currentResults = [];
+      currentFeedbackResults = [];
+      currentResultsTotal = 0;
+      currentResultsTotalPages = 1;
       renderCoachOverview([], []);
       renderCoachStudentSummary([], []);
       renderCoachContext([], []);
@@ -462,8 +540,10 @@
       renderCoachActions();
       renderFeedbackHelpers([]);
       renderStudents([]);
-      renderResultsSummary([]);
+      renderResultsSummary([], {});
       renderResults([]);
+      renderResultsPagination({});
+      renderResultsFilterHint();
       setStatus(feedbackStatus, error.message, "error");
     }
   }
@@ -493,8 +573,8 @@
 
       setStatus(feedbackStatus, payload.message, "ok");
       await loadOverview({
-        studentId: feedbackStudentSelect.value,
-        resultId,
+        feedbackStudentId: feedbackStudentSelect.value,
+        feedbackResultId: resultId,
       });
     } catch (error) {
       setStatus(feedbackStatus, error.message, "error");
@@ -507,22 +587,53 @@
   });
 
   feedbackResultSelect.addEventListener("change", () => {
-    const selectedResult = currentResults.find((result) => result.id === feedbackResultSelect.value) || null;
+    const selectedResult = currentFeedbackResults.find((result) => result.id === feedbackResultSelect.value) || null;
     renderFeedbackContext(selectedResult);
     setStatus(feedbackStatus, "");
   });
 
   feedbackForm.addEventListener("submit", saveFeedback);
   refreshButton.addEventListener("click", () => loadOverview({
-    studentId: feedbackStudentSelect.value,
-    resultId: feedbackResultSelect.value,
+    feedbackStudentId: feedbackStudentSelect.value,
+    feedbackResultId: feedbackResultSelect.value,
   }));
   coachModuleNav.addEventListener("click", (event) => {
     const button = event.target.closest("[data-coach-tab]");
     if (!button) return;
     setActiveCoachTab(button.dataset.coachTab);
   });
-  resultsStudentFilter.addEventListener("change", refreshResultsView);
+  resultsStudentFilter.addEventListener("change", () => {
+    currentResultsStudentId = resultsStudentFilter.value;
+    currentResultsPage = 1;
+    loadOverview({
+      feedbackStudentId: feedbackStudentSelect.value,
+      feedbackResultId: feedbackResultSelect.value,
+    });
+  });
+  resultsPageSizeSelect.addEventListener("change", () => {
+    currentResultsPageSize = Number(resultsPageSizeSelect.value || 25);
+    currentResultsPage = 1;
+    loadOverview({
+      feedbackStudentId: feedbackStudentSelect.value,
+      feedbackResultId: feedbackResultSelect.value,
+    });
+  });
+  previousResultsPageButton.addEventListener("click", () => {
+    if (currentResultsPage <= 1) return;
+    currentResultsPage -= 1;
+    loadOverview({
+      feedbackStudentId: feedbackStudentSelect.value,
+      feedbackResultId: feedbackResultSelect.value,
+    });
+  });
+  nextResultsPageButton.addEventListener("click", () => {
+    if (currentResultsPage >= currentResultsTotalPages) return;
+    currentResultsPage += 1;
+    loadOverview({
+      feedbackStudentId: feedbackStudentSelect.value,
+      feedbackResultId: feedbackResultSelect.value,
+    });
+  });
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login.html";
@@ -535,6 +646,10 @@
     const user = await requireCoachSession();
     if (!user) return;
     activeCoachTab = getPreferredCoachTab();
+    currentResultsPage = getInitialResultsPage();
+    currentResultsPageSize = getInitialResultsPageSize();
+    currentResultsStudentId = getInitialResultsStudentId();
+    resultsPageSizeSelect.value = String(currentResultsPageSize);
     setActiveCoachTab(activeCoachTab, { syncHash: false });
     renderFeedbackContext(null);
     await loadOverview();

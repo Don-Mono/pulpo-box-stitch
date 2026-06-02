@@ -91,6 +91,7 @@ El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, me
 La ficha del coach ya expone descripcion, enfoque y enlaces de video dentro de los ejercicios asignados al alumno para revisar tecnica sin salir de la vista.
 La ficha del coach ya permite filtrar historial por rutina y ejercicio, con indicadores rapidos para leer tendencias sin salir de la vista.
 El portal coach ahora se organiza como una experiencia tipo app con modulos internos de Alumnos, Seguimiento, Feedback y Perfil, manteniendo el mismo backend y sin tocar la landing publica.
+El modulo Seguimiento del coach ahora pagina los resultados por pagina, cantidad de filas y filtro por alumno desde backend, para que el panel siga siendo operativo cuando aumente el volumen por sede.
 La ficha individual `coach-student` ahora tambien se organiza como una experiencia modular de Perfil, Rutina, Progreso y Salud para seguir a cada alumno con menos friccion.
 El login extendido de coach y alumno ya fue validado con credenciales de Supabase Auth y perfil activo en `pb_profiles`.
 Admin ya puede abrir una ficha unificada por coach, editar datos base y revisar alumnos asignados, rutinas creadas y ultimas marcas relacionadas.
