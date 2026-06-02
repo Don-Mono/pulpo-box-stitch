@@ -187,6 +187,7 @@ Primera implementacion:
 - El portal alumno ya puede cambiar el estado de una rutina asignada entre pendiente, completada u omitida.
 - Coach y admin ya ven ese mismo estado reflejado en sus paneles operativos.
 - El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
+- El portal coach ahora se presenta como una experiencia tipo app con modulos internos de Alumnos, Seguimiento, Feedback y Perfil para uso mas claro desde celular o escritorio.
 - La ficha del coach ya usa el mismo formato guiado para revisar la rutina activa del alumno sin perder el contexto de seguimiento.
 
 ### Etapa 5 - Progreso

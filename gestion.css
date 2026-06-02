@@ -357,6 +357,10 @@ body {
   margin-bottom: 1rem;
 }
 
+.coach-overview-panel {
+  margin-bottom: 1rem;
+}
+
 .student-overview-grid {
   display: grid;
   gap: 1rem;
@@ -410,6 +414,10 @@ body {
   z-index: 5;
 }
 
+.coach-module-nav {
+  margin-bottom: 1rem;
+}
+
 .student-module-button {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(15, 23, 42, 0.08);
@@ -459,6 +467,10 @@ body {
 
 .student-module-section.is-active {
   display: block;
+}
+
+.coach-filter-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 1.3fr);
 }
 
 .student-health-layout .metric-grid {

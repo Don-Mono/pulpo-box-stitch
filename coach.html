@@ -39,70 +39,211 @@
           </div>
         </section>
 
-        <section class="dashboard-row student-layout">
-          <article class="panel-card">
-            <h2>Alumnos asignados</h2>
-            <div id="studentsList" class="mini-list">
-              <p class="muted">Cargando alumnos...</p>
+        <section class="panel-card coach-overview-panel">
+          <div class="table-header">
+            <div>
+              <h2>Vista general</h2>
+              <p class="muted">Tu lectura rapida del dia para revisar alumnos, rutinas y marcas sin perder tiempo.</p>
             </div>
-          </article>
+          </div>
+          <div class="student-overview-grid coach-overview-grid" id="coachOverviewGrid">
+            <article class="student-overview-card">
+              <span>Alumnos</span>
+              <strong>--</strong>
+              <small>Cargando...</small>
+            </article>
+            <article class="student-overview-card">
+              <span>Marcas recientes</span>
+              <strong>--</strong>
+              <small>Cargando...</small>
+            </article>
+            <article class="student-overview-card">
+              <span>Con actividad</span>
+              <strong>--</strong>
+              <small>Cargando...</small>
+            </article>
+            <article class="student-overview-card">
+              <span>Ultimo registro</span>
+              <strong>--</strong>
+              <small>Cargando...</small>
+            </article>
+          </div>
+        </section>
 
-          <article class="panel-card">
-            <h2>Feedback tecnico</h2>
-            <p>Selecciona una marca reciente y deja correcciones o seguimiento para ese alumno.</p>
-            <form class="student-form" id="feedbackForm">
-              <div class="field">
-                <label for="feedback_student_id">Alumno</label>
-                <select id="feedback_student_id" name="feedback_student_id">
+        <nav class="student-module-nav coach-module-nav" id="coachModuleNav" aria-label="Modulos del coach">
+          <button class="student-module-button coach-module-button is-active" data-coach-tab="alumnos" type="button">
+            <strong>Alumnos</strong>
+            <span>Ficha y contexto</span>
+          </button>
+          <button class="student-module-button coach-module-button" data-coach-tab="seguimiento" type="button">
+            <strong>Seguimiento</strong>
+            <span>Marcas recientes</span>
+          </button>
+          <button class="student-module-button coach-module-button" data-coach-tab="feedback" type="button">
+            <strong>Feedback</strong>
+            <span>Correcciones y foco</span>
+          </button>
+          <button class="student-module-button coach-module-button" data-coach-tab="perfil" type="button">
+            <strong>Perfil</strong>
+            <span>Accesos y acciones</span>
+          </button>
+        </nav>
+
+        <section class="student-module-section is-active" data-coach-panel="alumnos">
+          <div class="dashboard-row student-layout">
+            <article class="panel-card">
+              <h2>Alumnos asignados</h2>
+              <p>Accede rapido a cada ficha para revisar rutina, progreso corporal y notas de seguimiento.</p>
+              <div id="studentsList" class="mini-list">
+                <p class="muted">Cargando alumnos...</p>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <h2>Lectura operativa</h2>
+              <p>Resumen rapido de tu grupo para preparar clases, revisar cargas y detectar seguimiento pendiente.</p>
+              <div class="metric-grid compact-metrics" id="coachStudentSummaryGrid">
+                <article class="metric-card">
+                  <span>Objetivos activos</span>
+                  <strong>--</strong>
+                </article>
+                <article class="metric-card">
+                  <span>Con telefono</span>
+                  <strong>--</strong>
+                </article>
+                <article class="metric-card">
+                  <span>Rutinas con marcas</span>
+                  <strong>--</strong>
+                </article>
+                <article class="metric-card">
+                  <span>Sin actividad</span>
+                  <strong>--</strong>
+                </article>
+              </div>
+              <div id="coachContextList" class="mini-list">
+                <p class="muted">Cargando contexto del grupo...</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="student-module-section" data-coach-panel="seguimiento">
+          <section class="panel-card">
+            <div class="table-header">
+              <div>
+                <h2>Seguimiento del grupo</h2>
+                <p class="muted">Filtra las marcas recientes para entrar rapido al alumno o detectar quien necesita feedback.</p>
+              </div>
+              <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+            </div>
+            <div class="filter-grid coach-filter-grid">
+              <div class="field inline-field">
+                <label for="resultsStudentFilter">Alumno</label>
+                <select id="resultsStudentFilter">
                   <option value="">Todos mis alumnos</option>
                 </select>
               </div>
-              <div class="field">
-                <label for="feedback_result_id">Resultado</label>
-                <select id="feedback_result_id" name="feedback_result_id">
-                  <option value="">Selecciona un resultado</option>
-                </select>
-              </div>
-              <div class="mini-list-item" id="resultContext">
-                <strong>Selecciona un resultado</strong>
-                <span>Aqui veras la marca, la fecha y las notas del alumno antes de guardar tu feedback.</span>
-                <small>El coach solo puede intervenir resultados de sus alumnos asignados.</small>
-              </div>
-              <div class="field">
-                <label for="coach_feedback">Feedback coach</label>
-                <textarea id="coach_feedback" name="coach_feedback" placeholder="Correccion tecnica, sensacion observada o siguiente foco de trabajo"></textarea>
-              </div>
-              <span class="status" id="feedbackStatus"></span>
-              <button class="button accent" id="saveFeedbackButton" type="submit">Guardar feedback</button>
-            </form>
-          </article>
+              <article class="mini-list-item filter-helper">
+                <strong>Lectura rapida</strong>
+                <span id="resultsFilterHint">Filtra por alumno para revisar una tendencia puntual.</span>
+                <small>El resumen y la tabla cambian segun el filtro activo.</small>
+              </article>
+            </div>
+            <div class="metric-grid compact-metrics" id="coachResultsSummaryGrid">
+              <article class="metric-card">
+                <span>Registros</span>
+                <strong>--</strong>
+              </article>
+              <article class="metric-card">
+                <span>Ultimo registro</span>
+                <strong>--</strong>
+              </article>
+              <article class="metric-card">
+                <span>Con feedback</span>
+                <strong>--</strong>
+              </article>
+              <article class="metric-card">
+                <span>Sin feedback</span>
+                <strong>--</strong>
+              </article>
+            </div>
+            <div class="table-shell">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Alumno</th>
+                    <th>Rutina / Ejercicio</th>
+                    <th>Marca</th>
+                    <th>Notas</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsBody">
+                  <tr>
+                    <td colspan="5">Cargando marcas...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </section>
 
-        <section class="panel-card students-table-card">
-          <div class="table-header">
-            <div>
-              <h2>Ultimas marcas de mis alumnos</h2>
-              <p class="muted">Resumen rapido para seguimiento tecnico.</p>
-            </div>
-            <button class="button ghost" id="refreshButton" type="button">Actualizar</button>
+        <section class="student-module-section" data-coach-panel="feedback">
+          <div class="dashboard-row student-layout">
+            <article class="panel-card">
+              <h2>Feedback tecnico</h2>
+              <p>Selecciona una marca reciente y deja correcciones o seguimiento para ese alumno.</p>
+              <form class="student-form" id="feedbackForm">
+                <div class="field">
+                  <label for="feedback_student_id">Alumno</label>
+                  <select id="feedback_student_id" name="feedback_student_id">
+                    <option value="">Todos mis alumnos</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="feedback_result_id">Resultado</label>
+                  <select id="feedback_result_id" name="feedback_result_id">
+                    <option value="">Selecciona un resultado</option>
+                  </select>
+                </div>
+                <div class="mini-list-item" id="resultContext">
+                  <strong>Selecciona un resultado</strong>
+                  <span>Aqui veras la marca, la fecha y las notas del alumno antes de guardar tu feedback.</span>
+                  <small>El coach solo puede intervenir resultados de sus alumnos asignados.</small>
+                </div>
+                <div class="field">
+                  <label for="coach_feedback">Feedback coach</label>
+                  <textarea id="coach_feedback" name="coach_feedback" placeholder="Correccion tecnica, sensacion observada o siguiente foco de trabajo"></textarea>
+                </div>
+                <span class="status" id="feedbackStatus"></span>
+                <button class="button accent" id="saveFeedbackButton" type="submit">Guardar feedback</button>
+              </form>
+            </article>
+
+            <article class="panel-card">
+              <h2>Guia de seguimiento</h2>
+              <div id="feedbackHelperList" class="mini-list">
+                <p class="muted">Cargando guia de seguimiento...</p>
+              </div>
+            </article>
           </div>
-          <div class="table-shell">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Alumno</th>
-                  <th>Rutina / Ejercicio</th>
-                  <th>Marca</th>
-                  <th>Notas</th>
-                  <th>Fecha</th>
-                </tr>
-              </thead>
-              <tbody id="resultsBody">
-                <tr>
-                  <td colspan="5">Cargando marcas...</td>
-                </tr>
-              </tbody>
-            </table>
+        </section>
+
+        <section class="student-module-section" data-coach-panel="perfil">
+          <div class="dashboard-row student-layout">
+            <article class="panel-card">
+              <h2>Mi perfil coach</h2>
+              <div id="coachProfileCard" class="mini-list">
+                <p class="muted">Cargando tu perfil...</p>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <h2>Accesos rapidos</h2>
+              <div id="coachActionList" class="mini-list">
+                <p class="muted">Cargando accesos...</p>
+              </div>
+            </article>
           </div>
         </section>
       </div>
