@@ -27,6 +27,7 @@
   let currentAssignments = [];
   let currentMeasurements = [];
   let currentResults = [];
+  let assignmentPlayerState = new Map();
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -87,6 +88,18 @@
     }
   }
 
+  function extendExercise(exercise) {
+    const flow = window.PulpoWorkoutFlow;
+    if (flow?.extendExercise) return flow.extendExercise(exercise);
+    return {
+      ...exercise,
+      block_label: exercise.block_label || "",
+      rest_label: exercise.rest_label || "",
+      tempo_label: exercise.tempo_label || "",
+      display_prescription: exercise.prescription || "",
+    };
+  }
+
   function formatDelta(current, baseline, unit) {
     if (current == null || baseline == null) return "--";
     const delta = Number(current) - Number(baseline);
@@ -106,8 +119,11 @@
   }
 
   function buildExerciseMeta(exercise) {
+    const view = extendExercise(exercise);
     return [
       exercise.movement_type || "",
+      view.tempo_label ? `tempo ${view.tempo_label}` : "",
+      view.rest_label ? `descanso ${view.rest_label}` : "",
       exercise.sets ? `${exercise.sets} series` : "",
       exercise.reps || "",
       exercise.time_cap_seconds ? `cap ${exercise.time_cap_seconds} seg` : "",
@@ -122,16 +138,20 @@
     return `
       <div class="exercise-stack">
         ${exercises.map((exercise) => {
-          const meta = buildExerciseMeta(exercise);
-          const description = exercise.exercise_description || "";
-          const prescription = exercise.prescription || "";
-          const videoUrl = safeExternalUrl(exercise.video_url);
+          const view = extendExercise(exercise);
+          const meta = buildExerciseMeta(view);
+          const description = view.exercise_description || "";
+          const prescription = view.display_prescription || "";
+          const videoUrl = safeExternalUrl(view.video_url);
 
           return `
             <article class="exercise-item-card">
               <div class="exercise-item-head">
                 <div>
-                  <h4 class="exercise-item-title">${escapeHtml(exercise.exercise_name || "Ejercicio")}</h4>
+                  <div class="exercise-item-topline">
+                    ${view.block_label ? `<span class="section-pill is-accent">${escapeHtml(view.block_label)}</span>` : ""}
+                  </div>
+                  <h4 class="exercise-item-title">${escapeHtml(view.exercise_name || "Ejercicio")}</h4>
                   ${meta.length ? `
                     <div class="exercise-item-meta">
                       ${meta.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
@@ -151,6 +171,52 @@
         }).join("")}
       </div>
     `;
+  }
+
+  function renderGuidedRoutinePlayer(assignment, currentIndex) {
+    const exercises = (assignment.exercises || []).map((exercise) => extendExercise(exercise));
+    if (!exercises.length) {
+      return '<p class="muted">Sin ejercicios cargados.</p>';
+    }
+
+    const activeIndex = Math.min(Math.max(currentIndex, 0), exercises.length - 1);
+    const activeExercise = exercises[activeIndex];
+    const meta = buildExerciseMeta(activeExercise);
+    const videoUrl = safeExternalUrl(activeExercise.video_url);
+
+    return `
+      <div class="guided-routine-player">
+        <div class="guided-routine-head">
+          ${activeExercise.block_label ? `<span class="section-pill is-accent">${escapeHtml(activeExercise.block_label)}</span>` : '<span class="section-pill">Sesion</span>'}
+          <span class="guided-routine-counter">Paso ${activeIndex + 1} / ${exercises.length}</span>
+        </div>
+        <div class="guided-routine-surface">
+          <h4>${escapeHtml(activeExercise.exercise_name || "Ejercicio")}</h4>
+          ${meta.length ? `<div class="guided-routine-meta">${meta.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>` : ""}
+          ${activeExercise.exercise_description ? `<p class="guided-routine-description">${escapeHtml(activeExercise.exercise_description)}</p>` : ""}
+          ${activeExercise.display_prescription ? `<p class="guided-routine-instruction">${escapeHtml(activeExercise.display_prescription)}</p>` : ""}
+          ${videoUrl ? `<div class="guided-routine-actions"><a class="button ghost compact-button" href="${escapeHtml(videoUrl)}" rel="noreferrer noopener" target="_blank">Ver video</a></div>` : ""}
+        </div>
+        <div class="guided-routine-nav">
+          <button class="button ghost compact-button" data-guided-prev="${escapeHtml(assignment.id)}" type="button"${activeIndex === 0 ? " disabled" : ""}>Anterior</button>
+          <div class="guided-routine-dots">
+            ${exercises.map((_, index) => `<span class="guided-routine-dot${index === activeIndex ? " is-active" : ""}"></span>`).join("")}
+          </div>
+          <button class="button ghost compact-button" data-guided-next="${escapeHtml(assignment.id)}" type="button"${activeIndex === exercises.length - 1 ? " disabled" : ""}>Siguiente</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function shiftAssignmentPlayer(assignmentId, delta) {
+    const assignment = currentAssignments.find((item) => item.id === assignmentId);
+    if (!assignment) return;
+
+    const maxIndex = Math.max((assignment.exercises || []).length - 1, 0);
+    const currentIndex = assignmentPlayerState.get(assignmentId) ?? 0;
+    const nextIndex = Math.min(Math.max(currentIndex + delta, 0), maxIndex);
+    assignmentPlayerState.set(assignmentId, nextIndex);
+    renderAssignments(currentAssignments);
   }
 
   function getInitialStudentId() {
@@ -253,15 +319,19 @@
   function renderAssignments(assignments) {
     if (!assignments.length) {
       assignmentsList.innerHTML = '<p class="muted">No hay rutinas asignadas a este alumno.</p>';
+      assignmentPlayerState = new Map();
       return;
     }
 
+    const nextPlayerState = new Map();
     assignmentsList.innerHTML = assignments.map((assignment) => {
       const workout = assignment.workout || {};
       const exercises = assignment.exercises || [];
       const assignedAt = assignment.assigned_at ? new Date(assignment.assigned_at).toLocaleDateString("es-CL") : "Sin fecha";
       const statusMeta = getAssignmentStatusMeta(assignment.status);
       const completedLabel = assignment.completed_at ? formatDate(assignment.completed_at) : "";
+      const activeIndex = Math.min(Math.max(assignmentPlayerState.get(assignment.id) ?? 0, 0), Math.max(exercises.length - 1, 0));
+      nextPlayerState.set(assignment.id, activeIndex);
 
       return `
         <article class="workout-card">
@@ -276,10 +346,11 @@
             ${completedLabel ? `<span>${escapeHtml(`Cerrada ${completedLabel}`)}</span>` : ""}
           </div>
           <p class="muted assignment-status-helper">${escapeHtml(statusMeta.helper)}</p>
-          ${renderExerciseStack(exercises, "Sin ejercicios cargados.")}
+          ${renderGuidedRoutinePlayer(assignment, activeIndex)}
         </article>
       `;
     }).join("");
+    assignmentPlayerState = nextPlayerState;
   }
 
   function renderMeasurements(measurements) {
@@ -596,6 +667,18 @@
     refreshResultsView();
   });
   exerciseFilter.addEventListener("change", refreshResultsView);
+  assignmentsList.addEventListener("click", (event) => {
+    const previousButton = event.target.closest("[data-guided-prev]");
+    if (previousButton) {
+      shiftAssignmentPlayer(previousButton.dataset.guidedPrev, -1);
+      return;
+    }
+
+    const nextButton = event.target.closest("[data-guided-next]");
+    if (nextButton) {
+      shiftAssignmentPlayer(nextButton.dataset.guidedNext, 1);
+    }
+  });
   measurementForm.addEventListener("submit", createMeasurement);
   refreshButton.addEventListener("click", () => loadStudentDetail(currentStudentId || studentFilter.value));
   logoutButton.addEventListener("click", async () => {

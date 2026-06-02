@@ -2,3 +2,6 @@
 node_modules/
 *.log
 .env.local
+.codex_tmp/
+admin-cookie.txt
+login-body.json

@@ -18,8 +18,12 @@
   const exercisesJsonInput = document.querySelector("#exercises_json");
   const addExerciseButton = document.querySelector("#addExerciseButton");
   const selectedExercisesList = document.querySelector("#selectedExercisesList");
+  const routineComposerPreview = document.querySelector("#routineComposerPreview");
   const setsInput = document.querySelector("#sets");
   const repsInput = document.querySelector("#reps");
+  const blockLabelInput = document.querySelector("#block_label");
+  const tempoLabelInput = document.querySelector("#tempo_label");
+  const restLabelInput = document.querySelector("#rest_label");
   const prescriptionInput = document.querySelector("#prescription");
   const workoutFormTitle = document.querySelector("#workoutFormTitle");
   const workoutFormCopy = document.querySelector("#workoutFormCopy");
@@ -48,6 +52,45 @@
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;");
+  }
+
+  function getWorkoutFlow() {
+    return window.PulpoWorkoutFlow || null;
+  }
+
+  function extendExercise(exercise) {
+    const flow = getWorkoutFlow();
+    if (flow?.extendExercise) return flow.extendExercise(exercise);
+    return {
+      ...exercise,
+      block_label: exercise.block_label || "",
+      rest_label: exercise.rest_label || "",
+      tempo_label: exercise.tempo_label || "",
+      display_prescription: exercise.prescription || "",
+    };
+  }
+
+  function buildExerciseDetailBadges(exercise) {
+    const view = extendExercise(exercise);
+    return [
+      exercise.movement_type || "",
+      view.tempo_label ? `Tempo ${view.tempo_label}` : "",
+      view.rest_label ? `Descanso ${view.rest_label}` : "",
+      exercise.sets ? `${exercise.sets} series` : "",
+      exercise.reps || "",
+      exercise.time_cap_seconds ? `${exercise.time_cap_seconds} seg` : "",
+    ].filter(Boolean);
+  }
+
+  function buildGroupedExercises(exercises) {
+    const flow = getWorkoutFlow();
+    const source = exercises.map((exercise, index) => ({ ...exercise, _index: index }));
+    if (flow?.groupExercisesByBlock) return flow.groupExercisesByBlock(source);
+
+    return [{
+      label: flow?.getDefaultBlockLabel?.() || "Trabajo principal",
+      items: source.map((exercise) => extendExercise(exercise)),
+    }];
   }
 
   function formatDate(value) {
@@ -190,13 +233,25 @@
   }
 
   function getExerciseDraft() {
+    const flow = getWorkoutFlow();
+    const blockLabel = blockLabelInput.value.trim() || flow?.getDefaultBlockLabel?.() || "Trabajo principal";
+    const tempoLabel = tempoLabelInput.value.trim();
+    const restLabel = restLabelInput.value.trim();
+    const instruction = prescriptionInput.value.trim();
+
     return {
       exercise_id: exerciseIdInput.value,
       exercise_name: exerciseNameInput.value.trim(),
       exercise_description: exerciseDescriptionInput.value,
       movement_type: movementTypeInput.value,
       video_url: videoUrlInput.value.trim(),
-      prescription: prescriptionInput.value.trim(),
+      prescription: flow?.encodeExercisePrescription
+        ? flow.encodeExercisePrescription({ blockLabel, restLabel, tempoLabel, instruction })
+        : instruction,
+      display_prescription: instruction,
+      block_label: blockLabel,
+      rest_label: restLabel,
+      tempo_label: tempoLabel,
       sets: setsInput.value.trim(),
       reps: repsInput.value.trim(),
     };
@@ -210,6 +265,9 @@
     videoUrlInput.value = "";
     setsInput.value = "";
     repsInput.value = "";
+    blockLabelInput.value = "";
+    tempoLabelInput.value = "";
+    restLabelInput.value = "";
     prescriptionInput.value = "";
     libraryExerciseSelect.value = "";
   }
@@ -218,32 +276,113 @@
     exercisesJsonInput.value = selectedExercises.length ? JSON.stringify(selectedExercises) : "";
   }
 
+  function renderRoutineComposerPreview() {
+    if (!selectedExercises.length) {
+      routineComposerPreview.innerHTML = '<p class="muted">La vista guiada de la sesion aparecera aqui a medida que armes la rutina.</p>';
+      return;
+    }
+
+    const groupedExercises = buildGroupedExercises(selectedExercises);
+    routineComposerPreview.innerHTML = groupedExercises.map((block) => `
+      <section class="routine-preview-block">
+        <div class="routine-preview-block-head">
+          <strong>${escapeHtml(block.label)}</strong>
+          <span>${block.items.length} paso(s)</span>
+        </div>
+        <div class="routine-preview-steps">
+          ${block.items.map((exercise) => {
+            const view = extendExercise(exercise);
+            const badges = buildExerciseDetailBadges(view);
+            return `
+              <article class="routine-preview-step">
+                <div class="routine-preview-step-head">
+                  <div>
+                    <strong>${escapeHtml(view.exercise_name || "Ejercicio")}</strong>
+                    ${badges.length ? `<div class="routine-builder-badges">${badges.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>` : ""}
+                  </div>
+                  <span class="routine-preview-step-index">Paso ${exercise._index + 1}</span>
+                </div>
+                ${view.exercise_description ? `<p class="routine-preview-step-copy">${escapeHtml(view.exercise_description)}</p>` : ""}
+                ${view.display_prescription ? `<p class="routine-preview-step-note">${escapeHtml(view.display_prescription)}</p>` : ""}
+              </article>
+            `;
+          }).join("")}
+        </div>
+      </section>
+    `).join("");
+  }
+
+  function renderWorkoutExerciseSummary(exercises) {
+    if (!exercises.length) {
+      return '<p class="muted">Sin ejercicios cargados.</p>';
+    }
+
+    const groupedExercises = buildGroupedExercises(exercises);
+    return groupedExercises.map((block) => `
+      <section class="routine-builder-block">
+        <div class="routine-builder-block-head">
+          <strong>${escapeHtml(block.label)}</strong>
+          <span>${block.items.length} paso(s)</span>
+        </div>
+        <div class="routine-builder-block-list">
+          ${block.items.map((exercise) => {
+            const view = extendExercise(exercise);
+            const badges = buildExerciseDetailBadges(view);
+            return `
+              <article class="mini-list-item">
+                <strong>${escapeHtml(view.exercise_name || view.name || "Ejercicio")}</strong>
+                ${badges.length ? `<div class="routine-builder-badges">${badges.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>` : ""}
+                ${view.display_prescription ? `<small>${escapeHtml(view.display_prescription)}</small>` : ""}
+              </article>
+            `;
+          }).join("")}
+        </div>
+      </section>
+    `).join("");
+  }
+
   function renderSelectedExercises() {
     syncExercisesJson();
 
     if (!selectedExercises.length) {
       selectedExercisesList.innerHTML = '<p class="muted">Aun no agregas ejercicios. Si escribes uno y creas la rutina, se guardara como ejercicio unico.</p>';
+      renderRoutineComposerPreview();
       return;
     }
 
-    selectedExercisesList.innerHTML = selectedExercises.map((exercise, index) => {
-      const details = [
-        exercise.sets ? `${exercise.sets} series` : "",
-        exercise.reps || "",
-        exercise.prescription || "",
-      ].filter(Boolean).join(" / ") || "Sin indicacion detallada";
-
-      return `
-        <article class="routine-builder-item">
-          <span class="routine-builder-index">${index + 1}</span>
-          <div>
-            <strong>${escapeHtml(exercise.exercise_name)}</strong>
-            <small>${escapeHtml(details)}</small>
-          </div>
-          <button class="button ghost compact-button" data-remove-exercise="${index}" type="button">Eliminar</button>
-        </article>
-      `;
-    }).join("");
+    const groupedExercises = buildGroupedExercises(selectedExercises);
+    selectedExercisesList.innerHTML = groupedExercises.map((block) => `
+      <section class="routine-builder-block">
+        <div class="routine-builder-block-head">
+          <strong>${escapeHtml(block.label)}</strong>
+          <span>${block.items.length} paso(s)</span>
+        </div>
+        <div class="routine-builder-block-list">
+          ${block.items.map((exercise) => {
+            const view = extendExercise(exercise);
+            const badges = buildExerciseDetailBadges(view);
+            return `
+              <article class="routine-builder-item">
+                <span class="routine-builder-index">${exercise._index + 1}</span>
+                <div>
+                  <strong>${escapeHtml(view.exercise_name || "Ejercicio")}</strong>
+                  <small>${escapeHtml(view.display_prescription || "Sin indicacion detallada")}</small>
+                  ${badges.length ? `<div class="routine-builder-badges">${badges.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>` : ""}
+                </div>
+                <div class="routine-builder-actions">
+                  <div class="routine-builder-move">
+                    <button class="button ghost compact-button" data-move-exercise="${exercise._index}" data-move-direction="up" type="button">Subir</button>
+                    <button class="button ghost compact-button" data-move-exercise="${exercise._index}" data-move-direction="down" type="button">Bajar</button>
+                  </div>
+                  <button class="button ghost compact-button" data-remove-exercise="${exercise._index}" type="button">Eliminar</button>
+                </div>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      </section>
+    `).join("");
+    renderRoutineComposerPreview();
   }
 
   function addExerciseToRoutine() {
@@ -264,6 +403,18 @@
     renderSelectedExercises();
   }
 
+  function moveExerciseInRoutine(index, direction) {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || targetIndex < 0 || index >= selectedExercises.length || targetIndex >= selectedExercises.length) {
+      return;
+    }
+
+    const updated = [...selectedExercises];
+    [updated[index], updated[targetIndex]] = [updated[targetIndex], updated[index]];
+    selectedExercises = updated;
+    renderSelectedExercises();
+  }
+
   function resetWorkoutForm() {
     workoutForm.reset();
     selectedExercises = [];
@@ -277,17 +428,24 @@
   }
 
   function buildSelectedExercisesFromWorkout(workout) {
-    return (workout.exercises || []).map((exercise) => ({
-      exercise_id: exercise.exercise_id || "",
-      exercise_name: exercise.name || "",
-      exercise_description: exercise.description || "",
-      movement_type: exercise.movement_type || "",
-      video_url: exercise.video_url || "",
-      prescription: exercise.prescription || "",
-      sets: exercise.sets ?? "",
-      reps: exercise.reps || "",
-      time_cap_seconds: exercise.time_cap_seconds ?? "",
-    }));
+    return (workout.exercises || []).map((exercise) => {
+      const view = extendExercise({ prescription: exercise.prescription || "" });
+      return {
+        exercise_id: exercise.exercise_id || "",
+        exercise_name: exercise.name || "",
+        exercise_description: exercise.description || "",
+        movement_type: exercise.movement_type || "",
+        video_url: exercise.video_url || "",
+        prescription: exercise.prescription || "",
+        display_prescription: view.display_prescription || "",
+        block_label: view.block_label || "",
+        rest_label: view.rest_label || "",
+        tempo_label: view.tempo_label || "",
+        sets: exercise.sets ?? "",
+        reps: exercise.reps || "",
+        time_cap_seconds: exercise.time_cap_seconds ?? "",
+      };
+    });
   }
 
   function startWorkoutEdit(workoutId) {
@@ -328,16 +486,10 @@
       const exercises = workout.exercises || [];
       const assignments = workout.assignments || [];
       const unassignedStudents = currentStudents.filter((student) => !assignments.some((assignment) => assignment.student_id === student.id));
-      const exerciseSummary = exercises.length
-        ? exercises.map((exercise) => {
-          const details = [
-            exercise.sets ? `${exercise.sets} series` : "",
-            exercise.reps || "",
-            exercise.prescription || "",
-          ].filter(Boolean).join(" / ");
-          return `<li><strong>${escapeHtml(exercise.name)}</strong>${details ? `: ${escapeHtml(details)}` : ""}</li>`;
-        }).join("")
-        : "<li>Sin ejercicios cargados.</li>";
+      const exerciseSummary = renderWorkoutExerciseSummary(exercises.map((exercise) => ({
+        ...exercise,
+        exercise_name: exercise.name || "",
+      })));
       const assignedSummary = assignments.length
         ? assignments.map((assignment) => escapeHtml(assignment.student_name)).join(", ")
         : "Sin alumnos asignados";
@@ -401,7 +553,7 @@
             <span>${escapeHtml(workout.workout_date || "Sin fecha")}</span>
             <span>${assignments.length} asignacion(es)</span>
           </div>
-          <ul class="check-list">${exerciseSummary}</ul>
+          <div class="routine-builder-list">${exerciseSummary}</div>
           ${workout.notes ? `<p class="muted"><strong>Notas:</strong> ${escapeHtml(workout.notes)}</p>` : ""}
           <p class="muted"><strong>Asignado a:</strong> ${assignedSummary}</p>
           ${assignmentManager}
@@ -580,6 +732,12 @@
     }
   });
   selectedExercisesList.addEventListener("click", (event) => {
+    const moveButton = event.target.closest("[data-move-exercise]");
+    if (moveButton) {
+      moveExerciseInRoutine(Number(moveButton.dataset.moveExercise), moveButton.dataset.moveDirection);
+      return;
+    }
+
     const removeButton = event.target.closest("[data-remove-exercise]");
     if (!removeButton) return;
     removeExerciseFromRoutine(Number(removeButton.dataset.removeExercise));

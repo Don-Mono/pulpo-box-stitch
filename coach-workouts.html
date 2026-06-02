@@ -109,6 +109,31 @@
                   <input id="reps" name="reps" placeholder="5 reps / 30 seg" />
                 </div>
               </div>
+              <div class="form-grid-three">
+                <div class="field">
+                  <label for="block_label">Bloque</label>
+                  <input id="block_label" name="block_label" list="workoutBlockOptions" placeholder="Ej: Fuerza" />
+                </div>
+                <div class="field">
+                  <label for="tempo_label">Tempo</label>
+                  <input id="tempo_label" name="tempo_label" placeholder="31X1" />
+                </div>
+                <div class="field">
+                  <label for="rest_label">Descanso</label>
+                  <input id="rest_label" name="rest_label" placeholder="75 seg" />
+                </div>
+              </div>
+              <datalist id="workoutBlockOptions">
+                <option value="Calentamiento"></option>
+                <option value="Tecnica"></option>
+                <option value="Fuerza"></option>
+                <option value="Trabajo principal"></option>
+                <option value="Metcon"></option>
+                <option value="Accesorios"></option>
+                <option value="Core"></option>
+                <option value="Movilidad"></option>
+                <option value="Recuperacion"></option>
+              </datalist>
               <div class="field">
                 <label for="prescription">Indicacion escrita</label>
                 <input id="prescription" name="prescription" placeholder="RPE, descanso, enfoque tecnico, tempo..." />
@@ -120,6 +145,9 @@
               <button class="button ghost full-button" id="addExerciseButton" type="button">Agregar ejercicio a la rutina</button>
               <div class="routine-builder-list" id="selectedExercisesList">
                 <p class="muted">Aun no agregas ejercicios. Si escribes uno y creas la rutina, se guardara como ejercicio unico.</p>
+              </div>
+              <div class="routine-preview-shell" id="routineComposerPreview">
+                <p class="muted">La vista guiada de la sesion aparecera aqui a medida que armes la rutina.</p>
               </div>
               <div class="field">
                 <label for="notes">Notas internas</label>
@@ -160,6 +188,7 @@
       </div>
     </main>
 
+    <script src="/workout-flow.js"></script>
     <script src="/coach-workouts.js"></script>
   </body>
 </html>

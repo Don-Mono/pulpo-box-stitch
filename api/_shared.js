@@ -1,44 +1,86 @@
 const crypto = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
 const { createClient } = require("@supabase/supabase-js");
 
 const COOKIE_NAME = "pb_admin_session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
+let localEnvCache;
 
 function json(res, statusCode, payload) {
   return res.status(statusCode).json(payload);
 }
 
+function readLocalEnvCache() {
+  if (localEnvCache !== undefined) return localEnvCache;
+
+  if (process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production") {
+    localEnvCache = {};
+    return localEnvCache;
+  }
+
+  const envPath = path.join(process.cwd(), ".env.local");
+  if (!fs.existsSync(envPath)) {
+    localEnvCache = {};
+    return localEnvCache;
+  }
+
+  const content = fs.readFileSync(envPath, "utf8");
+  localEnvCache = content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#") && line.includes("="))
+    .reduce((accumulator, line) => {
+      const separatorIndex = line.indexOf("=");
+      const key = line.slice(0, separatorIndex).trim();
+      const value = line.slice(separatorIndex + 1).trim();
+      if (!key) return accumulator;
+      accumulator[key] = value;
+      return accumulator;
+    }, {});
+
+  return localEnvCache;
+}
+
+function env(name) {
+  const directValue = process.env[name];
+  if (directValue !== undefined && directValue !== "") return directValue;
+
+  const localValue = readLocalEnvCache()[name];
+  return localValue !== undefined && localValue !== "" ? localValue : "";
+}
+
 function getSupabase() {
-  const missing = ["SUPABASE_URL", "SUPABASE_SECRET_KEY"].filter((name) => !process.env[name]);
+  const missing = ["SUPABASE_URL", "SUPABASE_SECRET_KEY"].filter((name) => !env(name));
   if (missing.length > 0) {
     const error = new Error(`Missing environment variables: ${missing.join(", ")}`);
     error.statusCode = 500;
     throw error;
   }
 
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, {
+  return createClient(env("SUPABASE_URL"), env("SUPABASE_SECRET_KEY"), {
     auth: { persistSession: false },
   });
 }
 
 function getAdminConfig() {
-  const missing = ["ADMIN_EMAIL", "ADMIN_PASSWORD", "SESSION_SECRET"].filter((name) => !process.env[name]);
+  const missing = ["ADMIN_EMAIL", "ADMIN_PASSWORD", "SESSION_SECRET"].filter((name) => !env(name));
   if (missing.length > 0) {
     const error = new Error(`Missing environment variables: ${missing.join(", ")}`);
     error.statusCode = 500;
     throw error;
   }
 
-  if (String(process.env.SESSION_SECRET).length < 32) {
+  if (String(env("SESSION_SECRET")).length < 32) {
     const error = new Error("SESSION_SECRET must be at least 32 characters.");
     error.statusCode = 500;
     throw error;
   }
 
   return {
-    email: String(process.env.ADMIN_EMAIL).toLowerCase(),
-    password: String(process.env.ADMIN_PASSWORD),
-    secret: String(process.env.SESSION_SECRET),
+    email: String(env("ADMIN_EMAIL")).toLowerCase(),
+    password: String(env("ADMIN_PASSWORD")),
+    secret: String(env("SESSION_SECRET")),
   };
 }
 
@@ -83,8 +125,8 @@ function clearSessionCookie() {
 function getSession(req) {
   const token = parseCookies(req)[COOKIE_NAME];
   if (!token) return null;
-  const secret = String(process.env.SESSION_SECRET || "");
-  const adminEmail = String(process.env.ADMIN_EMAIL || "").toLowerCase();
+  const secret = String(env("SESSION_SECRET") || "");
+  const adminEmail = String(env("ADMIN_EMAIL") || "").toLowerCase();
   if (secret.length < 32) return null;
 
   const [payload, signature] = token.split(".");
@@ -188,6 +230,7 @@ module.exports = {
   clearSessionCookie,
   createSessionCookie,
   getAdminConfig,
+  env,
   getSession,
   getSupabase,
   json,

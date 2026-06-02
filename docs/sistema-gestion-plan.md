@@ -147,12 +147,14 @@ Primera implementacion:
 - Permite asignacion inicial a un alumno si ya existe en la base.
 - El creador de rutinas puede seleccionar ejercicios desde el glosario o escribir uno manualmente.
 - El creador de rutinas ya permite agregar varios ejercicios ordenados en una misma rutina.
+- El creador de rutinas ahora tiene una primera experiencia inspirada en TeamBuild: bloques de sesion, orden manual, tempo, descanso y una vista previa guiada de la rutina antes de guardarla.
 - Admin ya puede reasignar rutinas existentes a multiples alumnos activos y quitar asignaciones desde el mismo modulo.
 - Admin ya puede editar y eliminar rutinas completas desde el mismo modulo.
 - `/coach-workouts.html`: pantalla privada para que el coach cree rutinas y las asigne solo a sus alumnos activos.
 - `/api/coach/workouts`: API protegida por rol coach para listar rutinas relacionadas, cargar biblioteca y crear nuevas rutinas.
 - El coach ya puede reasignar o quitar alumnos dentro de rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
 - El coach ya puede editar y eliminar rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
+- La experiencia guiada usa `workout-flow.js` para mantener compatibilidad con el esquema actual mientras guarda bloque, tempo y descanso dentro de la prescripcion extendida.
 
 ### Etapa 4 - Registro de resultados
 
@@ -180,9 +182,11 @@ Primera implementacion:
 - El alumno ya puede actualizar su telefono y contacto de emergencia desde su propio portal, manteniendo coach, sede y objetivo como datos administrados por el equipo.
 - El portal alumno ya filtra historial por rutina y ejercicio, resume tendencia y muestra feedback del coach dentro de sus registros.
 - El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios asignados, incluyendo una vista previa contextual al registrar una marca.
+- El portal alumno ya consume la rutina en formato guiado paso a paso, con navegacion entre ejercicios y accion rapida para usar el ejercicio activo en el registro de marcas.
 - El portal alumno ya puede cambiar el estado de una rutina asignada entre pendiente, completada u omitida.
 - Coach y admin ya ven ese mismo estado reflejado en sus paneles operativos.
 - El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
+- La ficha del coach ya usa el mismo formato guiado para revisar la rutina activa del alumno sin perder el contexto de seguimiento.
 
 ### Etapa 5 - Progreso
 

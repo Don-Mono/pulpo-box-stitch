@@ -64,10 +64,12 @@ Las vistas especificas de coach y alumno quedan preparadas, pero los modulos ope
 
 La biblioteca inicial de ejercicios se genero desde `Glosario.xlsx` y queda versionada en `data/exercise-library.js`. Incluye las secciones Ejercicios, Progresiones, Movilidad y Core; los videos quedan como dato opcional para completar despues.
 El creador de rutinas puede guardar varios ejercicios por rutina, manteniendo compatibilidad con rutinas simples de un solo ejercicio.
+El creador de rutinas ahora incluye una primera experiencia inspirada en TeamBuild: bloques de sesion, orden manual de ejercicios, tempo, descanso y una vista previa guiada antes de guardar.
 Admin ya puede reasignar rutinas existentes a multiples alumnos activos y quitar asignaciones desde el mismo modulo de rutinas.
 Admin ya puede editar y eliminar rutinas completas desde el mismo modulo, manteniendo las asignaciones como gestion separada.
 Los ejercicios personalizados se pueden agregar y desactivar desde `/exercises.html` sin borrar el historial de rutinas.
 El portal alumno ya puede registrar marcas vinculadas a ejercicios concretos de sus rutinas asignadas.
+El portal alumno y la ficha operativa del coach ya muestran la rutina en formato guiado paso a paso, con navegacion entre ejercicios, descripcion, video y accion rapida para registrar la marca del ejercicio activo.
 Admin ya puede editar y eliminar resultados desde el modulo de resultados, manteniendo validacion entre alumno, rutina y ejercicio.
 Admin ya puede editar y eliminar mediciones corporales desde el modulo de progreso, manteniendo el historial mas limpio y corregible.
 El modulo de progreso ya incluye graficos ligeros de evolucion corporal para peso y cintura, sin depender de librerias externas.
