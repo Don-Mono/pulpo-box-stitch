@@ -28,6 +28,7 @@
   const routineComposerPreview = document.querySelector("#routineComposerPreview");
   const setsInput = document.querySelector("#sets");
   const repsInput = document.querySelector("#reps");
+  const timeCapInput = document.querySelector("#time_cap_seconds");
   const blockLabelInput = document.querySelector("#block_label");
   const tempoLabelInput = document.querySelector("#tempo_label");
   const restLabelInput = document.querySelector("#rest_label");
@@ -377,6 +378,7 @@
       tempo_label: tempoLabel,
       sets: setsInput.value.trim(),
       reps: repsInput.value.trim(),
+      time_cap_seconds: timeCapInput.value.trim(),
     };
   }
 
@@ -388,6 +390,7 @@
     videoUrlInput.value = "";
     setsInput.value = "";
     repsInput.value = "";
+    timeCapInput.value = "";
     blockLabelInput.value = "";
     tempoLabelInput.value = "";
     restLabelInput.value = "";
@@ -702,6 +705,11 @@
     if (editingWorkoutId) {
       body.workout_id = editingWorkoutId;
       body.student_id = "";
+    }
+    const hasDraftExercise = Boolean(body.exercise_id || String(body.exercise_name || "").trim());
+    if (!selectedExercises.length && !hasDraftExercise) {
+      setStatus(workoutStatus, "Agrega al menos un ejercicio antes de guardar la rutina.", "error");
+      return;
     }
 
     try {

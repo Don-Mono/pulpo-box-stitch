@@ -472,6 +472,12 @@ async function createCoachWorkout(supabase, body, coachId) {
     throw error;
   }
 
+  if (!workoutExercises.length) {
+    const error = new Error("Debes agregar al menos un ejercicio a la rutina.");
+    error.statusCode = 400;
+    throw error;
+  }
+
   const coachStudents = await listCoachStudents(supabase, coachId);
   if (studentId && !coachStudents.some((student) => student.id === studentId)) {
     const error = new Error("Solo puedes asignar rutinas a tus alumnos activos.");
@@ -583,6 +589,12 @@ async function updateCoachWorkout(supabase, body, coachId) {
 
   if (!title) {
     const error = new Error("El titulo de la rutina es obligatorio.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!workoutExercises.length) {
+    const error = new Error("Debes mantener al menos un ejercicio dentro de la rutina.");
     error.statusCode = 400;
     throw error;
   }

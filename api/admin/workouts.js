@@ -391,6 +391,12 @@ async function createWorkout(supabase, body, session) {
     throw error;
   }
 
+  if (!workoutExercises.length) {
+    const error = new Error("Debes agregar al menos un ejercicio a la rutina.");
+    error.statusCode = 400;
+    throw error;
+  }
+
   const { data: workout, error: workoutError } = await supabase
     .from("pb_workouts")
     .insert({
@@ -495,6 +501,12 @@ async function updateWorkout(supabase, body, session) {
 
   if (!title) {
     const error = new Error("El titulo de la rutina es obligatorio.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!workoutExercises.length) {
+    const error = new Error("Debes mantener al menos un ejercicio dentro de la rutina.");
     error.statusCode = 400;
     throw error;
   }

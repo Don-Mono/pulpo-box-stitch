@@ -155,6 +155,7 @@ Primera implementacion:
 - El coach ya puede reasignar o quitar alumnos dentro de rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
 - El coach ya puede editar y eliminar rutinas creadas por su propio perfil, manteniendo solo lectura sobre rutinas externas.
 - La experiencia guiada usa `workout-flow.js` para mantener compatibilidad con el esquema actual mientras guarda bloque, tempo y descanso dentro de la prescripcion extendida.
+- Los creadores de rutinas de admin y coach ahora exigen al menos un ejercicio por sesion y muestran `time cap` como parte visible del armado.
 
 ### Etapa 4 - Registro de resultados
 
