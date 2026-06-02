@@ -16,8 +16,12 @@
   const measurementsList = document.querySelector("#measurementsList");
   const workoutFilter = document.querySelector("#workoutFilter");
   const exerciseFilter = document.querySelector("#exerciseFilter");
+  const resultsPageSizeSelect = document.querySelector("#results_page_size");
   const resultsFilterHint = document.querySelector("#resultsFilterHint");
   const resultsSummaryGrid = document.querySelector("#resultsSummaryGrid");
+  const resultsPaginationStatus = document.querySelector("#resultsPaginationStatus");
+  const previousResultsPageButton = document.querySelector("#previousResultsPageButton");
+  const nextResultsPageButton = document.querySelector("#nextResultsPageButton");
   const resultsBody = document.querySelector("#resultsBody");
   const coachStudentProgressHelper = document.querySelector("#coachStudentProgressHelper");
   const medicalCard = document.querySelector("#medicalCard");
@@ -35,6 +39,13 @@
   let currentAssignments = [];
   let currentMeasurements = [];
   let currentResults = [];
+  let currentResultsSummary = null;
+  let currentResultsPage = Number(resultsPageSizeSelect?.dataset.initialPage || 1);
+  let currentResultsPageSize = Number(resultsPageSizeSelect?.value || 20);
+  let currentResultsTotalPages = 1;
+  let currentResultsTotal = 0;
+  let currentResultsWorkoutId = "";
+  let currentResultsExerciseId = "";
   let assignmentPlayerState = new Map();
   let activeCoachStudentTab = "perfil";
   const coachStudentTabs = ["perfil", "rutina", "progreso", "salud"];
@@ -62,6 +73,41 @@
 
   function formatMetric(value, unit) {
     return value == null ? "--" : `${formatNumber(value)} ${unit}`.trim();
+  }
+
+  function getInitialResultsPage() {
+    try {
+      const page = Number(new URLSearchParams(window.location.search).get("results_page") || "1");
+      return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  function getInitialResultsPageSize() {
+    try {
+      const pageSize = Number(new URLSearchParams(window.location.search).get("results_page_size") || String(currentResultsPageSize));
+      if ([10, 20, 50].includes(pageSize)) return pageSize;
+      return currentResultsPageSize;
+    } catch {
+      return currentResultsPageSize;
+    }
+  }
+
+  function getInitialWorkoutFilter() {
+    try {
+      return new URLSearchParams(window.location.search).get("workout_id") || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function getInitialExerciseFilter() {
+    try {
+      return new URLSearchParams(window.location.search).get("exercise_id") || "";
+    } catch {
+      return "";
+    }
   }
 
   function getAssignmentStatusMeta(status) {
@@ -278,6 +324,13 @@
       const url = new URL(window.location.href);
       if (studentId) url.searchParams.set("id", studentId);
       else url.searchParams.delete("id");
+      if (currentResultsWorkoutId) url.searchParams.set("workout_id", currentResultsWorkoutId);
+      else url.searchParams.delete("workout_id");
+      if (currentResultsExerciseId) url.searchParams.set("exercise_id", currentResultsExerciseId);
+      else url.searchParams.delete("exercise_id");
+      url.searchParams.set("results_page", String(currentResultsPage));
+      url.searchParams.set("results_page_size", String(currentResultsPageSize));
+      url.hash = activeCoachStudentTab;
       window.history.replaceState({}, "", url.toString());
     } catch {
       // Ignore URL sync errors in constrained environments.
@@ -310,12 +363,11 @@
     studentFilter.innerHTML = options.join("");
   }
 
-  function renderCoachStudentOverview(student, assignments, results, medicalNotes) {
-    const latestResult = results[0] || null;
+  function renderCoachStudentOverview(student, assignments, resultsSummary, medicalNotes) {
     const cards = [
       ["Alumno", student?.full_name || "--", student?.goal || "Objetivo pendiente"],
       ["Rutinas activas", String(assignments.length || 0), assignments.length ? "Cargadas para seguimiento" : "Sin rutinas activas"],
-      ["Ultima marca", latestResult ? formatDate(latestResult.logged_at) : "--", latestResult?.exercise_name || "Sin resultados recientes"],
+      ["Ultima marca", resultsSummary?.latestLoggedAt ? formatDate(resultsSummary.latestLoggedAt) : "--", `${resultsSummary?.total || 0} registro(s) dentro del filtro activo`],
       ["Notas visibles", String(medicalNotes.length || 0), medicalNotes.length ? "Disponibles para el coach" : "Sin notas compartidas"],
     ];
 
@@ -597,33 +649,12 @@
     return [...exerciseMap.entries()].map(([id, name]) => ({ id, name }));
   }
 
-  function getFilteredResults() {
-    const selectedWorkoutId = workoutFilter.value;
-    const selectedExerciseId = exerciseFilter.value;
-
-    return currentResults.filter((result) => {
-      if (selectedWorkoutId && result.workout_id !== selectedWorkoutId) return false;
-      if (selectedExerciseId && result.exercise_id !== selectedExerciseId) return false;
-      return true;
-    });
-  }
-
-  function renderResultsSummary(filteredResults) {
-    const latestResult = filteredResults[0] || null;
-    const bestWeight = filteredResults
-      .map((result) => result.weight_kg)
-      .filter((value) => value != null)
-      .reduce((max, value) => Math.max(max, value), Number.NEGATIVE_INFINITY);
-    const bestReps = filteredResults
-      .map((result) => result.reps)
-      .filter((value) => value != null)
-      .reduce((max, value) => Math.max(max, value), Number.NEGATIVE_INFINITY);
-
+  function renderResultsSummary() {
     const values = [
-      ["Registros", String(filteredResults.length)],
-      ["Ultimo registro", latestResult ? formatDate(latestResult.logged_at) : "--"],
-      ["Mejor carga", Number.isFinite(bestWeight) ? `${formatNumber(bestWeight)} kg` : "--"],
-      ["Mayor reps", Number.isFinite(bestReps) ? String(bestReps) : "--"],
+      ["Registros", String(currentResultsSummary?.total || 0)],
+      ["Ultimo registro", currentResultsSummary?.latestLoggedAt ? formatDate(currentResultsSummary.latestLoggedAt) : "--"],
+      ["Mejor carga", currentResultsSummary?.bestWeightKg != null ? `${formatNumber(currentResultsSummary.bestWeightKg)} kg` : "--"],
+      ["Mayor reps", currentResultsSummary?.bestReps != null ? String(currentResultsSummary.bestReps) : "--"],
     ];
 
     resultsSummaryGrid.innerHTML = values.map(([label, value]) => `
@@ -634,13 +665,13 @@
     `).join("");
   }
 
-  function renderResults(filteredResults) {
-    if (!filteredResults.length) {
+  function renderResults(results) {
+    if (!results.length) {
       resultsBody.innerHTML = '<tr><td colspan="4">No hay marcas para este filtro.</td></tr>';
       return;
     }
 
-    resultsBody.innerHTML = filteredResults.map((result) => {
+    resultsBody.innerHTML = results.map((result) => {
       const notes = [
         result.student_notes ? `Alumno: ${result.student_notes}` : "",
         result.coach_notes ? `Coach: ${result.coach_notes}` : "",
@@ -660,20 +691,32 @@
     }).join("");
   }
 
-  function refreshResultsView() {
-    const filteredResults = getFilteredResults();
+  function renderResultsPagination() {
+    currentResultsTotal = Math.max(Number(currentResultsSummary?.total || 0), 0);
+    currentResultsTotalPages = Math.max(Math.ceil(currentResultsTotal / currentResultsPageSize), 1);
+    const start = currentResultsTotal ? ((currentResultsPage - 1) * currentResultsPageSize) + 1 : 0;
+    const end = Math.min(currentResultsPage * currentResultsPageSize, currentResultsTotal);
     const selectedWorkoutLabel = workoutFilter.options[workoutFilter.selectedIndex]?.text || "Todas las rutinas";
     const selectedExerciseLabel = exerciseFilter.options[exerciseFilter.selectedIndex]?.text || "Todos los ejercicios";
 
-    resultsFilterHint.textContent = workoutFilter.value || exerciseFilter.value
-      ? `${filteredResults.length} registro(s) para ${selectedWorkoutLabel} / ${selectedExerciseLabel}.`
+    resultsPaginationStatus.textContent = currentResultsTotal
+      ? `Mostrando ${start}-${end} de ${currentResultsTotal} registro(s). Pagina ${currentResultsPage} de ${currentResultsTotalPages}.`
+      : "Sin registros para este filtro.";
+    previousResultsPageButton.disabled = currentResultsPage <= 1;
+    nextResultsPageButton.disabled = currentResultsPage >= currentResultsTotalPages;
+
+    resultsFilterHint.textContent = currentResultsWorkoutId || currentResultsExerciseId
+      ? `${currentResultsTotal} registro(s) para ${selectedWorkoutLabel} / ${selectedExerciseLabel}.`
       : "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
+  }
 
-    renderResultsSummary(filteredResults);
-    renderResults(filteredResults);
+  function refreshResultsView() {
+    renderResultsSummary();
+    renderResults(currentResults);
+    renderResultsPagination();
 
-    const latestResult = filteredResults[0] || null;
-    const resultsWithCoachNotes = filteredResults.filter((result) => String(result.coach_notes || "").trim()).length;
+    const latestResult = currentResults[0] || null;
+    const resultsWithCoachNotes = currentResults.filter((result) => String(result.coach_notes || "").trim()).length;
     coachStudentProgressHelper.innerHTML = `
       <article class="mini-list-item">
         <strong>Ultima marca del filtro</strong>
@@ -687,14 +730,13 @@
       </article>
       <article class="mini-list-item">
         <strong>Lectura sugerida</strong>
-        <span>${escapeHtml(workoutFilter.value || exerciseFilter.value ? "El filtro esta afinado para revisar una tendencia puntual." : "Activa un filtro para leer mejor la progresion por rutina o ejercicio.")}</span>
+        <span>${escapeHtml(currentResultsWorkoutId || currentResultsExerciseId ? "El filtro esta afinado para revisar una tendencia puntual." : "Activa un filtro para leer mejor la progresion por rutina o ejercicio.")}</span>
         <small>La tabla y el resumen cambian juntos para facilitar la lectura.</small>
       </article>
     `;
   }
 
   function syncResultFilters() {
-    const previousWorkoutId = workoutFilter.value;
     const workoutOptions = collectWorkoutOptions();
 
     workoutFilter.innerHTML = [
@@ -702,11 +744,13 @@
       ...workoutOptions.map((workout) => `<option value="${escapeHtml(workout.id)}">${escapeHtml(workout.title)}</option>`),
     ].join("");
 
-    if (workoutOptions.some((workout) => workout.id === previousWorkoutId)) {
-      workoutFilter.value = previousWorkoutId;
+    if (workoutOptions.some((workout) => workout.id === currentResultsWorkoutId)) {
+      workoutFilter.value = currentResultsWorkoutId;
+    } else {
+      workoutFilter.value = "";
+      currentResultsWorkoutId = "";
     }
 
-    const previousExerciseId = exerciseFilter.value;
     const exerciseOptions = collectExerciseOptions(workoutFilter.value);
 
     exerciseFilter.innerHTML = [
@@ -714,8 +758,11 @@
       ...exerciseOptions.map((exercise) => `<option value="${escapeHtml(exercise.id)}">${escapeHtml(exercise.name)}</option>`),
     ].join("");
 
-    if (exerciseOptions.some((exercise) => exercise.id === previousExerciseId)) {
-      exerciseFilter.value = previousExerciseId;
+    if (exerciseOptions.some((exercise) => exercise.id === currentResultsExerciseId)) {
+      exerciseFilter.value = currentResultsExerciseId;
+    } else {
+      exerciseFilter.value = "";
+      currentResultsExerciseId = "";
     }
 
     refreshResultsView();
@@ -727,7 +774,7 @@
 
     try {
       const url = preferredStudentId
-        ? `/api/coach/student-detail?student_id=${encodeURIComponent(preferredStudentId)}`
+        ? `/api/coach/student-detail?student_id=${encodeURIComponent(preferredStudentId)}&results_page=${encodeURIComponent(currentResultsPage)}&results_page_size=${encodeURIComponent(currentResultsPageSize)}&workout_id=${encodeURIComponent(currentResultsWorkoutId)}&exercise_id=${encodeURIComponent(currentResultsExerciseId)}`
         : "/api/coach/student-detail";
       const response = await fetch(url);
       const payload = await response.json();
@@ -740,13 +787,20 @@
       currentAssignments = payload.assignments || [];
       currentMeasurements = payload.measurements || [];
       currentResults = payload.results || [];
+      currentResultsSummary = payload.resultsSummary || null;
+      currentResultsPage = Math.max(Number(payload.pagination?.page || currentResultsPage || 1), 1);
+      currentResultsPageSize = Number(payload.pagination?.pageSize || currentResultsPageSize || 20);
+      currentResultsTotalPages = Math.max(Number(payload.pagination?.totalPages || 1), 1);
+      currentResultsTotal = Math.max(Number(payload.pagination?.total || 0), 0);
+      currentResultsWorkoutId = payload.selectedWorkoutId || "";
+      currentResultsExerciseId = payload.selectedExerciseId || "";
       const visibleMedicalNotes = payload.medicalNotes || [];
 
       setupMessage.textContent = setupRequired
         ? payload.message
         : "Ficha conectada. Aqui ves solo alumnos asignados a tu perfil.";
       renderStudents(payload.students || [], currentStudentId);
-      renderCoachStudentOverview(currentStudent, currentAssignments, currentResults, visibleMedicalNotes);
+      renderCoachStudentOverview(currentStudent, currentAssignments, currentResultsSummary, visibleMedicalNotes);
       renderSummary(currentSummary, currentMeasurements);
       renderProfile(currentStudent);
       renderCoachStudentActions(currentStudent);
@@ -764,9 +818,15 @@
       currentAssignments = [];
       currentMeasurements = [];
       currentResults = [];
+      currentResultsSummary = null;
+      currentResultsPage = 1;
+      currentResultsTotalPages = 1;
+      currentResultsTotal = 0;
+      currentResultsWorkoutId = "";
+      currentResultsExerciseId = "";
       setupMessage.textContent = error.message;
       renderStudents([], "");
-      renderCoachStudentOverview(null, [], [], []);
+      renderCoachStudentOverview(null, [], null, []);
       renderSummary(null, []);
       renderProfile(null);
       renderCoachStudentActions(null);
@@ -775,8 +835,10 @@
       renderMedical(null, []);
       workoutFilter.innerHTML = '<option value="">Todas las rutinas</option>';
       exerciseFilter.innerHTML = '<option value="">Todos los ejercicios</option>';
+      if (resultsPageSizeSelect) resultsPageSizeSelect.value = String(currentResultsPageSize);
       resultsFilterHint.textContent = "Filtra por rutina o ejercicio para revisar una tendencia puntual.";
-      renderResultsSummary([]);
+      resultsPaginationStatus.textContent = "Sin registros para este filtro.";
+      renderResultsSummary();
       resultsBody.innerHTML = `<tr><td colspan="4">${escapeHtml(error.message)}</td></tr>`;
       coachStudentProgressHelper.innerHTML = '<p class="muted">No fue posible cargar la lectura del progreso.</p>';
     }
@@ -817,11 +879,13 @@
   }
 
   studentFilter.addEventListener("change", () => {
-    workoutFilter.value = "";
-    exerciseFilter.value = "";
+    currentResultsWorkoutId = "";
+    currentResultsExerciseId = "";
+    currentResultsPage = 1;
     loadStudentDetail(studentFilter.value);
   });
   workoutFilter.addEventListener("change", () => {
+    currentResultsWorkoutId = workoutFilter.value;
     const previousExerciseId = exerciseFilter.value;
     const exerciseOptions = collectExerciseOptions(workoutFilter.value);
     exerciseFilter.innerHTML = [
@@ -830,10 +894,34 @@
     ].join("");
     if (exerciseOptions.some((exercise) => exercise.id === previousExerciseId)) {
       exerciseFilter.value = previousExerciseId;
+      currentResultsExerciseId = previousExerciseId;
+    } else {
+      exerciseFilter.value = "";
+      currentResultsExerciseId = "";
     }
-    refreshResultsView();
+    currentResultsPage = 1;
+    loadStudentDetail(currentStudentId || studentFilter.value);
   });
-  exerciseFilter.addEventListener("change", refreshResultsView);
+  exerciseFilter.addEventListener("change", () => {
+    currentResultsExerciseId = exerciseFilter.value;
+    currentResultsPage = 1;
+    loadStudentDetail(currentStudentId || studentFilter.value);
+  });
+  resultsPageSizeSelect?.addEventListener("change", () => {
+    currentResultsPageSize = Number(resultsPageSizeSelect.value || 20);
+    currentResultsPage = 1;
+    loadStudentDetail(currentStudentId || studentFilter.value);
+  });
+  previousResultsPageButton?.addEventListener("click", () => {
+    if (currentResultsPage <= 1) return;
+    currentResultsPage -= 1;
+    loadStudentDetail(currentStudentId || studentFilter.value);
+  });
+  nextResultsPageButton?.addEventListener("click", () => {
+    if (currentResultsPage >= currentResultsTotalPages) return;
+    currentResultsPage += 1;
+    loadStudentDetail(currentStudentId || studentFilter.value);
+  });
   assignmentsList.addEventListener("click", (event) => {
     const previousButton = event.target.closest("[data-guided-prev]");
     if (previousButton) {
@@ -864,6 +952,11 @@
   async function boot() {
     const user = await requireCoachSession();
     if (!user) return;
+    currentResultsPage = getInitialResultsPage();
+    currentResultsPageSize = getInitialResultsPageSize();
+    currentResultsWorkoutId = getInitialWorkoutFilter();
+    currentResultsExerciseId = getInitialExerciseFilter();
+    if (resultsPageSizeSelect) resultsPageSizeSelect.value = String(currentResultsPageSize);
     activeCoachStudentTab = getPreferredCoachStudentTab();
     setActiveCoachStudentTab(activeCoachStudentTab, { syncHash: false });
     await loadStudentDetail();

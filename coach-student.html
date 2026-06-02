@@ -231,6 +231,14 @@
                   <span id="resultsFilterHint">Filtra por rutina o ejercicio para revisar una tendencia puntual.</span>
                   <small>Los indicadores de abajo cambian segun el filtro activo.</small>
                 </article>
+                <div class="field inline-field">
+                  <label for="results_page_size">Filas</label>
+                  <select id="results_page_size">
+                    <option value="10">10</option>
+                    <option selected value="20">20</option>
+                    <option value="50">50</option>
+                  </select>
+                </div>
               </div>
               <div class="metric-grid compact-metrics" id="resultsSummaryGrid">
                 <article class="metric-card">
@@ -266,6 +274,13 @@
                     </tr>
                   </tbody>
                 </table>
+              </div>
+              <div class="table-header">
+                <span class="muted" id="resultsPaginationStatus">Cargando paginacion...</span>
+                <div class="topbar-actions">
+                  <button class="button ghost compact-button" id="previousResultsPageButton" type="button">Anterior</button>
+                  <button class="button ghost compact-button" id="nextResultsPageButton" type="button">Siguiente</button>
+                </div>
               </div>
             </article>
 

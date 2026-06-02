@@ -193,6 +193,7 @@ Primera implementacion:
 - El modulo Seguimiento del coach ya pagina resultados por pagina, cantidad de filas y filtro por alumno desde backend, para soportar mejor el crecimiento operativo por sede.
 - La ficha del coach ya usa el mismo formato guiado para revisar la rutina activa del alumno sin perder el contexto de seguimiento.
 - La ficha individual `coach-student` ahora se presenta en modulos de Perfil, Rutina, Progreso y Salud para ordenar mejor la lectura operativa del alumno.
+- La ficha individual `coach-student` ahora pagina las marcas por pagina, cantidad de filas y filtros por rutina/ejercicio desde backend para que el seguimiento individual siga siendo fluido con historiales largos.
 
 ### Etapa 5 - Progreso
 
