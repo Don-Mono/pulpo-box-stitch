@@ -45,6 +45,7 @@ function setupPayload() {
     assignments: [],
     results: [],
     measurements: [],
+    medicalNotes: [],
     summary: null,
     setupRequired: true,
     message: "Tu panel de alumno aun no esta activo en Supabase.",
@@ -58,6 +59,7 @@ async function loadStudentOverview(supabase, studentId) {
     { data: assignments, error: assignmentsError },
     { data: results, error: resultsError },
     { data: measurements, error: measurementsError },
+    { data: medicalNotes, error: medicalNotesError },
   ] = await Promise.all([
     supabase.from("pb_profiles").select("id, full_name, email, phone").eq("id", studentId).maybeSingle(),
     supabase
@@ -83,6 +85,12 @@ async function loadStudentOverview(supabase, studentId) {
       .eq("student_id", studentId)
       .order("measured_at", { ascending: false })
       .limit(MEASUREMENT_HISTORY_LIMIT),
+    supabase
+      .from("pb_medical_notes")
+      .select("id, note_type, description, visible_to_coach, created_at")
+      .eq("student_id", studentId)
+      .order("created_at", { ascending: false })
+      .limit(12),
   ]);
 
   if (profileError) throw profileError;
@@ -90,6 +98,7 @@ async function loadStudentOverview(supabase, studentId) {
   if (assignmentsError) throw assignmentsError;
   if (resultsError) throw resultsError;
   if (measurementsError) throw measurementsError;
+  if (medicalNotesError) throw medicalNotesError;
 
   const workoutIds = [...new Set([
     ...(assignments || []).map((assignment) => assignment.workout_id),
@@ -187,12 +196,14 @@ async function loadStudentOverview(supabase, studentId) {
       video_url: exerciseMap.get(result.exercise_id)?.video_url || "",
     })),
     measurements: measurements || [],
+    medicalNotes: medicalNotes || [],
     summary: {
       latest_weight_kg: latestMeasurement?.body_weight_kg || studentDetails?.current_weight_kg || null,
       latest_height_cm: latestMeasurement?.height_cm || studentDetails?.height_cm || null,
       latest_waist_cm: latestMeasurement?.waist_cm || null,
       result_count: results?.length || 0,
       measurement_count: measurements?.length || 0,
+      medical_note_count: medicalNotes?.length || 0,
     },
   };
 }

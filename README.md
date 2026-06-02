@@ -70,6 +70,7 @@ Admin ya puede editar y eliminar rutinas completas desde el mismo modulo, manten
 Los ejercicios personalizados se pueden agregar y desactivar desde `/exercises.html` sin borrar el historial de rutinas.
 El portal alumno ya puede registrar marcas vinculadas a ejercicios concretos de sus rutinas asignadas.
 El portal alumno y la ficha operativa del coach ya muestran la rutina en formato guiado paso a paso, con navegacion entre ejercicios, descripcion, video y accion rapida para registrar la marca del ejercicio activo.
+El portal alumno ahora se organiza como una experiencia tipo app con modulos internos de Rutina, Progreso, Salud y Perfil, manteniendo el mismo backend y sin tocar la landing publica.
 Admin ya puede editar y eliminar resultados desde el modulo de resultados, manteniendo validacion entre alumno, rutina y ejercicio.
 Admin ya puede editar y eliminar mediciones corporales desde el modulo de progreso, manteniendo el historial mas limpio y corregible.
 El modulo de progreso ya incluye graficos ligeros de evolucion corporal para peso y cintura, sin depender de librerias externas.
@@ -78,6 +79,7 @@ Admin ya puede editar y eliminar notas medicas sensibles desde el modulo medico,
 El portal alumno ya puede filtrar su historial por rutina y ejercicio, ver tendencias rapidas y leer feedback del coach dentro de sus propias marcas.
 El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios de sus rutinas asignadas, incluyendo una vista previa al registrar marcas.
 El portal alumno ya puede actualizar sus datos de contacto permitidos y su contacto de emergencia sin tocar coach, sede ni objetivo.
+El modulo Salud del alumno ya muestra informacion base, contacto de emergencia, visibilidad hacia coach y observaciones medicas registradas por el equipo.
 El portal alumno ya puede marcar cada rutina asignada como pendiente, completada u omitida, y ese estado se refleja tambien en coach y admin.
 El portal coach ya puede revisar resultados de sus alumnos asignados y guardar feedback tecnico sobre cada marca.
 Admin ya puede regenerar claves temporales para alumnos y coaches desde sus listados, y coach/alumno ya pueden cambiar su propia clave desde una vista privada.

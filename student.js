@@ -2,6 +2,8 @@
   const studentTitle = document.querySelector("#studentTitle");
   const setupMessage = document.querySelector("#setupMessage");
   const userEmail = document.querySelector("#userEmail");
+  const studentOverviewGrid = document.querySelector("#studentOverviewGrid");
+  const studentModuleNav = document.querySelector("#studentModuleNav");
   const studentProfileForm = document.querySelector("#studentProfileForm");
   const profileStatus = document.querySelector("#profileStatus");
   const saveProfileButton = document.querySelector("#saveProfileButton");
@@ -21,7 +23,12 @@
   const resultsSummaryGrid = document.querySelector("#resultsSummaryGrid");
   const resultsBody = document.querySelector("#resultsBody");
   const measurementsList = document.querySelector("#measurementsList");
+  const healthSummaryGrid = document.querySelector("#healthSummaryGrid");
+  const studentSafetyCard = document.querySelector("#studentSafetyCard");
+  const medicalNotesStudentList = document.querySelector("#medicalNotesStudentList");
   const logoutButton = document.querySelector("#logoutButton");
+  const studentModuleButtons = Array.from(document.querySelectorAll("[data-student-tab]"));
+  const studentModuleSections = Array.from(document.querySelectorAll("[data-student-panel]"));
 
   let setupRequired = false;
   let currentProfile = null;
@@ -30,7 +37,10 @@
   let currentResults = [];
   let currentMeasurements = [];
   let currentSummary = null;
+  let currentMedicalNotes = [];
   let assignmentPlayerState = new Map();
+  let activeStudentTab = "rutina";
+  const studentTabs = ["rutina", "progreso", "salud", "perfil"];
 
   function setStatus(element, message, type = "") {
     element.textContent = message;
@@ -255,6 +265,42 @@
     renderAssignments(currentAssignments);
   }
 
+  function getPreferredStudentTab() {
+    try {
+      const hash = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+      return studentTabs.includes(hash) ? hash : "rutina";
+    } catch {
+      return "rutina";
+    }
+  }
+
+  function setActiveStudentTab(tab, options = {}) {
+    const nextTab = studentTabs.includes(tab) ? tab : "rutina";
+    activeStudentTab = nextTab;
+
+    studentModuleButtons.forEach((button) => {
+      const isActive = button.dataset.studentTab === nextTab;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-current", isActive ? "page" : "false");
+    });
+
+    studentModuleSections.forEach((section) => {
+      const isActive = section.dataset.studentPanel === nextTab;
+      section.classList.toggle("is-active", isActive);
+      section.classList.toggle("hidden", !isActive);
+    });
+
+    if (options.syncHash !== false) {
+      try {
+        const url = new URL(window.location.href);
+        url.hash = nextTab;
+        window.history.replaceState({}, "", url.toString());
+      } catch {
+        // Ignore hash sync errors.
+      }
+    }
+  }
+
   function focusAssignmentExercise(assignmentId) {
     const assignment = currentAssignments.find((item) => item.id === assignmentId);
     if (!assignment) return;
@@ -274,6 +320,7 @@
       exerciseSelect.value = activeExercise.exercise_id;
       renderSelectedExercisePreview();
     }
+    setActiveStudentTab("rutina");
     studentResultForm.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -329,6 +376,77 @@
         <small>Si necesitas cambiar coach, sede u objetivo, solicita apoyo al equipo admin.</small>
       </article>
     `;
+  }
+
+  function renderStudentOverview(profile, assignments) {
+    const assignmentCount = assignments.length;
+    const pendingCount = assignments.filter((assignment) => !["completed", "skipped"].includes(String(assignment.status || "").toLowerCase())).length;
+    const completedCount = assignments.filter((assignment) => String(assignment.status || "").toLowerCase() === "completed").length;
+    const coachName = profile?.primary_coach_name || "--";
+    const locationName = profile?.location_name || "--";
+
+    const cards = [
+      ["Rutinas activas", String(assignmentCount), assignmentCount ? `${completedCount} completada(s)` : "Aun sin rutinas asignadas"],
+      ["Pendientes", String(pendingCount), pendingCount ? "Listas para entrenar" : "Sin pendientes por ahora"],
+      ["Coach", coachName, profile?.goal || "Objetivo pendiente"],
+      ["Sede", locationName, profile?.email || "Sin email principal"],
+    ];
+
+    studentOverviewGrid.innerHTML = cards.map(([label, value, helper]) => `
+      <article class="student-overview-card">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+        <small>${escapeHtml(helper)}</small>
+      </article>
+    `).join("");
+  }
+
+  function renderHealthSummary(summary, profile, notes) {
+    const visibleToCoachCount = notes.filter((note) => note.visible_to_coach).length;
+    const values = [
+      ["Altura", summary?.latest_height_cm ? `${formatNumber(summary.latest_height_cm)} cm` : "--"],
+      ["Peso base", summary?.latest_weight_kg ? `${formatNumber(summary.latest_weight_kg)} kg` : "--"],
+      ["Notas medicas", String(notes.length || 0)],
+      ["Compartidas coach", String(visibleToCoachCount)],
+    ];
+
+    healthSummaryGrid.innerHTML = values.map(([label, value]) => `
+      <article class="metric-card">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+      </article>
+    `).join("");
+
+    studentSafetyCard.innerHTML = `
+      <article class="mini-list-item">
+        <strong>Contacto de emergencia</strong>
+        <span>${escapeHtml(
+          [profile?.emergency_contact_name, profile?.emergency_contact_phone].filter(Boolean).join(" / ")
+          || "Sin contacto configurado"
+        )}</span>
+        <small>Si necesitas corregirlo, hazlo desde la pestaña Perfil.</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Visibilidad con tu coach</strong>
+        <span>${escapeHtml(visibleToCoachCount ? `${visibleToCoachCount} nota(s) visibles para seguimiento.` : "No hay notas visibles para coach.")}</span>
+        <small>El equipo admin define que informacion medica se comparte para cuidar tu entrenamiento.</small>
+      </article>
+    `;
+  }
+
+  function renderMedicalNotes(notes) {
+    if (!notes.length) {
+      medicalNotesStudentList.innerHTML = '<p class="muted">No hay observaciones medicas registradas por ahora.</p>';
+      return;
+    }
+
+    medicalNotesStudentList.innerHTML = notes.map((note) => `
+      <article class="mini-list-item">
+        <strong>${escapeHtml(note.note_type || "Nota medica")}</strong>
+        <span>${escapeHtml(note.description || "")}</span>
+        <small>${escapeHtml(`${formatDate(note.created_at)} · ${note.visible_to_coach ? "Visible para coach" : "Solo equipo admin"}`)}</small>
+      </article>
+    `).join("");
   }
 
   function renderSummary(summary, measurements) {
@@ -640,17 +758,22 @@
       currentResults = payload.results || [];
       currentMeasurements = payload.measurements || [];
       currentSummary = payload.summary || null;
+      currentMedicalNotes = payload.medicalNotes || [];
 
       setupMessage.textContent = setupRequired
         ? payload.message
         : "Panel listo. Revisa tu progreso, tus rutinas, actualiza tus datos y registra tus marcas.";
       setStatus(assignmentStatus, "");
       renderProfile(currentProfile);
+      renderStudentOverview(currentProfile, payload.assignments || []);
       renderSummary(currentSummary, currentMeasurements);
+      renderHealthSummary(currentSummary, currentProfile, currentMedicalNotes);
+      renderMedicalNotes(currentMedicalNotes);
       renderAssignments(payload.assignments || []);
       renderMeasurements(currentMeasurements);
       syncHistoryFilters();
       setStatus(profileStatus, "");
+      setActiveStudentTab(activeStudentTab, { syncHash: false });
     } catch (error) {
       setupMessage.textContent = error.message;
       currentProfile = null;
@@ -658,8 +781,12 @@
       currentResults = [];
       currentMeasurements = [];
       currentSummary = null;
+      currentMedicalNotes = [];
       renderProfile(null);
+      renderStudentOverview(null, []);
       renderSummary(null, []);
+      renderHealthSummary(null, null, []);
+      renderMedicalNotes([]);
       renderAssignments([]);
       renderResults([]);
       renderMeasurements([]);
@@ -765,6 +892,11 @@
 
   studentProfileForm.addEventListener("submit", saveProfile);
   studentResultForm.addEventListener("submit", saveResult);
+  studentModuleNav.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-student-tab]");
+    if (!button) return;
+    setActiveStudentTab(button.dataset.studentTab);
+  });
   workoutSelect.addEventListener("change", syncExerciseOptions);
   exerciseSelect.addEventListener("change", renderSelectedExercisePreview);
   workoutHistoryFilter.addEventListener("change", () => {
@@ -807,10 +939,15 @@
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login.html";
   });
+  window.addEventListener("hashchange", () => {
+    setActiveStudentTab(getPreferredStudentTab(), { syncHash: false });
+  });
 
   async function boot() {
     const user = await requireStudentSession();
     if (!user) return;
+    activeStudentTab = getPreferredStudentTab();
+    setActiveStudentTab(activeStudentTab, { syncHash: false });
     await loadOverview();
   }
 

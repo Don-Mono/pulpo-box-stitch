@@ -183,6 +183,7 @@ Primera implementacion:
 - El portal alumno ya filtra historial por rutina y ejercicio, resume tendencia y muestra feedback del coach dentro de sus registros.
 - El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios asignados, incluyendo una vista previa contextual al registrar una marca.
 - El portal alumno ya consume la rutina en formato guiado paso a paso, con navegacion entre ejercicios y accion rapida para usar el ejercicio activo en el registro de marcas.
+- El portal alumno ya se presenta como una experiencia tipo app con modulos internos de Rutina, Progreso, Salud y Perfil para uso mas claro desde celular.
 - El portal alumno ya puede cambiar el estado de una rutina asignada entre pendiente, completada u omitida.
 - Coach y admin ya ven ese mismo estado reflejado en sus paneles operativos.
 - El coach ya puede revisar las ultimas marcas de sus alumnos asignados y guardar feedback tecnico desde su panel.
@@ -227,6 +228,7 @@ Primera implementacion:
 - Requiere confirmacion explicita de consentimiento antes de guardar.
 - El modulo admin ya acepta `student_id` en URL y mantiene visibilidad de alumnos inactivos para revision administrativa.
 - El modulo admin de datos medicos ya resume consentimiento, contacto de emergencia, filtros por tipo/visibilidad y una vista previa exacta de las notas compartidas con coach.
+- El alumno ya puede ver un resumen seguro de su contexto de salud, contacto de emergencia y observaciones medicas registradas por el equipo, incluyendo cuales son visibles para seguimiento del coach.
 
 ### Etapa 7 - Mejoras futuras
 
