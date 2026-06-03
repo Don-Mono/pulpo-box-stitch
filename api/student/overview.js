@@ -26,6 +26,15 @@ function cleanAssignmentStatus(value) {
   return ["assigned", "completed", "skipped"].includes(status) ? status : "";
 }
 
+function countDigits(value) {
+  return String(value || "").replace(/\D/g, "").length;
+}
+
+function isPhoneLike(value) {
+  if (!value) return true;
+  return countDigits(value) >= 8;
+}
+
 function applyStudentResultFilters(query, studentId, filters = {}) {
   let nextQuery = query.eq("student_id", studentId);
 
@@ -330,6 +339,24 @@ async function updateStudentProfile(supabase, studentId, body) {
   const emergencyContactName = clean(body.emergency_contact_name, 120);
   const emergencyContactPhone = clean(body.emergency_contact_phone, 40);
   const timestamp = new Date().toISOString();
+
+  if (Boolean(emergencyContactName) !== Boolean(emergencyContactPhone)) {
+    const error = new Error("Completa nombre y telefono del contacto de emergencia, o deja ambos vacios.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!isPhoneLike(phone)) {
+    const error = new Error("El telefono principal no tiene un formato valido.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!isPhoneLike(emergencyContactPhone)) {
+    const error = new Error("El telefono de emergencia no tiene un formato valido.");
+    error.statusCode = 400;
+    throw error;
+  }
 
   const { data: currentStudent, error: currentStudentError } = await supabase
     .from("pb_students")
