@@ -80,6 +80,15 @@
     return value == null ? "--" : `${formatNumber(value)} ${unit}`.trim();
   }
 
+  function countDigits(value) {
+    return String(value || "").replace(/\D/g, "").length;
+  }
+
+  function isPhoneLike(value) {
+    if (!value) return true;
+    return countDigits(value) >= 8;
+  }
+
   function getAssignmentStateStorageKey() {
     return currentProfile?.id ? `${assignmentStateStoragePrefix}:${currentProfile.id}` : "";
   }
@@ -499,7 +508,33 @@
       return;
     }
 
+    const hasMainPhone = Boolean(profile.phone);
+    const hasEmergencyName = Boolean(profile.emergency_contact_name);
+    const hasEmergencyPhone = Boolean(profile.emergency_contact_phone);
+    const hasEmergencyContact = hasEmergencyName && hasEmergencyPhone;
+    const hasCoach = Boolean(profile.primary_coach_name);
+    const hasLocation = Boolean(profile.location_name);
+    const hasConsent = Boolean(profile.medical_consent_at);
+    const missingItems = [
+      !hasMainPhone ? "telefono principal" : "",
+      !hasEmergencyContact ? "contacto de emergencia completo" : "",
+      !hasCoach ? "coach asignado" : "",
+      !hasLocation ? "sede asignada" : "",
+      !hasConsent ? "consentimiento de salud" : "",
+    ].filter(Boolean);
+    const readinessLabel = missingItems.length
+      ? `Faltan ${missingItems.length} dato(s) clave`
+      : "Perfil listo para seguimiento";
+    const readinessBody = missingItems.length
+      ? `Te conviene completar ${missingItems.join(", ")} para que el equipo pueda acompanarte mejor.`
+      : "Tu ficha base ya tiene los datos minimos para operar bien en esta beta privada.";
+
     profileContextCard.innerHTML = `
+      <div class="warning-card">
+        <strong>${escapeHtml(readinessLabel)}</strong>
+        <p>${escapeHtml(readinessBody)}</p>
+        <span${missingItems.length ? "" : ' class="is-ok"'}>${escapeHtml(missingItems.length ? "Revisar perfil" : "Listo para beta")}</span>
+      </div>
       <article class="mini-list-item">
         <strong>${escapeHtml(profile.full_name || "Alumno")}</strong>
         <span>${escapeHtml(profile.goal || "Objetivo pendiente")}</span>
@@ -517,6 +552,11 @@
           || "Sin contacto de emergencia"
         )}</span>
         <small>Si necesitas cambiar coach, sede u objetivo, solicita apoyo al equipo admin.</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Checklist rapido</strong>
+        <span>${escapeHtml(`${hasMainPhone ? "Telefono" : "Telefono faltante"} / ${hasEmergencyContact ? "Emergencia completa" : "Emergencia pendiente"}`)}</span>
+        <small>${escapeHtml(`${hasCoach ? "Coach asignado" : "Sin coach"} / ${hasLocation ? "Sede asignada" : "Sin sede"} / ${hasConsent ? "Consentimiento registrado" : "Consentimiento pendiente"}`)}</small>
       </article>
     `;
   }
@@ -547,6 +587,14 @@
   function renderHealthSummary(summary, profile, notes) {
     const visibleToCoachCount = notes.filter((note) => note.visible_to_coach).length;
     const consentLabel = profile?.medical_consent_at ? `Registrado ${formatDate(profile.medical_consent_at)}` : "Pendiente";
+    const hasEmergencyContact = Boolean(profile?.emergency_contact_name && profile?.emergency_contact_phone);
+    const visibleHealthNotes = notes.length || 0;
+    const healthMissing = [
+      !profile?.medical_consent_at ? "consentimiento" : "",
+      !hasEmergencyContact ? "contacto de emergencia" : "",
+      !summary?.latest_height_cm ? "altura base" : "",
+      !summary?.latest_weight_kg ? "peso base" : "",
+    ].filter(Boolean);
     const values = [
       ["Altura", summary?.latest_height_cm ? `${formatNumber(summary.latest_height_cm)} cm` : "--"],
       ["Peso base", summary?.latest_weight_kg ? `${formatNumber(summary.latest_weight_kg)} kg` : "--"],
@@ -562,6 +610,15 @@
     `).join("");
 
     studentSafetyCard.innerHTML = `
+      <div class="warning-card">
+        <strong>${escapeHtml(healthMissing.length ? "Salud con datos pendientes" : "Salud lista para seguimiento")}</strong>
+        <p>${escapeHtml(
+          healthMissing.length
+            ? `Seria ideal completar ${healthMissing.join(", ")} para que tu seguimiento sea mas seguro y claro.`
+            : "Tu contexto de salud tiene base suficiente para el seguimiento inicial de esta beta."
+        )}</p>
+        <span${healthMissing.length ? "" : ' class="is-ok"'}>${escapeHtml(healthMissing.length ? "Completar con admin" : "Seguimiento activo")}</span>
+      </div>
       <article class="mini-list-item">
         <strong>Contacto de emergencia</strong>
         <span>${escapeHtml(
@@ -574,6 +631,11 @@
         <strong>Visibilidad con tu coach</strong>
         <span>${escapeHtml(visibleToCoachCount ? `${visibleToCoachCount} nota(s) visibles para seguimiento.` : "No hay notas visibles para coach.")}</span>
         <small>El equipo admin define que informacion medica se comparte para cuidar tu entrenamiento.</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Estado del modulo</strong>
+        <span>${escapeHtml(`${visibleHealthNotes} nota(s) registradas / ${visibleToCoachCount} compartidas con coach`)}</span>
+        <small>${escapeHtml(profile?.medical_consent_at ? "Consentimiento activo para seguimiento." : "Aun falta registrar consentimiento de salud.")}</small>
       </article>
       <article class="mini-list-item">
         <strong>Consentimiento y seguimiento</strong>
@@ -1009,6 +1071,23 @@
     setStatus(profileStatus, "Guardando tus datos...");
     const formData = new FormData(studentProfileForm);
     const body = Object.fromEntries(formData.entries());
+    const hasEmergencyName = Boolean(String(body.emergency_contact_name || "").trim());
+    const hasEmergencyPhone = Boolean(String(body.emergency_contact_phone || "").trim());
+
+    if (hasEmergencyName !== hasEmergencyPhone) {
+      setStatus(profileStatus, "Completa nombre y telefono del contacto de emergencia, o deja ambos vacios.", "error");
+      return;
+    }
+
+    if (!isPhoneLike(body.phone || "")) {
+      setStatus(profileStatus, "Ingresa un telefono principal valido para continuar.", "error");
+      return;
+    }
+
+    if (!isPhoneLike(body.emergency_contact_phone || "")) {
+      setStatus(profileStatus, "Ingresa un telefono de emergencia valido para continuar.", "error");
+      return;
+    }
 
     try {
       const response = await fetch("/api/student/overview", {

@@ -244,6 +244,7 @@ Primera implementacion:
 - El modulo admin de datos medicos ya resume consentimiento, contacto de emergencia, filtros por tipo/visibilidad y una vista previa exacta de las notas compartidas con coach.
 - El alumno ya puede ver un resumen seguro de su contexto de salud, contacto de emergencia y observaciones medicas registradas por el equipo, incluyendo cuales son visibles para seguimiento del coach.
 - La rutina guiada del alumno ahora recuerda el paso activo por sesion y puede enfocar el siguiente ejercicio despues de guardar una marca, para sostener mejor el uso tipo app en movil.
+- El perfil y salud del alumno ahora muestran una lectura de preparacion para beta, destacando datos faltantes y validando contactos antes de guardar cambios.
 
 ### Etapa 7 - Mejoras futuras
 

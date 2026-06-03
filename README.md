@@ -81,6 +81,7 @@ El historial de progreso del alumno ahora pagina sus resultados por pagina, cant
 El portal alumno ya muestra descripcion, enfoque y enlaces de video en los ejercicios de sus rutinas asignadas, incluyendo una vista previa al registrar marcas.
 El portal alumno ya puede actualizar sus datos de contacto permitidos y su contacto de emergencia sin tocar coach, sede ni objetivo.
 El modulo Salud del alumno ya muestra informacion base, contacto de emergencia, visibilidad hacia coach y observaciones medicas registradas por el equipo.
+El modulo Perfil y Salud del alumno ahora muestran tarjetas de preparacion para beta, destacando datos faltantes y validando que los contactos telefonicos no queden a medias.
 El portal alumno ya puede marcar cada rutina asignada como pendiente, completada u omitida, y ese estado se refleja tambien en coach y admin.
 El portal alumno ahora exige al menos una marca, tiempo, ronda, texto o nota antes de guardar un resultado, y opcionalmente puede marcar la rutina como completada al registrar esa marca.
 La rutina guiada del alumno ahora recuerda el paso activo por sesion y, al guardar una marca, puede dejar enfocado el siguiente ejercicio para sostener mejor el flujo en movil.
