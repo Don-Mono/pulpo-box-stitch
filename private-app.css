@@ -497,3 +497,527 @@ textarea:focus-visible {
     font-size: 1rem;
   }
 }
+
+/* FASE 1 polish: private app only */
+body[data-private-app="true"] {
+  --app-black: #050505;
+  --app-black-2: #0b0b0b;
+  --app-panel: rgba(20, 20, 19, 0.78);
+  --app-panel-strong: rgba(28, 28, 26, 0.92);
+  --app-panel-soft: rgba(255, 255, 255, 0.045);
+  --app-text: #f7f7f3;
+  --app-text-soft: rgba(247, 247, 243, 0.76);
+  --app-muted: rgba(247, 247, 243, 0.58);
+  --app-yellow: #ffd200;
+  --app-yellow-2: #f0b700;
+  --app-yellow-soft: rgba(255, 210, 0, 0.14);
+  --app-green: #24d66f;
+  --app-purple: #9b51ff;
+  --app-blue: #2f99ff;
+  --app-orange: #ff9600;
+  --app-border: rgba(255, 255, 255, 0.12);
+  --app-border-soft: rgba(255, 255, 255, 0.075);
+  --app-border-yellow: rgba(255, 210, 0, 0.42);
+  --app-shadow: 0 30px 90px rgba(0, 0, 0, 0.48);
+  --app-font-ui: "Montserrat", "Arial", sans-serif;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 210, 0, 0.07), transparent 26rem),
+    radial-gradient(circle at 92% 8%, rgba(255, 210, 0, 0.05), transparent 22rem),
+    linear-gradient(135deg, #050505 0%, #0b0b0b 48%, #030303 100%);
+  color: var(--app-text);
+  font-family: var(--app-font-ui);
+}
+
+body[data-private-app="true"]::before {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 44px 44px;
+  content: "";
+  inset: 0;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent 76%);
+  opacity: 0.25;
+  pointer-events: none;
+  position: fixed;
+  z-index: -1;
+}
+
+body[data-private-app="true"] .management-container {
+  margin-inline: auto;
+  max-width: 1500px;
+  width: min(100% - 2rem, 1500px);
+}
+
+body[data-private-app="true"] .management-shell {
+  background: transparent;
+  min-height: 100vh;
+}
+
+body[data-private-app="true"] .management-topbar {
+  align-items: center;
+  background: rgba(6, 6, 6, 0.78);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 0;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  margin: 0 0 1.5rem;
+  padding: 0.85rem clamp(1rem, 2vw, 1.4rem);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+body[data-private-app="true"] .brand-lockup strong,
+body[data-private-app="true"] .dashboard-header h1,
+body[data-private-app="true"] .dashboard-header h2,
+body[data-private-app="true"] .panel-card h2,
+body[data-private-app="true"] .panel-card h3 {
+  color: var(--app-text);
+  letter-spacing: -0.025em;
+}
+
+body[data-private-app="true"] .brand-lockup {
+  gap: 0.75rem;
+}
+
+body[data-private-app="true"] .brand-lockup img {
+  background: var(--app-yellow);
+  border-radius: 1rem;
+  box-shadow: 0 0 28px rgba(255, 210, 0, 0.2);
+  height: 3.1rem;
+  object-fit: contain;
+  padding: 0.35rem;
+  width: 3.1rem;
+}
+
+body[data-private-app="true"] .topbar-actions {
+  align-items: center;
+  gap: 0.35rem;
+}
+
+body[data-private-app="true"] .topbar-actions a,
+body[data-private-app="true"] .topbar-actions button {
+  border-radius: 0.9rem;
+  color: var(--app-text-soft);
+  font-weight: 800;
+  padding: 0.7rem 0.9rem;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+body[data-private-app="true"] .topbar-actions a:hover,
+body[data-private-app="true"] .topbar-actions button:hover,
+body[data-private-app="true"] .topbar-actions a.is-active {
+  background: var(--app-yellow-soft);
+  color: var(--app-yellow);
+  transform: translateY(-1px);
+}
+
+body[data-private-app="true"] .dashboard-header {
+  background:
+    linear-gradient(135deg, rgba(255, 210, 0, 0.12), rgba(255, 255, 255, 0.035)),
+    rgba(18, 18, 17, 0.72);
+  border: 1px solid var(--app-border);
+  border-radius: 1.6rem;
+  box-shadow: var(--app-shadow);
+  margin-bottom: 1.4rem;
+  overflow: hidden;
+  padding: clamp(1.35rem, 2.4vw, 2.2rem);
+  position: relative;
+}
+
+body[data-private-app="true"] .dashboard-header::after {
+  background: radial-gradient(circle, rgba(255, 210, 0, 0.18), transparent 62%);
+  content: "";
+  height: 14rem;
+  opacity: 0.58;
+  position: absolute;
+  right: -4rem;
+  top: -5rem;
+  width: 14rem;
+}
+
+body[data-private-app="true"] .dashboard-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+body[data-private-app="true"] .dashboard-header p,
+body[data-private-app="true"] .panel-card p,
+body[data-private-app="true"] .muted,
+body[data-private-app="true"] small {
+  color: var(--app-muted);
+}
+
+body[data-private-app="true"] .panel-card,
+body[data-private-app="true"] .student-overview-panel,
+body[data-private-app="true"] .coach-overview-panel,
+body[data-private-app="true"] .table-shell,
+body[data-private-app="true"] .private-calendar-day,
+body[data-private-app="true"] .mini-list-item,
+body[data-private-app="true"] .workout-card {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    var(--app-panel);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.22);
+}
+
+body[data-private-app="true"] .panel-card {
+  border-radius: 1.35rem;
+  padding: clamp(1rem, 2vw, 1.4rem);
+}
+
+body[data-private-app="true"] .dashboard-row {
+  gap: clamp(1rem, 1.8vw, 1.35rem);
+}
+
+body[data-private-app="true"] .student-layout {
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.65fr);
+}
+
+body[data-private-app="true"] .student-overview-grid,
+body[data-private-app="true"] .coach-overview-grid,
+body[data-private-app="true"] .summary-grid {
+  gap: 0.85rem;
+}
+
+body[data-private-app="true"] .student-overview-card,
+body[data-private-app="true"] .metric-card {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
+    rgba(18, 18, 17, 0.72);
+  border: 1px solid var(--app-border);
+  border-radius: 1.1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+body[data-private-app="true"] .student-overview-card span,
+body[data-private-app="true"] .metric-card span,
+body[data-private-app="true"] label,
+body[data-private-app="true"] .form-field span {
+  color: var(--app-muted);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+body[data-private-app="true"] .student-overview-card strong,
+body[data-private-app="true"] .metric-card strong {
+  color: var(--app-text);
+  font-size: clamp(1.45rem, 2vw, 2rem);
+}
+
+body[data-private-app="true"] input,
+body[data-private-app="true"] select,
+body[data-private-app="true"] textarea {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--app-border);
+  border-radius: 0.9rem;
+  color: var(--app-text);
+}
+
+body[data-private-app="true"] input:focus,
+body[data-private-app="true"] select:focus,
+body[data-private-app="true"] textarea:focus {
+  border-color: var(--app-border-yellow);
+  box-shadow: 0 0 0 3px rgba(255, 210, 0, 0.12);
+  outline: none;
+}
+
+body[data-private-app="true"] .button,
+body[data-private-app="true"] button.button,
+body[data-private-app="true"] .form-actions button[type="submit"] {
+  border-radius: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  min-height: 2.85rem;
+}
+
+body[data-private-app="true"] .button.accent,
+body[data-private-app="true"] .form-actions button[type="submit"],
+body[data-private-app="true"] .compact-button.accent {
+  background: linear-gradient(135deg, var(--app-yellow), var(--app-yellow-2));
+  border-color: transparent;
+  color: #0a0a0a;
+}
+
+body[data-private-app="true"] .button.ghost,
+body[data-private-app="true"] .compact-button.ghost {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: var(--app-border);
+  color: var(--app-text);
+}
+
+body[data-private-app="true"] .status-pill,
+body[data-private-app="true"] .private-app-badge,
+body[data-private-app="true"] .private-eyebrow {
+  background: var(--app-yellow-soft);
+  border: 1px solid rgba(255, 210, 0, 0.25);
+  border-radius: 999px;
+  color: var(--app-yellow);
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.58rem;
+  text-transform: uppercase;
+}
+
+body[data-private-app="true"] .status-pill.is-completed,
+body[data-private-app="true"] .status-pill.is-ok {
+  background: rgba(36, 214, 111, 0.12);
+  border-color: rgba(36, 214, 111, 0.28);
+  color: var(--app-green);
+}
+
+body[data-private-app="true"] .student-module-nav,
+body[data-private-app="true"] .coach-module-nav {
+  background: rgba(14, 14, 13, 0.82);
+  border: 1px solid var(--app-border);
+  border-radius: 1.2rem;
+  box-shadow: 0 18px 56px rgba(0, 0, 0, 0.28);
+  gap: 0.35rem;
+  padding: 0.35rem;
+}
+
+body[data-private-app="true"] .student-module-button,
+body[data-private-app="true"] .coach-module-button {
+  background: transparent;
+  border: 0;
+  color: var(--app-muted);
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+body[data-private-app="true"] .student-module-button.is-active,
+body[data-private-app="true"] .coach-module-button.is-active {
+  background: linear-gradient(135deg, var(--app-yellow), var(--app-yellow-2));
+  color: #0b0b0b;
+  transform: translateY(-1px);
+}
+
+body[data-private-app="true"] .workout-card {
+  border-radius: 1.2rem;
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem;
+}
+
+body[data-private-app="true"] .guided-routine-player,
+body[data-private-app="true"] .assignment-player,
+body[data-private-app="true"] .routine-composer-preview,
+body[data-private-app="true"] .selected-exercises-list {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 1.1rem;
+}
+
+body[data-private-app="true"] .exercise-item-card,
+body[data-private-app="true"] .selected-exercise-card,
+body[data-private-app="true"] .routine-block-card,
+body[data-private-app="true"] .action-list-item {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 1rem;
+}
+
+body[data-private-app="true"] .data-table {
+  color: var(--app-text-soft);
+}
+
+body[data-private-app="true"] .data-table th {
+  color: var(--app-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+body[data-private-app="true"] .data-table tr:hover td {
+  background: rgba(255, 210, 0, 0.04);
+}
+
+body[data-private-app="true"] .private-calendar-grid {
+  gap: 0.55rem;
+}
+
+body[data-private-app="true"] .private-calendar-day {
+  min-height: 6.2rem;
+}
+
+body[data-private-app="true"] .private-section-heading {
+  align-items: end;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+body[data-private-app="true"] .private-section-heading h2 {
+  color: var(--app-text);
+  margin: 0.25rem 0 0;
+}
+
+body[data-private-app="true"] .private-section-heading p {
+  color: var(--app-muted);
+  margin: 0.25rem 0 0;
+}
+
+body[data-private-app="true"] .private-profile-mini {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 1rem;
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.9rem;
+}
+
+body[data-private-app="true"] .private-avatar {
+  align-items: center;
+  background: var(--app-yellow);
+  border-radius: 999px;
+  color: #0a0a0a;
+  display: grid;
+  font-weight: 950;
+  height: 3rem;
+  justify-items: center;
+  overflow: hidden;
+  width: 3rem;
+}
+
+body[data-private-app="true"] .private-avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+body[data-private-app="true"][data-private-page="workouts"] .dashboard-row,
+body[data-private-app="true"][data-private-page="coach-workouts"] .dashboard-row,
+body[data-private-app="true"][data-private-page="exercises"] .dashboard-row {
+  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
+}
+
+body[data-private-app="true"][data-private-page="workouts"] .students-table-card,
+body[data-private-app="true"][data-private-page="coach-workouts"] .students-table-card,
+body[data-private-app="true"][data-private-page="exercises"] .students-table-card {
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  body[data-private-app="true"] .management-container {
+    padding-bottom: 2.5rem;
+  }
+
+  body[data-private-app="true"][data-private-page="student"] .management-container,
+  body[data-private-app="true"][data-private-page="coach"] .management-container {
+    max-width: 1420px;
+  }
+}
+
+@media (max-width: 1100px) {
+  body[data-private-app="true"] .student-layout,
+  body[data-private-app="true"][data-private-page="workouts"] .dashboard-row,
+  body[data-private-app="true"][data-private-page="coach-workouts"] .dashboard-row,
+  body[data-private-app="true"][data-private-page="exercises"] .dashboard-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  body[data-private-app="true"] {
+    background:
+      radial-gradient(circle at 18% 0%, rgba(255, 210, 0, 0.09), transparent 18rem),
+      linear-gradient(135deg, #050505 0%, #11100d 100%);
+  }
+
+  body[data-private-app="true"] .management-container {
+    width: min(100% - 1rem, 44rem);
+  }
+
+  body[data-private-app="true"] .management-topbar {
+    border-radius: 1rem;
+    margin-bottom: 0.85rem;
+    padding: 0.65rem 0.75rem;
+  }
+
+  body[data-private-app="true"] .brand-lockup strong {
+    font-size: 1rem;
+  }
+
+  body[data-private-app="true"] .brand-lockup img {
+    border-radius: 0.8rem;
+    height: 2.35rem;
+    width: 2.35rem;
+  }
+
+  body[data-private-app="true"] .dashboard-header {
+    border-radius: 1.15rem;
+    padding: 1rem;
+  }
+
+  body[data-private-app="true"] .dashboard-header h1 {
+    font-size: clamp(1.65rem, 8vw, 2.35rem);
+  }
+
+  body[data-private-app="true"] .panel-card {
+    border-radius: 1rem;
+  }
+
+  body[data-private-app="true"] .summary-grid,
+  body[data-private-app="true"] .student-overview-grid,
+  body[data-private-app="true"] .coach-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body[data-private-app="true"] .student-module-section,
+  body[data-private-app="true"] .coach-module-section {
+    animation: pulpoPanelIn 220ms ease both;
+  }
+
+  body[data-private-app="true"] .workout-card,
+  body[data-private-app="true"] .mini-list-item {
+    border-radius: 0.95rem;
+  }
+
+  body[data-private-app="true"] .private-calendar-day {
+    min-height: 4.2rem;
+  }
+
+  body[data-private-app="true"] .private-app-bottom-nav span {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 999px;
+    display: grid;
+    font-size: 0.65rem;
+    font-weight: 950;
+    height: 1.45rem;
+    justify-items: center;
+    width: 1.45rem;
+  }
+}
+
+@media (max-width: 520px) {
+  body[data-private-app="true"] .summary-grid,
+  body[data-private-app="true"] .student-overview-grid,
+  body[data-private-app="true"] .coach-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-private-app="true"] .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-private-app="true"] .assignment-action-row,
+  body[data-private-app="true"] .form-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes pulpoPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

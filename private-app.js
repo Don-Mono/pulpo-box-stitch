@@ -1,11 +1,34 @@
 (function () {
-  const routes = [
-    { href: "/dashboard.html", label: "Inicio", icon: "⌂" },
-    { href: "/student.html", label: "Mi rutina", icon: "▦" },
-    { href: "/workouts.html", label: "Rutinas", icon: "▤" },
-    { href: "/exercises.html", label: "Biblioteca", icon: "◫" },
-    { href: "/progress.html", label: "Progreso", icon: "↗" },
-  ];
+  const routeGroups = {
+    admin: [
+      { href: "/dashboard.html", label: "Inicio", icon: "IN" },
+      { href: "/students.html", label: "Alumnos", icon: "AL" },
+      { href: "/workouts.html", label: "Rutinas", icon: "RU" },
+      { href: "/exercises.html", label: "Biblioteca", icon: "BI" },
+      { href: "/progress.html", label: "Progreso", icon: "PR" },
+    ],
+    coach: [
+      { href: "/coach.html", label: "Inicio", icon: "IN" },
+      { href: "/coach-workouts.html", label: "Rutinas", icon: "RU" },
+      { href: "/coach.html#seguimiento", label: "Progreso", icon: "PR" },
+      { href: "/coach.html#feedback", label: "Feedback", icon: "FB" },
+      { href: "/coach.html#perfil", label: "Perfil", icon: "PE" },
+    ],
+    student: [
+      { href: "/student.html#rutina", label: "Rutina", icon: "RU" },
+      { href: "/student.html#progreso", label: "Progreso", icon: "PR" },
+      { href: "/student.html#calendario", label: "Agenda", icon: "AG" },
+      { href: "/student.html#salud", label: "Salud", icon: "SA" },
+      { href: "/student.html#perfil", label: "Perfil", icon: "PE" },
+    ],
+  };
+
+  const pageRoles = new Map([
+    ["/student.html", "student"],
+    ["/coach.html", "coach"],
+    ["/coach-workouts.html", "coach"],
+    ["/coach-student.html", "coach"],
+  ]);
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -38,6 +61,40 @@
         ${helper ? `<small>${escapeHtml(helper)}</small>` : ""}
       </article>
     `;
+  }
+
+  function createSectionHeader({ eyebrow = "", title = "", copy = "", action = "" } = {}) {
+    return `
+      <header class="private-section-heading">
+        <div>
+          ${eyebrow ? `<span class="private-eyebrow">${escapeHtml(eyebrow)}</span>` : ""}
+          ${title ? `<h2>${escapeHtml(title)}</h2>` : ""}
+          ${copy ? `<p>${escapeHtml(copy)}</p>` : ""}
+        </div>
+        ${action || ""}
+      </header>
+    `;
+  }
+
+  function createProfileMiniCard({ name = "Pulpo Box", role = "Activo", helper = "", image = "", tone = "" } = {}) {
+    const avatar = image
+      ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(name)}">`
+      : `<span>${escapeHtml(getInitialsAvatar(name))}</span>`;
+
+    return `
+      <article class="private-profile-mini ${tone ? `is-${escapeHtml(tone)}` : ""}">
+        <div class="private-avatar">${avatar}</div>
+        <div>
+          <strong>${escapeHtml(name)}</strong>
+          <small>${escapeHtml(role)}</small>
+          ${helper ? `<p>${escapeHtml(helper)}</p>` : ""}
+        </div>
+      </article>
+    `;
+  }
+
+  function createAppBadge(label, tone = "") {
+    return `<span class="private-app-badge ${tone ? `is-${escapeHtml(tone)}` : ""}">${escapeHtml(label)}</span>`;
   }
 
   function createStatusChip(label, status = "") {
@@ -73,15 +130,38 @@
   }
 
   function setActiveTab(buttons, panels, nextTab) {
-    buttons.forEach((button) => button.classList.toggle("is-active", button.dataset.studentTab === nextTab));
-    panels.forEach((panel) => panel.classList.toggle("is-active", panel.dataset.studentPanel === nextTab));
+    buttons.forEach((button) => {
+      const tab = button.dataset.studentTab || button.dataset.coachTab;
+      const isActive = tab === nextTab;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-current", isActive ? "page" : "false");
+    });
+    panels.forEach((panel) => {
+      const tab = panel.dataset.studentPanel || panel.dataset.coachPanel;
+      const isActive = tab === nextTab;
+      panel.classList.toggle("is-active", isActive);
+      panel.classList.toggle("hidden", !isActive);
+    });
+  }
+
+  function getPageRole() {
+    const path = window.location.pathname;
+    if (pageRoles.has(path)) return pageRoles.get(path);
+    if (path.includes("coach")) return "coach";
+    return "admin";
+  }
+
+  function getPrivateRoutes() {
+    return routeGroups[getPageRole()] || routeGroups.admin;
   }
 
   function markActiveTopbarLink() {
     const path = window.location.pathname;
     document.querySelectorAll(".management-topbar a[href], .private-app-bottom-nav a[href]").forEach((link) => {
-      const href = new URL(link.getAttribute("href"), window.location.origin).pathname;
-      link.classList.toggle("is-active", href === path);
+      const url = new URL(link.getAttribute("href"), window.location.origin);
+      const href = url.pathname;
+      const hashMatches = url.hash ? url.hash === window.location.hash : true;
+      link.classList.toggle("is-active", href === path && hashMatches);
     });
   }
 
@@ -90,7 +170,7 @@
     const nav = document.createElement("nav");
     nav.className = "private-app-bottom-nav";
     nav.setAttribute("aria-label", "Navegacion privada");
-    nav.innerHTML = routes.map((route) => `
+    nav.innerHTML = getPrivateRoutes().map((route) => `
       <a href="${route.href}">
         <span aria-hidden="true">${route.icon}</span>
         <strong>${route.label}</strong>
@@ -107,16 +187,24 @@
   }
 
   function init() {
+    const pageName = window.location.pathname.replace(/^\//, "").replace(/\.html$/, "") || "dashboard";
     document.body.dataset.privateApp = "true";
+    document.body.dataset.privatePage = pageName;
+    document.body.dataset.privateRole = getPageRole();
+    document.body.classList.add("private-app-page", `private-page-${pageName}`);
     createBottomNav();
     markActiveTopbarLink();
     enhanceTables();
+    window.addEventListener("hashchange", markActiveTopbarLink);
   }
 
   window.PulpoPrivateApp = {
-    createMetricCard,
-    createStatusChip,
+    createAppBadge,
     createEmptyState,
+    createMetricCard,
+    createProfileMiniCard,
+    createSectionHeader,
+    createStatusChip,
     escapeHtml,
     formatDate,
     formatNumber,
