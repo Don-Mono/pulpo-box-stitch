@@ -1526,18 +1526,45 @@ body {
     min-height: 1.8rem;
   }
 
-  .student-overview-grid,
+  .student-overview-grid {
+    gap: 0.75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .metric-grid {
     grid-template-columns: 1fr;
   }
 
   .student-module-nav {
-    grid-template-columns: 1fr;
+    gap: 0.55rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     position: static;
   }
 
   .student-module-button {
-    min-height: 4.2rem;
+    border-radius: 0.9rem;
+    min-height: 3.75rem;
+    padding: 0.7rem 0.75rem;
+  }
+
+  .student-module-button strong {
+    font-size: 1.2rem;
+    letter-spacing: 0;
+  }
+
+  .student-module-button span {
+    font-size: 0.74rem;
+  }
+
+  .student-overview-card {
+    border-radius: 0.95rem;
+    min-height: 7.4rem;
+    padding: 0.85rem;
+  }
+
+  .student-overview-card strong {
+    font-size: clamp(1.65rem, 9vw, 2.35rem);
+    letter-spacing: 0;
   }
 
   .inline-field {

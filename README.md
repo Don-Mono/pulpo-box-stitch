@@ -96,6 +96,7 @@ El coach ya puede editar y eliminar sus propias rutinas, manteniendo solo lectur
 El modulo de rutinas del coach ahora soporta busqueda, filtro por alumno/nivel y paginacion para sostener mejor el crecimiento operativo desde su propio panel.
 Los modulos privados principales ahora incluyen una capa responsive adicional para movil en panel alumno, ficha coach y creador de rutinas.
 El panel alumno ahora tiene un encabezado movil mas compacto, acciones superiores estables y titulos que se adaptan sin cortar texto en pantallas angostas.
+Las navegaciones internas de alumno, coach y ficha coach ahora quedan mas compactas en movil, reduciendo altura inicial y dejando visible antes el contenido operativo.
 El coach ya puede abrir una ficha detallada por alumno con rutinas asignadas, mediciones, marcas y notas medicas visibles para seguimiento.
 La ficha del coach ya expone descripcion, enfoque y enlaces de video dentro de los ejercicios asignados al alumno para revisar tecnica sin salir de la vista.
 La ficha del coach ya permite filtrar historial por rutina y ejercicio, con indicadores rapidos para leer tendencias sin salir de la vista.
