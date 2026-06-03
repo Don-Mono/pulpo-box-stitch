@@ -76,6 +76,20 @@
     return value == null ? "--" : `${formatNumber(value)} ${unit}`.trim();
   }
 
+  function cleanMetricNumber(value) {
+    if (value === "" || value == null) return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function ensureNonNegativeMetric(value, label) {
+    if (value == null) return null;
+    if (!Number.isFinite(value) || value < 0) {
+      throw new Error(`${label} debe ser un numero igual o mayor a 0.`);
+    }
+    return value;
+  }
+
   function getAssignmentStateStorageKey() {
     return currentStudentId ? `${coachStudentAssignmentStoragePrefix}:${currentStudentId}` : "";
   }
@@ -962,6 +976,14 @@
     body.student_id = studentId;
 
     try {
+      Object.assign(body, {
+        body_weight_kg: ensureNonNegativeMetric(cleanMetricNumber(body.body_weight_kg), "Peso corporal"),
+        height_cm: ensureNonNegativeMetric(cleanMetricNumber(body.height_cm), "Estatura"),
+        waist_cm: ensureNonNegativeMetric(cleanMetricNumber(body.waist_cm), "Cintura"),
+        chest_cm: ensureNonNegativeMetric(cleanMetricNumber(body.chest_cm), "Pecho"),
+        hip_cm: ensureNonNegativeMetric(cleanMetricNumber(body.hip_cm), "Cadera"),
+      });
+
       const response = await fetch("/api/coach/student-detail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

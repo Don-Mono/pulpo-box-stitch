@@ -23,6 +23,16 @@ function cleanNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function ensureNonNegativeNumber(value, fieldLabel) {
+  if (value == null) return null;
+  if (!Number.isFinite(value) || value < 0) {
+    const error = new Error(`${fieldLabel} debe ser un numero igual o mayor a 0.`);
+    error.statusCode = 400;
+    throw error;
+  }
+  return value;
+}
+
 function isMissingManagementSchema(error) {
   if (!error) return false;
   const message = `${error.message || ""} ${error.details || ""} ${error.hint || ""}`.toLowerCase();
@@ -375,11 +385,11 @@ async function loadStudentDetail(supabase, coachId, studentId, options = {}) {
 async function createMeasurement(supabase, coachId, body) {
   const students = await listCoachStudents(supabase, coachId);
   const studentId = clean(body.student_id, 90);
-  const bodyWeightKg = cleanNumber(body.body_weight_kg);
-  const heightCm = cleanNumber(body.height_cm);
-  const waistCm = cleanNumber(body.waist_cm);
-  const chestCm = cleanNumber(body.chest_cm);
-  const hipCm = cleanNumber(body.hip_cm);
+  const bodyWeightKg = ensureNonNegativeNumber(cleanNumber(body.body_weight_kg), "Peso corporal");
+  const heightCm = ensureNonNegativeNumber(cleanNumber(body.height_cm), "Estatura");
+  const waistCm = ensureNonNegativeNumber(cleanNumber(body.waist_cm), "Cintura");
+  const chestCm = ensureNonNegativeNumber(cleanNumber(body.chest_cm), "Pecho");
+  const hipCm = ensureNonNegativeNumber(cleanNumber(body.hip_cm), "Cadera");
   const notes = clean(body.notes, 500);
 
   if (!studentId) {

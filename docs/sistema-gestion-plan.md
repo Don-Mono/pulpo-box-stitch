@@ -248,6 +248,7 @@ Primera implementacion:
 - El perfil y salud del alumno ahora muestran una lectura de preparacion para beta, destacando datos faltantes y validando contactos antes de guardar cambios.
 - La API privada del alumno ahora valida telefono principal y contacto de emergencia tambien en backend, evitando guardar fichas inconsistentes fuera del frontend.
 - El registro de resultados del alumno ahora valida en backend pesos, reps, rondas y tiempos no negativos, y el formulario se adapto mejor para captura movil.
+- La ficha `coach-student` ahora valida mediciones no negativas tanto en frontend como en backend y mejora la captura movil con inputs numericos.
 
 ### Etapa 7 - Mejoras futuras
 
