@@ -247,6 +247,7 @@ Primera implementacion:
 - La rutina guiada del alumno ahora recuerda el paso activo por sesion y puede enfocar el siguiente ejercicio despues de guardar una marca, para sostener mejor el uso tipo app en movil.
 - El perfil y salud del alumno ahora muestran una lectura de preparacion para beta, destacando datos faltantes y validando contactos antes de guardar cambios.
 - La API privada del alumno ahora valida telefono principal y contacto de emergencia tambien en backend, evitando guardar fichas inconsistentes fuera del frontend.
+- El registro de resultados del alumno ahora valida en backend pesos, reps, rondas y tiempos no negativos, y el formulario se adapto mejor para captura movil.
 
 ### Etapa 7 - Mejoras futuras
 

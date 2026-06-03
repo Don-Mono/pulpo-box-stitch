@@ -21,6 +21,23 @@ function cleanNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function ensureNonNegativeNumber(value, fieldLabel, options = {}) {
+  if (value == null) return null;
+  if (!Number.isFinite(value) || value < 0) {
+    const error = new Error(`${fieldLabel} no puede ser negativo.`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (options.integer && !Number.isInteger(value)) {
+    const error = new Error(`${fieldLabel} debe ser un numero entero.`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return value;
+}
+
 function cleanAssignmentStatus(value) {
   const status = clean(value, 24).toLowerCase();
   return ["assigned", "completed", "skipped"].includes(status) ? status : "";
@@ -447,10 +464,10 @@ async function updateStudentAssignmentStatus(supabase, studentId, body) {
 async function createStudentResult(supabase, studentId, body) {
   const workoutId = clean(body.workout_id, 90) || null;
   const exerciseId = clean(body.exercise_id, 90) || null;
-  const weightKg = cleanNumber(body.weight_kg);
-  const reps = cleanNumber(body.reps);
-  const rounds = cleanNumber(body.rounds);
-  const timeSeconds = cleanNumber(body.time_seconds);
+  const weightKg = ensureNonNegativeNumber(cleanNumber(body.weight_kg), "El peso");
+  const reps = ensureNonNegativeNumber(cleanNumber(body.reps), "Las repeticiones", { integer: true });
+  const rounds = ensureNonNegativeNumber(cleanNumber(body.rounds), "Las rondas");
+  const timeSeconds = ensureNonNegativeNumber(cleanNumber(body.time_seconds), "El tiempo", { integer: true });
   const scoreText = clean(body.score_text, 160);
   const studentNotes = clean(body.student_notes, 500);
   const markCompleted = String(body.mark_completed || "").toLowerCase() === "true";
