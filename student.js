@@ -30,6 +30,10 @@
   const healthSummaryGrid = document.querySelector("#healthSummaryGrid");
   const studentSafetyCard = document.querySelector("#studentSafetyCard");
   const medicalNotesStudentList = document.querySelector("#medicalNotesStudentList");
+  const calendarMonthLabel = document.querySelector("#calendarMonthLabel");
+  const studentCalendarGrid = document.querySelector("#studentCalendarGrid");
+  const studentCalendarActivities = document.querySelector("#studentCalendarActivities");
+  const calendarStatus = document.querySelector("#calendarStatus");
   const logoutButton = document.querySelector("#logoutButton");
   const studentModuleButtons = Array.from(document.querySelectorAll("[data-student-tab]"));
   const studentModuleSections = Array.from(document.querySelectorAll("[data-student-panel]"));
@@ -52,7 +56,7 @@
   let currentResultsTotal = 0;
   let currentResultsWorkoutId = "";
   let currentResultsExerciseId = "";
-  const studentTabs = ["rutina", "progreso", "salud", "perfil"];
+  const studentTabs = ["rutina", "progreso", "calendario", "salud", "perfil"];
   const assignmentStateStoragePrefix = "pulpo-student-assignment-state";
 
   function setStatus(element, message, type = "") {
@@ -70,6 +74,26 @@
 
   function formatDate(value) {
     return value ? new Date(value).toLocaleDateString("es-CL") : "Sin fecha";
+  }
+
+  function parseCalendarDate(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function sameCalendarDay(left, right) {
+    return (
+      left
+      && right
+      && left.getFullYear() === right.getFullYear()
+      && left.getMonth() === right.getMonth()
+      && left.getDate() === right.getDate()
+    );
+  }
+
+  function formatMonthLabel(date) {
+    return date.toLocaleDateString("es-CL", { month: "long", year: "numeric" });
   }
 
   function formatNumber(value) {
@@ -584,6 +608,89 @@
     `).join("");
   }
 
+  function getAssignmentCalendarDate(assignment) {
+    return parseCalendarDate(assignment?.workout?.workout_date) || parseCalendarDate(assignment?.assigned_at);
+  }
+
+  function renderStudentCalendar(assignments) {
+    const today = new Date();
+    const datedAssignments = assignments
+      .map((assignment) => ({ assignment, date: getAssignmentCalendarDate(assignment) }))
+      .filter((entry) => entry.date)
+      .sort((left, right) => left.date - right.date);
+
+    const baseDate = datedAssignments.find((entry) => entry.date >= today)?.date || datedAssignments[0]?.date || today;
+    const firstDay = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+    const firstWeekday = (firstDay.getDay() + 6) % 7;
+    const gridStart = new Date(firstDay);
+    gridStart.setDate(firstDay.getDate() - firstWeekday);
+    const weekdays = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+    const days = Array.from({ length: 42 }, (_, index) => {
+      const date = new Date(gridStart);
+      date.setDate(gridStart.getDate() + index);
+      return date;
+    });
+
+    if (calendarMonthLabel) calendarMonthLabel.textContent = formatMonthLabel(baseDate);
+
+    if (!assignments.length) {
+      studentCalendarGrid.innerHTML = `
+        <article class="mini-list-item private-empty-state">
+          <strong>Sin rutinas para calendarizar</strong>
+          <span>Cuando tu coach asigne entrenamientos, apareceran aqui.</span>
+        </article>
+      `;
+      studentCalendarActivities.innerHTML = '<p class="muted">No hay actividades programadas.</p>';
+      setStatus(calendarStatus, "Reservas reales disponibles en proxima fase.");
+      return;
+    }
+
+    studentCalendarGrid.innerHTML = [
+      ...weekdays.map((weekday) => `<div class="private-calendar-weekday">${weekday}</div>`),
+      ...days.map((date) => {
+        const dayAssignments = datedAssignments.filter((entry) => sameCalendarDay(entry.date, date));
+        const isMuted = date.getMonth() !== baseDate.getMonth();
+        const isToday = sameCalendarDay(date, today);
+        return `
+          <article class="private-calendar-day${isMuted ? " is-muted" : ""}${isToday ? " is-today" : ""}">
+            <strong>${date.getDate()}</strong>
+            ${dayAssignments.slice(0, 2).map(({ assignment }) => {
+              const statusMeta = getAssignmentStatusMeta(assignment.status);
+              return `<span class="private-calendar-event ${statusMeta.code === "completed" ? "is-completed" : statusMeta.code === "skipped" ? "is-skipped" : ""}">${escapeHtml(assignment.workout?.title || "Rutina")}</span>`;
+            }).join("")}
+          </article>
+        `;
+      }),
+    ].join("");
+
+    const upcoming = datedAssignments.filter((entry) => entry.date >= today).slice(0, 5);
+    const unscheduled = assignments.filter((assignment) => !getAssignmentCalendarDate(assignment)).slice(0, 3);
+    const activityItems = [
+      ...upcoming.map(({ assignment, date }) => {
+        const statusMeta = getAssignmentStatusMeta(assignment.status);
+        return `
+          <article class="mini-list-item">
+            <strong>${escapeHtml(assignment.workout?.title || "Rutina asignada")}</strong>
+            <span>${escapeHtml(formatDate(date))} · ${escapeHtml(statusMeta.label)}</span>
+            <small>${escapeHtml(assignment.workout?.level || "Nivel por definir")}</small>
+          </article>
+        `;
+      }),
+      ...unscheduled.map((assignment) => `
+        <article class="mini-list-item">
+          <strong>${escapeHtml(assignment.workout?.title || "Rutina asignada")}</strong>
+          <span>Pendiente por programar</span>
+          <small>${escapeHtml(getAssignmentStatusMeta(assignment.status).label)}</small>
+        </article>
+      `),
+    ];
+
+    studentCalendarActivities.innerHTML = activityItems.length
+      ? activityItems.join("")
+      : '<p class="muted">No hay proximas actividades con fecha.</p>';
+    setStatus(calendarStatus, "Calendario FASE 1: lectura visual, sin reservas reales todavia.");
+  }
+
   function renderHealthSummary(summary, profile, notes) {
     const visibleToCoachCount = notes.filter((note) => note.visible_to_coach).length;
     const consentLabel = profile?.medical_consent_at ? `Registrado ${formatDate(profile.medical_consent_at)}` : "Pendiente";
@@ -992,6 +1099,7 @@
       renderHealthSummary(currentSummary, currentProfile, currentMedicalNotes);
       renderMedicalNotes(currentMedicalNotes);
       renderAssignments(payload.assignments || []);
+      renderStudentCalendar(payload.assignments || []);
       renderMeasurements(currentMeasurements);
       syncHistoryFilters();
       applyPendingRoutineFocus();
@@ -1015,6 +1123,7 @@
       renderHealthSummary(null, null, []);
       renderMedicalNotes([]);
       renderAssignments([]);
+      renderStudentCalendar([]);
       renderResults([]);
       renderMeasurements([]);
       workoutHistoryFilter.innerHTML = '<option value="">Todas las rutinas</option>';

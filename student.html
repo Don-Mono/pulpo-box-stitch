@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&family=Teko:wght@600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/gestion.css" />
+    <link rel="stylesheet" href="/private-app.css" />
   </head>
   <body>
     <main class="management-shell">
@@ -77,6 +78,10 @@
           <button class="student-module-button" data-student-tab="progreso" type="button">
             <strong>Progreso</strong>
             <span>Marcas y mediciones</span>
+          </button>
+          <button class="student-module-button" data-student-tab="calendario" type="button">
+            <strong>Calendario</strong>
+            <span>Rutinas con fecha</span>
           </button>
           <button class="student-module-button" data-student-tab="salud" type="button">
             <strong>Salud</strong>
@@ -277,6 +282,36 @@
           </div>
         </section>
 
+        <section class="student-module-section" data-student-panel="calendario">
+          <div class="dashboard-row student-layout">
+            <article class="panel-card">
+              <div class="table-header">
+                <div>
+                  <h2>Mi calendario</h2>
+                  <p class="muted">Vista FASE 1 con rutinas asignadas y estados actuales. Las reservas reales quedan para FASE 2.</p>
+                </div>
+                <span class="status-pill" id="calendarMonthLabel">Calendario</span>
+              </div>
+              <div class="private-calendar-grid" id="studentCalendarGrid">
+                <article class="mini-list-item">
+                  <strong>Cargando calendario...</strong>
+                  <span>Estamos leyendo tus rutinas asignadas.</span>
+                </article>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <h2>Proximas actividades</h2>
+              <p>Si una rutina no tiene fecha, aparece como pendiente por programar.</p>
+              <div id="studentCalendarActivities" class="mini-list">
+                <p class="muted">Cargando actividades...</p>
+              </div>
+              <button class="button ghost is-disabled" type="button" disabled>Reservas disponibles en proxima fase</button>
+              <span class="status" id="calendarStatus"></span>
+            </article>
+          </div>
+        </section>
+
         <section class="student-module-section" data-student-panel="salud">
           <div class="dashboard-row student-layout student-health-layout">
             <article class="panel-card">
@@ -357,6 +392,7 @@
       </div>
     </main>
 
+    <script src="/private-app.js"></script>
     <script src="/workout-flow.js"></script>
     <script src="/student.js"></script>
   </body>
