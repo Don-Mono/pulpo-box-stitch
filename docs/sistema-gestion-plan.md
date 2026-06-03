@@ -122,6 +122,7 @@ Primera implementacion de alumnos:
 - La ficha del coach ya muestra descripcion, enfoque y enlaces de video dentro de los ejercicios asignados al alumno.
 - La ficha del coach ya filtra el historial por rutina y ejercicio, y entrega lectura rapida de tendencia sobre el filtro activo.
 - La rutina guiada dentro de `coach-student` ahora recuerda el paso activo por alumno y permite saltar directo entre ejercicios desde la navegacion por dots.
+- La ficha `coach-student` ahora destaca faltantes criticos de perfil y salud para que el coach vea rapido si el alumno tiene contexto suficiente para seguimiento seguro.
 - Admin ya puede entrar a una ficha unificada por coach desde el listado y revisar alumnos asignados, rutinas creadas y ultimas marcas relacionadas.
 - Admin ya puede entrar a una ficha unificada por alumno desde el listado y mantener el mismo `student_id` al abrir progreso, resultados o datos medicos.
 - Admin ya puede crear, editar y desactivar sedes, y usarlas desde el alta inicial de alumnos.

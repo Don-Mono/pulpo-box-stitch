@@ -101,6 +101,7 @@ El modulo Seguimiento del coach ahora pagina los resultados por pagina, cantidad
 La ficha individual `coach-student` ahora tambien se organiza como una experiencia modular de Perfil, Rutina, Progreso y Salud para seguir a cada alumno con menos friccion.
 La ficha individual `coach-student` ahora pagina las marcas por pagina, cantidad de filas y filtros por rutina/ejercicio desde backend, para sostener historiales largos por alumno sin recargar toda la vista.
 La rutina guiada del coach dentro de `coach-student` ahora recuerda el paso activo por alumno y permite saltar directo entre ejercicios desde los dots de navegacion.
+La ficha `coach-student` ahora destaca faltantes criticos de perfil/salud para que el coach detecte rapido si la ficha del alumno esta lista para seguimiento seguro.
 El login extendido de coach y alumno ya fue validado con credenciales de Supabase Auth y perfil activo en `pb_profiles`.
 Admin ya puede abrir una ficha unificada por coach, editar datos base y revisar alumnos asignados, rutinas creadas y ultimas marcas relacionadas.
 El modulo admin de coaches ahora soporta busqueda, filtro de estado y paginacion desde backend, para sostener mejor la operacion cuando crezca el equipo por sede o unidad de negocio.

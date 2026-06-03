@@ -450,7 +450,7 @@
     `).join("");
   }
 
-  function renderProfile(profile) {
+  function renderProfile(profile, consent) {
     if (!profile) {
       studentProfileCard.innerHTML = '<p class="muted">No hay ficha disponible para este alumno.</p>';
       studentTitle.textContent = "Ficha del alumno";
@@ -463,7 +463,29 @@
       ? `Objetivo principal: ${profile.goal}`
       : "Aun no hay objetivo cargado para este alumno.";
 
+    const hasMainPhone = Boolean(profile.phone);
+    const hasEmergencyContact = Boolean(profile.emergency_contact_name && profile.emergency_contact_phone);
+    const hasLocation = Boolean(profile.location_name);
+    const hasGoal = Boolean(profile.goal);
+    const hasConsent = Boolean(consent);
+    const missingItems = [
+      !hasMainPhone ? "telefono principal" : "",
+      !hasEmergencyContact ? "contacto de emergencia" : "",
+      !hasLocation ? "sede" : "",
+      !hasGoal ? "objetivo" : "",
+      !hasConsent ? "consentimiento visible" : "",
+    ].filter(Boolean);
+
     studentProfileCard.innerHTML = `
+      <div class="warning-card">
+        <strong>${escapeHtml(missingItems.length ? "Ficha con datos pendientes" : "Ficha lista para seguimiento")}</strong>
+        <p>${escapeHtml(
+          missingItems.length
+            ? `Aun faltan ${missingItems.join(", ")} para que el seguimiento sea mas claro y seguro.`
+            : "La ficha visible del alumno ya tiene los datos minimos para revisar su progreso en esta beta."
+        )}</p>
+        <span${missingItems.length ? "" : ' class="is-ok"'}>${escapeHtml(missingItems.length ? "Revisar con admin/alumno" : "Lista para operar")}</span>
+      </div>
       <article class="mini-list-item">
         <strong>${escapeHtml(profile.full_name || "Alumno")}</strong>
         <span>${escapeHtml(profile.goal || "Objetivo pendiente")}</span>
@@ -476,6 +498,11 @@
           [profile.emergency_contact_name, profile.emergency_contact_phone].filter(Boolean).join(" / ")
           || "Sin contacto de emergencia"
         )}</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Checklist operativo</strong>
+        <span>${escapeHtml(`${hasMainPhone ? "Telefono ok" : "Telefono faltante"} / ${hasEmergencyContact ? "Emergencia ok" : "Emergencia pendiente"}`)}</span>
+        <small>${escapeHtml(`${hasLocation ? "Sede visible" : "Sin sede"} / ${hasGoal ? "Objetivo visible" : "Sin objetivo"} / ${hasConsent ? "Consentimiento visible" : "Consentimiento no visible"}`)}</small>
       </article>
     `;
   }
@@ -611,6 +638,11 @@
       `;
       medicalNotesList.innerHTML = '<p class="muted">No hay notas compartidas para este alumno.</p>';
       coachStudentHealthHelper.innerHTML = `
+        <div class="warning-card">
+          <strong>Salud aun incompleta para seguimiento</strong>
+          <p>No hay consentimiento visible ni notas compartidas por administracion para este alumno.</p>
+          <span>Esperando contexto</span>
+        </div>
         <article class="mini-list-item">
           <strong>Sin restricciones visibles</strong>
           <span>No hay notas compartidas por administracion para este alumno.</span>
@@ -649,6 +681,15 @@
     }).join("");
 
     coachStudentHealthHelper.innerHTML = `
+      <div class="warning-card">
+        <strong>${escapeHtml(consent ? "Contexto de salud disponible" : "Seguimiento parcial de salud")}</strong>
+        <p>${escapeHtml(
+          consent
+            ? "Ya existe consentimiento visible y puedes considerar estas notas dentro de la planificacion."
+            : "No hay consentimiento visible; considera solo las notas explicitamente compartidas por administracion."
+        )}</p>
+        <span${consent ? ' class="is-ok"' : ""}>${escapeHtml(consent ? "Salud visible para coach" : "Usar con cautela")}</span>
+      </div>
       <article class="mini-list-item">
         <strong>Consentimiento</strong>
         <span>${escapeHtml(consent ? "Existe consentimiento registrado para seguimiento." : "Solo ves notas explicitamente compartidas.")}</span>
@@ -658,6 +699,11 @@
         <strong>Notas visibles</strong>
         <span>${escapeHtml(`${notes.length} registro(s) compartido(s) para este seguimiento.`)}</span>
         <small>Revisa tipo y descripcion antes de definir cargas o tecnica.</small>
+      </article>
+      <article class="mini-list-item">
+        <strong>Lectura sugerida</strong>
+        <span>${escapeHtml(notes.length ? "Hay contexto medico para revisar antes de ajustar cargas." : "No hay notas visibles en este momento.")}</span>
+        <small>Si algo falta, coordinalo con administracion o con el propio alumno.</small>
       </article>
     `;
   }
@@ -855,7 +901,7 @@
       renderStudents(payload.students || [], currentStudentId);
       renderCoachStudentOverview(currentStudent, currentAssignments, currentResultsSummary, visibleMedicalNotes);
       renderSummary(currentSummary, currentMeasurements);
-      renderProfile(currentStudent);
+      renderProfile(currentStudent, payload.consent || null);
       renderCoachStudentActions(currentStudent);
       renderAssignments(currentAssignments);
       renderMeasurements(currentMeasurements);
@@ -881,7 +927,7 @@
       renderStudents([], "");
       renderCoachStudentOverview(null, [], null, []);
       renderSummary(null, []);
-      renderProfile(null);
+      renderProfile(null, null);
       renderCoachStudentActions(null);
       renderAssignments([]);
       renderMeasurements([]);
