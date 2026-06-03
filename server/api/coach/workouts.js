@@ -1,5 +1,5 @@
 const { getSupabase, json, requireRole } = require("../_shared");
-const { exerciseLibrary, exerciseSections } = require("../../data/exercise-library");
+const { exerciseLibrary, exerciseSections } = require("../../../data/exercise-library");
 
 const DEFAULT_WORKOUT_PAGE_SIZE = 20;
 const MAX_WORKOUT_PAGE_SIZE = 50;

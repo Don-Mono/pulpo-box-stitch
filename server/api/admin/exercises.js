@@ -1,5 +1,5 @@
 const { getSupabase, json, requireAdmin } = require("../_shared");
-const { exerciseLibrary, exerciseSections } = require("../../data/exercise-library");
+const { exerciseLibrary, exerciseSections } = require("../../../data/exercise-library");
 
 const EXERCISE_LIMIT = 500;
 
